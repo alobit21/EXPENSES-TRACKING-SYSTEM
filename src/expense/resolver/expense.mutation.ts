@@ -1,5 +1,5 @@
 // resolver/expense.mutation.ts
-import { Resolver, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Mutation, Args, ID } from '@nestjs/graphql';
 import { ExpenseService } from '../expense.service';
 import { CreateExpenseInput } from '../dto/input/create-expense.input';
 import { UpdateExpenseInput } from '../dto/input/update-expense.input';
@@ -23,5 +23,14 @@ export class ExpenseMutation {
   @Mutation(() => ExpenseOutput)
   updateExpense(@Args('input') input: UpdateExpenseInput, @CurrentUser() user: User) {
     return this.expenseService.update(user, input);
+  }
+
+  @UseGuards(GqlAuthGuard)
+  @Mutation(()=>Boolean)
+  async deleteExpense(
+    @Args('id', { type: () => ID }) id:string,
+    @CurrentUser() user: User,
+  ): Promise<boolean> {
+    return this.expenseService.remove(user, id);
   }
 }

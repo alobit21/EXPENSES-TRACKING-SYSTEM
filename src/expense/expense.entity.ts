@@ -26,9 +26,10 @@ export class Expense {
   @ManyToOne(() => User, user => user.expenses)
   user: User;
 
-@Field(() => Category, { nullable: true })  // ✅ GraphQL knows it can be null
-@ManyToOne(() => Category, category => category.expenses, { nullable: true })
-category: Category | null;  // ✅ allow null at the TS level
-
+  @ManyToOne(() => Category, category => category.expenses, {
+    nullable: true,
+    eager: true,   // 👈 this makes TypeORM auto-join category
+  })
+  category?: Category;
 
 }
