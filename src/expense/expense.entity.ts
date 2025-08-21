@@ -26,6 +26,9 @@ export class Expense {
   @ManyToOne(() => User, user => user.expenses)
   user: User;
 
-  @ManyToOne(() => Category, category => category.expenses, { nullable: true })
-  category?: Category;
+@Field(() => Category, { nullable: true })  // ✅ GraphQL knows it can be null
+@ManyToOne(() => Category, category => category.expenses, { nullable: true })
+category: Category | null;  // ✅ allow null at the TS level
+
+
 }

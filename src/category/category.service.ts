@@ -13,31 +13,29 @@ export class CategoryService {
   ) {}
 
   
-async create(user: User, input: CreateCategoryInput): Promise<Category> {
-  const category = this.repo.create({ ...input, user });
+async create(user: { id: string }, input: CreateCategoryInput): Promise<Category> {
+  const category = this.repo.create({ ...input, user: { id: user.id } });
   return this.repo.save(category);
 }
 
+async update(user: { id: string }, input: UpdateCategoryInput): Promise<Category> {
+  const category = await this.repo.findOne({
+    where: { id: input.id, user: { id: user.id } },
+  });
+  if (!category) throw new Error(`Category with id ${input.id} not found`);
+  this.repo.merge(category, input);
+  return this.repo.save(category);
+}
 
-  async update(user: User, input: UpdateCategoryInput): Promise<Category> {
-    const category = await this.repo.findOne({
-      where: { id: input.id, user: { id: user.id } },
-    });
+async findAll(user: { id: string }): Promise<Category[]> {
+  if (!user?.id) throw new Error('User ID is missing');
 
-    if (!category) {
-      throw new Error(`Category with id ${input.id} not found`);
-    }
+  return this.repo.find({
+    where: { user: { id: user.id } },
+    relations: ['expenses'],
+  });
+}
 
-    this.repo.merge(category, input);
-    return this.repo.save(category);
-  }
-
-  async findAll(user: User): Promise<Category[]> {
-    return this.repo.find({
-      where: { user: { id: user.id } },
-      relations: ['expenses'], // preload related expenses
-    });
-  }
 
   async findOne(user: User, id: string): Promise<Category> {
     const category = await this.repo.findOne({

@@ -25,6 +25,7 @@ import { AppResolver } from './app.resolver';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,
+      context: ({ req }) => ({ req }), // ⚠️ This is required for Passport
     }),
 
     UserModule,

@@ -16,4 +16,6 @@ export class UserInfoQuery {
   user(@Args('id', { type: () => Int }) id: number) {
     return this.userRepo.findOne({ where: { id: id.toString() } }); // If your ID column is string
   }
+
+  
 }

@@ -5,6 +5,5 @@ export class CreateCategoryInput {
   @Field()
   name: string;
 
-  @Field(() => ID)
-  userId: string;
+ 
 }

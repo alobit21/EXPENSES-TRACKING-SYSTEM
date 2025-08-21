@@ -10,6 +10,7 @@ export class UserService {
     @InjectRepository(User) private readonly userRepo: Repository<User>,
   ) {}
 
+  
   create(input: CreateUserInput): Promise<User> {
     const user = this.userRepo.create(input);
     return this.userRepo.save(user);
@@ -46,8 +47,5 @@ async delete(id: string) {
   const result = await this.userRepo.delete(id);
   return (result.affected ?? 0) > 0;
 }
-
-
- 
 }
 
