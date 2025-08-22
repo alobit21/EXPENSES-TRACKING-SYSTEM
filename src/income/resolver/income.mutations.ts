@@ -30,4 +30,13 @@ export class IncomeMutations {
   ) {
     return this.incomeService.update(user, input);
   }
+
+  @UseGuards(GqlJwtAuthGuard)
+  @Mutation(() => Boolean)
+  deleteIncome(
+    @Args('id') id: string,
+    @CurrentUser() user: User,
+  ): Promise<boolean> {
+    return this.incomeService.remove(user, id);
+  }
 }

@@ -1,9 +1,15 @@
-import { ApolloDriver } from '@nestjs/apollo';
+// goal.module.ts
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Goal } from './goal.entity';
+import { GoalService } from './goal.service';
+import { GoalMutations } from './resolver/goal.mutation';
+import { GoalQueries } from './resolver/goal.query';
+import { Expense } from 'src/expense/expense.entity';
+import { Income } from 'src/income/income.entity';
 
-@Module({})
-export class GoalModule {
-  static forRoot<T>(arg0: { driver: ApolloDriver; }): import("@nestjs/common").Type<any> | import("@nestjs/common").DynamicModule | Promise<import("@nestjs/common").DynamicModule> | import("@nestjs/common").ForwardReference<any> {
-    throw new Error('Method not implemented.');
-  }
-}
+@Module({
+  imports: [TypeOrmModule.forFeature([Goal,Expense,Income])],
+  providers: [GoalService, GoalMutations, GoalQueries],
+})
+export class GoalModule {}

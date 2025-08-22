@@ -12,6 +12,7 @@ import { GoalModule } from './goal/goal.module';
 import { AuthModule } from './auth/auth.module';
 import { AppService } from './app.service';
 import { AppResolver } from './app.resolver';
+import { FinanceModule } from './finance/finance.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { AppResolver } from './app.resolver';
     CategoryModule,
     GoalModule,
     AuthModule,
+    FinanceModule, // ✅ add this
   ],
   controllers: [],
   providers: [AppService, AppResolver],

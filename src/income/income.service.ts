@@ -47,4 +47,19 @@ export class IncomeService {
     if (!income) throw new NotFoundException('Income not found');
     return income;
   }
+
+  // income.service.ts
+async remove(user: User, id: string): Promise<boolean> {
+  const income = await this.repo.findOne({
+    where: { id, user: { id: user.id } },
+  });
+
+  if (!income) {
+    throw new NotFoundException(`Income with id ${id} not found`);
+  }
+
+  await this.repo.remove(income);
+  return true;
+}
+
 }

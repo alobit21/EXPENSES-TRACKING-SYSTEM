@@ -1,5 +1,6 @@
 // dto/output/goal.output.ts
-import { ObjectType, Field, ID, Float } from '@nestjs/graphql';
+import { ObjectType, Field, ID, Float, GraphQLISODateTime } from '@nestjs/graphql';
+import { GraphQLDate } from 'graphql-scalars';
 
 @ObjectType()
 export class GoalOutput {
@@ -15,6 +16,6 @@ export class GoalOutput {
   @Field(() => Float)
   currentAmount: number;
 
-  @Field({ nullable: true })
+  @Field(() => GraphQLDate,{ nullable: true })
   deadline?: Date;
 }

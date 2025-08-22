@@ -1,0 +1,9 @@
+think and act as senior software developer ,
+
+now let create optimistic queries for expenses, and goal and income tracting 
+that will enable us to almost all informations and help us to draw charts in the frontend later
+
+
+
+good, now can we add other analytics that can help users to analyze forexample what categories used alot of expense,
+which month spent alot of expense and others similar to that 
