@@ -5,6 +5,15 @@ import { User } from '../user/user.entity';
 import { Category } from '../category/category.entity';
 import { GraphQLDate } from 'graphql-scalars';
 
+
+export enum PaymentMethod {
+  CASH = 'CASH',
+  CREDIT_CARD = 'CREDIT_CARD',
+  DEBIT_CARD = 'DEBIT_CARD',
+  MOBILE_PAYMENT = 'MOBILE_PAYMENT',
+  BANK_TRANSFER = 'BANK_TRANSFER',
+  OTHER = 'OTHER',
+}
 @ObjectType()
 @Entity()
 export class Expense {
@@ -24,14 +33,26 @@ export class Expense {
   @Column({ type: 'date' })
   date: Date;
 
+  @Field()
+  @Column({
+    type: 'enum',
+    enum: PaymentMethod,
+    default: PaymentMethod.CASH }
+)
+    
+  paymentMethod?: PaymentMethod;
+
   @ManyToOne(() => User, user => user.expenses)
   user: User;
 
-  @Field(() => Category, { nullable: true })   // 👈 add this
+  @Field(() => Category, { nullable: true })    
   @ManyToOne(() => Category, category => category.expenses, {
     nullable: true,
     eager: true,   // 👈 this makes TypeORM auto-join category
   })
   category?: Category;
 
+
+
 }
+

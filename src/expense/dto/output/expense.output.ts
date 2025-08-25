@@ -17,6 +17,9 @@ export class ExpenseOutput {
   @Field()
   date: Date;
 
+  @Field()
+  paymentMethod?: string;
+
   @Field(()=> CategoryOutput, {nullable:true})
   category: CategoryOutput;
 }

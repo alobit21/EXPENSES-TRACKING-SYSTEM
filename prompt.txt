@@ -1,9 +1,29 @@
-think and act as senior software developer ,
+ i have already implemented nestjs backend for expenses tracking system using GraphQl api, now i want to connect with react front end 
 
-now let create optimistic queries for expenses, and goal and income tracting 
-that will enable us to almost all informations and help us to draw charts in the frontend later
+ and here is my structure example
+
+ src/
+    api/
+        user/
+            mutation
+            queries
+
+        ...
+
+    context
+    routes
+    components
+    pages
+    types.ts
 
 
+    let start with authentiation login and register
 
-good, now can we add other analytics that can help users to analyze forexample what categories used alot of expense,
-which month spent alot of expense and others similar to that 
+
+    auth.service.ts
+    
+
+    user.entity.ts
+    user.service.ts
+
+    jwt.strategy.ts

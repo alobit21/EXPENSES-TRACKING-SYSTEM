@@ -1,5 +1,6 @@
 // dto/input/create-expense.input.ts
 import { InputType, Field, Float, ID } from '@nestjs/graphql';
+import { PaymentMethod } from 'src/expense/expense.entity';
 
 @InputType()
 export class CreateExpenseInput {
@@ -14,4 +15,7 @@ export class CreateExpenseInput {
 
   @Field(() => ID, { nullable: true })
   categoryId?: string;
+
+  @Field()
+  paymentMethod?: PaymentMethod;
 }
