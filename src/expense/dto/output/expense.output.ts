@@ -1,7 +1,9 @@
 // dto/output/expense.output.ts
 import { ObjectType, Field, ID, Float } from '@nestjs/graphql';
+import { GraphQLDate } from 'graphql-scalars';
 import { CategoryMutation } from 'src/category/dto/output/category.mutation';
 import { CategoryOutput } from 'src/category/dto/output/category.output';
+import { Column } from 'typeorm';
 
 @ObjectType()
 export class ExpenseOutput {
@@ -14,7 +16,8 @@ export class ExpenseOutput {
   @Field({ nullable: true })
   description?: string;
 
-  @Field()
+  @Field(()=> GraphQLDate)
+  @Column({ type: 'date' })
   date: Date;
 
   @Field()

@@ -16,7 +16,7 @@ export class Category {
   name: string;
 
 
-  @OneToMany(() => Expense, expense => expense.category)
+  @OneToMany(() => Expense, expense => expense.category, {nullable: true})
   expenses: Expense[];
 
   @ManyToOne(() => User, user => user.categories, { onDelete: 'CASCADE' })

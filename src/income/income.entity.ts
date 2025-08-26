@@ -10,7 +10,7 @@ export class Income {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Field(() => Float)
+  @Field(() => Float) 
   @Column('decimal')
   amount: number;
 
