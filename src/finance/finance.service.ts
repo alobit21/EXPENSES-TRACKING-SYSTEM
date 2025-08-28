@@ -1,3 +1,5 @@
+ 
+
 // src/finance/finance.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -275,3 +277,17 @@ async getMonthlyIncomeExpense(user: User, monthsBack = 12): Promise<MonthlyIncom
 }
 
 }
+
+ 
+
+ 
+
+ 
+
+ 
+ 
+
+
+ 
+ 
+ 
