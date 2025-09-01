@@ -1,21 +1,19 @@
-# Use Node.js image
 FROM node:latest
 
-# Create app directory
 WORKDIR /usr/src/app
 
-# Copy package.json and install dependencies
+# Install ALL dependencies (including dev)
 COPY package*.json ./
-RUN npm install --production
+RUN npm install
 
-# Copy source code
+# Copy source
 COPY . .
 
-# Build NestJS project
+# Build app
 RUN npm run build
 
-# Expose port
-EXPOSE 3000
+# Remove dev dependencies to slim image
+RUN npm prune --production
 
-# Start the app
+EXPOSE 3000
 CMD ["node", "dist/main"]
