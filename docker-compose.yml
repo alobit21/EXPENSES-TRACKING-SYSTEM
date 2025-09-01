@@ -1,3 +1,36 @@
+# services:
+#   postgres:
+#     image: postgres:15-alpine
+#     container_name: pesayangu-db
+#     environment:
+#       POSTGRES_DB: pesayangu
+#       POSTGRES_USER: mac
+#       POSTGRES_PASSWORD: 1234
+#     ports:
+#       - "5433:5432"
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data
+#     networks:
+#       - pesayangu-network
+#     restart: unless-stopped
+#     healthcheck:
+#       test: ["CMD-SHELL", "pg_isready -U mac -d pesayangu"]
+#       interval: 30s
+#       timeout: 10s
+#       retries: 5
+
+# volumes:
+#   postgres_data:
+
+# networks:
+#   pesayangu-network:
+#     driver: bridge
+
+
+
+
+version: "3.9"
+
 services:
   postgres:
     image: postgres:15-alpine
@@ -18,6 +51,24 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+
+  backend:
+    build: .
+    container_name: pesayangu-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: mac
+      DATABASE_PASSWORD: 1234
+      DATABASE_NAME: pesayangu
+    networks:
+      - pesayangu-network
+    restart: unless-stopped
 
 volumes:
   postgres_data:
