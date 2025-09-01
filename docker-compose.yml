@@ -60,12 +60,10 @@ services:
         condition: service_healthy
     ports:
       - "3000:3000"
-    environment:
-      DATABASE_HOST: postgres
-      DATABASE_PORT: 5432
-      DATABASE_USER: mac
-      DATABASE_PASSWORD: 1234
-      DATABASE_NAME: pesayangu
+      
+    env_file:
+      - .env
+
     networks:
       - pesayangu-network
     restart: unless-stopped
