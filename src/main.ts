@@ -8,8 +8,8 @@ async function bootstrap() {
     origin: 'http://localhost:5173', // frontend URL
     allowedHeaders: ['Content-Type', 'Authorization'], // required for JWT
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    console.log('CORS enabled for http://localhost:5173')
   });
+    console.log('CORS enabled for http://localhost:5173')
 
   await app.listen(process.env.PORT ?? 3000,'0.0.0.0');
 }
