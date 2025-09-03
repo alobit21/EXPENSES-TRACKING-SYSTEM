@@ -1,98 +1,183 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 🚀 Deploying NestJS + PostgreSQL on AWS EC2 with PM2 and Nginx
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+This document explains the **full end-to-end process** of deploying a NestJS + PostgreSQL application (`pesayangu`) on an **AWS EC2 Ubuntu server**, managing it with **PM2**, and serving it with **Nginx**.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+ 
 
-## Description
+## ✅ Prerequisites
+- AWS EC2 instance running Ubuntu 20.04+  
+- Security group allowing ports **22 (SSH)**, **80 (HTTP)**, and **443 (HTTPS if using SSL)**  
+- SSH access to the EC2 instance  
+- Basic familiarity with terminal commands  
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+ 
 
-## Project setup
+## 🛠️ Step-by-Step Deployment
 
+### 1. Connect to EC2
 ```bash
-$ npm install
+# Connect to your EC2 instance
+ssh -i my-key.pem ubuntu@my-ec2-public-ip
+```
+ 
+
+### 2. Update System
+```bash
+# Update and upgrade system packages
+sudo apt update && sudo apt upgrade -y
+```
+ 
+
+### 3. Install Node.js & npm
+```bash
+# Add Node.js v18 repository
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+
+# Install Node.js and essential build tools
+sudo apt install -y nodejs build-essential
+
+# Verify installation
+node -v
+npm -v
+```
+ 
+
+### 4. Install PostgreSQL and Create Database
+```bash
+# Install PostgreSQL
+sudo apt install postgresql postgresql-contrib -y
+
+# Switch to postgres user
+sudo -i -u postgres
+psql
 ```
 
-## Compile and run the project
+Inside PostgreSQL shell:
+```sql
+-- Create application database
+CREATE DATABASE pesayangu;
 
-```bash
-# development
-$ npm run start
+-- Reset password for postgres user
+ALTER USER postgres WITH PASSWORD 'postgres';
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+-- Exit
+\q
 ```
 
-## Run tests
-
+Test connection:
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+psql -U postgres -W -d pesayangu
 ```
 
-## Deployment
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
+### 5. Clone and Configure NestJS App
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# Clone your repo
+git clone https://github.com/your-repo/EXPENSES-TRACKING-SYSTEM.git
+
+# Move into project directory
+cd EXPENSES-TRACKING-SYSTEM
+
+# Install dependencies
+npm install
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Create `.env` file in the project root:
+```env
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
+DB_DATABASE=pesayangu
+```
 
-## Resources
+Build the app:
+```bash
+npm run build
+```
+ 
 
-Check out a few resources that may come in handy when working with NestJS:
+### 6. Run App with PM2
+```bash
+# Install PM2 globally
+sudo npm install -g pm2
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+# Start the app with PM2
+pm2 start npm --name "pesayangu-app" -- run start:prod
 
-## Support
+# Check status and logs
+pm2 status
+pm2 logs pesayangu-app
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+# Enable PM2 startup on reboot
+pm2 startup systemd
+pm2 save
+```
 
-## Stay in touch
+ 
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### 7. Configure Nginx as Reverse Proxy
+```bash
+# Install Nginx
+sudo apt install nginx -y
 
-## License
+# Create a new Nginx site config
+sudo nano /etc/nginx/sites-available/pesayangu
+```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Add the following:
+```nginx
+server {
+    listen 80;
+    server_name your_domain_or_public_ip;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+```
+
+Enable the site and restart Nginx:
+```bash
+sudo ln -s /etc/nginx/sites-available/pesayangu /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl restart nginx
+```
+
+### 8. Configure Firewall / Security Group
+For EC2 Security Group → allow:
+- **Port 22 (SSH)**  
+- **Port 80 (HTTP)**  
+- **Port 443 (HTTPS)**  
+
+For UFW firewall:
+```bash
+sudo ufw allow 'Nginx Full'
+sudo ufw enable
+sudo ufw status
+```
+
+### 9. Access the App
+- Visit: `http://your-ec2-public-ip` or `http://your-domain.com`  
+- Your NestJS app should now be live 🎉  
+
+
+
+ 
+
+ 
+
+## 📖 To sumarize what have been done
+- ✅ Connected to EC2 and updated system  
+- ✅ Installed Node.js, npm, and PostgreSQL  
+- ✅ Created database `pesayangu` and configured credentials  
+- ✅ Cloned and built NestJS app  
+- ✅ Managed app with PM2  
+- ✅ Configured Nginx reverse proxy  
+- ✅ Enabled firewall rules  
+- ✅ App live on browser (HTTP/HTTPS)  
