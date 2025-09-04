@@ -18,6 +18,9 @@ This document explains the **full end-to-end process** of deploying a NestJS + P
 ```bash
 # Connect to your EC2 instance
 ssh -i my-key.pem ubuntu@my-ec2-public-ip
+ssh -i "manualconfig.pem" ubuntu@ec2-51-21-246-100.eu-north-1.compute.amazonaws.com  #was my key
+
+
 ```
  
 
@@ -181,3 +184,371 @@ sudo ufw status
 - ✅ Configured Nginx reverse proxy  
 - ✅ Enabled firewall rules  
 - ✅ App live on browser (HTTP/HTTPS)  
+
+
+
+
+
+
+## CREATING DATABASE BACKUP AFTER EACH THREE HOURS 
+
+
+PostgreSQL Automated Backup Script Setup on Ubuntu EC2
+This  explains how to set up an automated PostgreSQL database backup system that runs every 3 hours, compresses backups, logs activity, and deletes old backups after 7 days.
+1. Create Backup Directory
+Choose a directory where backups will be stored and that the script user can write to. For this setup, we use /opt/db_backups.
+
+```bash
+sudo mkdir -p /home/ubuntu/EXPENSES-TRACKING-SYSTEM/db_backups
+sudo chown postgres:postgres /home/ubuntu/EXPENSES-TRACKING-SYSTEM/db_backups
+sudo chmod 755 /home/ubuntu/EXPENSES-TRACKING-SYSTEM/db_backups
+```
+- `chown postgres:postgres` ensures the `postgres` user can write files.
+- `chmod 755` allows read/execute for everyone and write for the owner.
+2. Create the Backup Script
+
+
+## 1. Create a scripts folder:
+```bash
+sudo mkdir -p /opt/scripts
+```
+## 2. Create the script file:
+```bash
+sudo nano /opt/scripts/db_backup.sh
+```
+## 3. Paste the following content:
+```bash
+#!/bin/bash
+
+# === CONFIGURATION ===
+DB_NAME="pesayangu"
+DB_USER="postgres"
+DB_PASS="postgres"
+BACKUP_DIR="/home/ubuntu/EXPENSES-TRACKING-SYSTEM/db_backups"
+DATE=$(date +"%Y-%m-%d_%H-%M-%S")
+FILE_NAME="${DB_NAME}_backup_${DATE}.sql"
+
+export PGPASSWORD=$DB_PASS
+mkdir -p $BACKUP_DIR
+pg_dump -U $DB_USER -d $DB_NAME > $BACKUP_DIR/$FILE_NAME
+gzip $BACKUP_DIR/$FILE_NAME
+cd $BACKUP_DIR || exit
+find . -type f -mtime +7 -name "*.gz" -delete
+echo "[$(date)] Backup completed: $BACKUP_DIR/${FILE_NAME}.gz" >> $BACKUP_DIR/backup.log
+```
+## 3. Make the Script Executable
+```bash
+sudo chmod 755 /opt/scripts/db_backup.sh
+```
+- `755` allows the owner to read/write/execute and everyone else to read/execute.
+## 4. Test the Script Manually
+Run the script as the `postgres` user:
+```bash
+sudo -u postgres /opt/scripts/db_backup.sh
+```
+Check the backup folder:
+```bash
+ls -lh /home/ubuntu/EXPENSES-TRACKING-SYSTEM/db_backups
+```- You should see the compressed `.sql.gz` file(s) and `backup.log`.
+5. Set Up Cron for Automatic Backups
+1. Edit the cron jobs for the user:
+```bash
+crontab -e
+```
+## 2. Add the following line to run the script every 3 hours:
+```cron
+0 */3 * * * /opt/scripts/db_backup.sh >> /opt/db_backups/cron.log 2>&1
+```
+- `0 */3 * * *` → runs at minute 0 every 3 hours.
+- `>> /opt/db_backups/cron.log 2>&1` → captures output and errors for review.
+## 3. Save and exit. Verify cron job:
+```bash
+crontab -l
+```
+## 4. Verify Backups and Logs
+- Backup files: `/opt/db_backups/pesayangu_backup_YYYY-MM-DD_HH-MM-SS.sql.gz`
+- Script log: `/opt/db_backups/backup.log`
+- Cron log: `/opt/db_backups/cron.log`
+
+Check recent backups:
+```bash
+ls -lh /home/ubuntu/EXPENSES-TRACKING-SYSTEM/db_backups
+tail -n 10 /home/ubuntu/EXPENSES-TRACKING-SYSTEM/db_backups/backup.log
+tail -n 20 /home/ubuntu/EXPENSES-TRACKING-SYSTEM/db_backups/cron.log
+```
+ 
+## To summarize
+- Backups run every 3 hours automatically.
+- Backups are compressed to save space.
+- Backups older than 7 days are automatically deleted.
+- Logs record successful backups (`backup.log`) and cron activity (`cron.log`).
+- Script can be run manually or automatically via cron.
+
+
+
+
+## CREATING A SCRIPT FOR AUTOMATIC RUN-UP AN APPLICATION WHEN THE SERVER(EC2) GOES DOWN
+
+
+
+
+
+SCRIPT FOR AUTOMATIC RUN UP APPLICATION
+
+
+#!/bin/bash
+
+# === CONFIGURATION ===
+APP_NAME="pesayangu-app"
+LOG_DIR="/opt/monitoring_logs"
+LOG_FILE="$LOG_DIR/monitor_log.txt"
+DATE=$(date +"%Y-%m-%d_%H-%M-%S")
+ALERT_EMAIL="macapp5363@gmail.com"
+
+# Gmail credentials
+GMAIL_USER="your-gmail@gmail.com"
+GMAIL_APP_PASSWORD="your-app-password"
+
+# Thresholds
+CPU_THRESHOLD=80 # in %
+MEM_THRESHOLD=80 # in %
+DISK_THRESHOLD=80 # in %
+
+# Ensure log directory exists
+mkdir -p $LOG_DIR
+
+# Function to send email via Gmail SMTP
+send_email() {
+local subject="$1"
+local body="$2"
+email_content=$(cat << EOF
+From: $GMAIL_USER
+To: $ALERT_EMAIL
+Subject: $subject
+
+$body
+
+This is an automated message from your server monitoring script.
+EOF
+)
+curl -s --url 'smtps://smtp.gmail.com:465' \
+--ssl-reqd \
+--mail-from "$GMAIL_USER" \
+--mail-rcpt "$ALERT_EMAIL" \
+--user "$GMAIL_USER:$GMAIL_APP_PASSWORD" \
+-T <(echo "$email_content") > /dev/null 2>&1
+
+if [ $? -eq 0 ]; then
+echo "[$DATE] Email sent successfully: $subject" >> $LOG_FILE
+else
+echo "[$DATE] Failed to send email: $subject" >> $LOG_FILE
+fi
+}
+
+# === START LOG SECTION ===
+{
+echo "========================================="
+echo "Health Check Run: $DATE"
+echo "-----------------------------------------"
+
+# Disk usage
+DISK_USAGE=$(df / | tail -1 | awk '{print $5}' | tr -d '%')
+echo "Disk Usage: $DISK_USAGE%"
+if [ "$DISK_USAGE" -ge "$DISK_THRESHOLD" ]; then
+send_email "🚨 ALERT: High Disk Usage" "Disk usage is at ${DISK_USAGE}% on $(hostname) at $DATE"
+fi
+echo "-----------------------------------------"
+
+# CPU usage
+CPU_LOAD=$(top -bn1 | grep "Cpu(s)" | awk '{print int($2 + $4)}')
+echo "CPU Load: $CPU_LOAD%"
+if [ "$CPU_LOAD" -ge "$CPU_THRESHOLD" ]; then
+send_email "🚨 ALERT: High CPU Usage" "CPU load is at ${CPU_LOAD}% on $(hostname) at $DATE"
+fi
+echo "-----------------------------------------"
+
+# Memory usage
+MEM_USAGE=$(free | awk '/Mem:/ {print int($3/$2 * 100)}')
+echo "Memory Usage: $MEM_USAGE%"
+if [ "$MEM_USAGE" -ge "$MEM_THRESHOLD" ]; then
+send_email "🚨 ALERT: High Memory Usage" "Memory usage is at ${MEM_USAGE}% on $(hostname) at $DATE"
+fi
+echo "-----------------------------------------"
+
+# Check app status
+echo "Application Status:"
+if pm2 show $APP_NAME > /dev/null 2>&1; then
+STATUS=$(pm2 status $APP_NAME | grep $APP_NAME | awk '{print $10}')
+echo "PM2 reports status: $STATUS"
+
+if [ "$STATUS" != "online" ]; then
+echo "App is DOWN. Restarting..."
+pm2 restart $APP_NAME
+echo "App restarted at: $(date)"
+send_email "🚨 ALERT: $APP_NAME restarted" "[$DATE] ALERT: $APP_NAME was DOWN and restarted on $(hostname)"
+else
+echo "App is running normally."
+fi
+else
+echo "App not found in PM2. Starting..."
+pm2 start npm --name "$APP_NAME" -- run start:prod
+echo "App started at: $(date)"
+send_email "🚨 ALERT: $APP_NAME started" "[$DATE] ALERT: $APP_NAME was not running and has been started on $(hostname)"
+fi
+
+echo "Health check finished at: $(date)"
+echo "========================================="
+echo ""
+
+} >> $LOG_FILE 2>&1
+
+
+
+
+
+##  AUTOMATIC MONITORING AND DEPLOYMENT FOR NESTJS ON AWS EC2 
+
+1. Overview
+This document details the full setup of automated monitoring and deployment scripts for a NestJS application (pesayangu) deployed on an Ubuntu EC2 instance. These scripts ensure the application stays up-to-date, running, and healthy, while maintaining logs and sending email alerts.
+Scripts: - Monitoring Script: Checks app health, system resources, restarts the app if down, and sends email alerts. - Auto-Pull & Deploy Script: Automatically pulls GitHub changes, rebuilds the app, restarts PM2, logs activities, and sends email alerts.
+
+2. Prerequisites
+    • Ubuntu 20.04+ EC2 instance
+    • NestJS application deployed and running under PM2
+    • Node.js & npm installed
+    • Git installed
+    • Gmail account with App Password configured for sending emails
+    • SSH access to EC2 instance
+
+3. Monitoring Script Setup
+Script Location
+/opt/scripts/monitor_app.sh
+Features
+    1. Checks PM2 application health.
+    2. Monitors CPU, memory, and disk usage.
+    3. Restarts the app if down.
+    4. Sends email alerts.
+    5. Logs all activity every 3 hours in /opt/monitoring_logs/monitor_log.txt.
+Script Content
+#!/bin/bash
+
+APP_NAME="pesayangu-app"
+LOG_DIR="/opt/monitoring_logs"
+LOG_FILE="$LOG_DIR/monitor_log.txt"
+DATE=$(date +"%Y-%m-%d_%H-%M-%S")
+ALERT_EMAIL="macapp5363@gmail.com"
+
+mkdir -p $LOG_DIR
+
+{
+echo "========================================="
+echo "Health Check Run: $DATE"
+echo "-----------------------------------------"
+
+# Disk usage
+echo "Disk Usage:"
+df -h /
+echo "-----------------------------------------"
+
+# CPU usage
+echo "CPU Load:"
+uptime
+echo "-----------------------------------------"
+
+# Memory usage
+echo "Memory Usage:"
+free -m
+echo "-----------------------------------------"
+
+# Application status
+echo "Application Status:"
+if pm2 show $APP_NAME > /dev/null 2>&1; then
+    STATUS=$(pm2 status $APP_NAME | grep $APP_NAME | awk '{print $10}')
+    echo "PM2 reports status: $STATUS"
+
+    if [ "$STATUS" != "online" ]; then
+        echo "App is DOWN. Restarting..."
+        pm2 restart $APP_NAME
+        echo "App restarted at: $(date)"
+        echo "[$DATE] ALERT: $APP_NAME was DOWN and restarted!" | mail -s "🚨 ALERT: $APP_NAME restarted" $ALERT_EMAIL
+    else
+        echo "App is running normally."
+    fi
+else
+    echo "App not found in PM2. Starting..."
+    pm2 start npm --name "$APP_NAME" -- run start:prod
+    echo "App started at: $(date)"
+    echo "[$DATE] ALERT: $APP_NAME started" | mail -s "🚨 ALERT: $APP_NAME started" $ALERT_EMAIL
+fi
+
+echo "Health check finished at: $(date)"
+echo "========================================="
+echo ""
+} >> $LOG_FILE 2>&1
+Cron Setup
+0 */3 * * * /bin/bash /opt/scripts/monitor_app.sh
+Testing
+sudo -u ubuntu /bin/bash /opt/scripts/monitor_app.sh
+tail -f /opt/monitoring_logs/monitor_log.txt
+
+4. Auto-Pull & Deploy Script Setup
+Script Location
+/opt/scripts/auto_pull_deploy.sh
+Features
+    1. Checks GitHub repository for changes.
+    2. Pulls changes automatically.
+    3. Rebuilds the NestJS app.
+    4. Restarts PM2 process.
+    5. Sends email alerts.
+    6. Logs activity every 3 hours in /home/ubuntu/deploy_logs/.
+Script Content
+#!/bin/bash
+
+APP_NAME="pesayangu-app"
+REPO_DIR="/home/ubuntu/EXPENSES-TRACKING-SYSTEM"
+LOG_DIR="/home/ubuntu/deploy_logs"
+DATE=$(date +"%Y-%m-%d_%H-%M-%S")
+ALERT_EMAIL="macapp5363@gmail.com"
+
+mkdir -p $LOG_DIR
+LOG_FILE="$LOG_DIR/deploy_${DATE}.txt"
+
+{
+echo "========================================="
+echo "Deployment Run: $DATE"
+echo "-----------------------------------------"
+cd $REPO_DIR
+
+git fetch origin
+CHANGES=$(git log HEAD..origin/main --oneline)
+if [ -n "$CHANGES" ]; then
+    echo "New changes detected. Pulling updates..."
+    git pull origin main
+    npm install
+    npm run build
+    pm2 restart $APP_NAME
+    echo "Deployment successful at: $(date)"
+    echo "[$DATE] ALERT: $APP_NAME updated and restarted" | mail -s "🚀 $APP_NAME Deployment" $ALERT_EMAIL
+else
+    echo "No changes detected. Skipping deployment."
+fi
+
+echo "Deployment finished at: $(date)"
+echo "========================================="
+echo ""
+} >> $LOG_FILE 2>&1
+Cron Setup
+0 */3 * * * /bin/bash /opt/scripts/auto_pull_deploy.sh
+Testing
+sudo -u ubuntu /bin/bash /opt/scripts/auto_pull_deploy.sh
+tail -f /home/ubuntu/deploy_logs/deploy_$(date +"%Y-%m-%d")_*.txt
+
+5. Best Practices
+    • Run scripts as the ubuntu user.
+    • Use absolute paths.
+    • PM2 processes must have proper ownership.
+    • Keep Gmail App Password secure.
+    • Separate logs per 3-hour interval.
+    • Clean old logs periodically if needed.
+
+ 
