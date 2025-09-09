@@ -1,5 +1,5 @@
 # Use full Node.js image to avoid crypto issues
-FROM node:18-alpine
+FROM node:18
 
 # Set working directory
 WORKDIR /usr/src/app
