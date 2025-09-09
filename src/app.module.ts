@@ -27,7 +27,9 @@ import { GraphQLDate } from 'graphql-scalars';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,
-    resolvers: { Date: GraphQLDate }, // 👈 tell NestJS to use GraphQLDate
+      playground: true,       // ✅ enable GraphQL Playground
+      csrfPrevention: false, 
+      resolvers: { Date: GraphQLDate }, // 👈 tell NestJS to use GraphQLDate
 
       context: ({ req }) => ({ req }), // ⚠️ This is required for Passport
     }),
