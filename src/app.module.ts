@@ -29,6 +29,7 @@ import { GraphQLDate } from 'graphql-scalars';
       autoSchemaFile: true,
       playground: true,       // ✅ enable GraphQL Playground
       csrfPrevention: false, 
+      introspection: true,    // ✅ allow introspection in production
       resolvers: { Date: GraphQLDate }, // 👈 tell NestJS to use GraphQLDate
 
       context: ({ req }) => ({ req }), // ⚠️ This is required for Passport
