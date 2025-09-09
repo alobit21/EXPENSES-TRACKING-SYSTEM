@@ -12,11 +12,12 @@ RUN npm install --production
 COPY . .
 
 # Copy wait-for-postgres script
-COPY wait-for-postgres.sh /usr/src/app/wait-for-postgres.sh
+COPY wait-for-postgres.sh /usr/src/app/
 RUN chmod +x /usr/src/app/wait-for-postgres.sh
 
-# Expose application port
 EXPOSE 3000
 
-# Start the app after Postgres is ready
 CMD ["/usr/src/app/wait-for-postgres.sh", "postgres", "npm", "run", "start:prod"]
+
+
+ 
