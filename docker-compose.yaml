@@ -9,6 +9,9 @@ services:
       - postgres
     networks:
       - expenses_net
+    
+    ports:
+      - "3000:3000"
 
   postgres:
     image: postgres:15
