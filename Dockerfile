@@ -4,20 +4,20 @@ FROM node:18-alpine
 # Set working directory
 WORKDIR /usr/src/app
 
-# Copy package files and install dependencies
+# Copy package files first for caching
 COPY package*.json ./
-RUN npm install --production
 
-# Copy the rest of the project
+# Install dependencies
+RUN npm install
+
+# Copy project files
 COPY . .
 
-# Copy wait-for-postgres script
-COPY wait-for-postgres.sh /usr/src/app/
-RUN chmod +x /usr/src/app/wait-for-postgres.sh
+# Build application (if you have build step)
+RUN npm run build
 
+# Expose port (matching your app)
 EXPOSE 3000
 
-CMD ["/usr/src/app/wait-for-postgres.sh", "postgres", "npm", "run", "start:prod"]
-
-
- 
+# Start app
+CMD ["npm", "run", "start:prod"]
