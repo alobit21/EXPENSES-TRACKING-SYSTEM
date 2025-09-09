@@ -1,23 +1,22 @@
 # Use official Node.js image
-FROM node:18-alpine
+FROM node:20-alpine
 
 # Set working directory
 WORKDIR /usr/src/app
 
-# Copy package files first for caching
+# Copy package files and install dependencies
 COPY package*.json ./
+RUN npm install --production
 
-# Install dependencies
-RUN npm install
-
-# Copy project files
+# Copy the rest of the project
 COPY . .
 
-# Build application (if you have build step)
-RUN npm run build
+# Copy wait-for-postgres script
+COPY wait-for-postgres.sh /usr/src/app/wait-for-postgres.sh
+RUN chmod +x /usr/src/app/wait-for-postgres.sh
 
-# Expose port (matching your app)
+# Expose application port
 EXPOSE 3000
 
-# Start app
-CMD ["npm", "run", "start:prod"]
+# Start the app after Postgres is ready
+CMD ["/usr/src/app/wait-for-postgres.sh", "postgres", "npm", "run", "start:prod"]
