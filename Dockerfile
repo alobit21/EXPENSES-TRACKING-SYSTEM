@@ -1,5 +1,5 @@
 # Use full Node.js image to avoid crypto issues
-FROM node:18
+FROM node:latest
 
 # Set working directory
 WORKDIR /usr/src/app

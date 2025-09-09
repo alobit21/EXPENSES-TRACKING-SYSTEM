@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import crypto from 'crypto';
+(global as any).crypto = crypto;
 
 @Module({
   imports: [
