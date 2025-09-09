@@ -1,12 +1,13 @@
-# Use official Node.js image
+# Use full Node.js image to avoid crypto issues
 FROM node:18
 
+# Set working directory
 WORKDIR /usr/src/app
 
+# Copy package files
 COPY package*.json ./
 
-
-# Install dependencies (including dev, so we can build)
+# Install dependencies
 RUN npm install
 
 # Install Nest CLI globally
@@ -18,6 +19,8 @@ COPY . .
 # Build application
 RUN npm run build
 
+# Expose port
 EXPOSE 3000
 
+# Run production
 CMD ["npm", "run", "start:prod"]
