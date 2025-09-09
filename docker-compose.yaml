@@ -1,50 +1,22 @@
-version: "3.9"
+version: "3.8"
 
 services:
-  # --- Postgres Database ---
-  postgres:
-    image: postgres:15-alpine
-    container_name: pesayangu_postgres
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: pesayangu
-    ports: []
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  # --- Node.js App with PM2 ---
   app:
     build: .
-    container_name: pesayangu_app
+    container_name: expenses_app
+    env_file:
+      - .env
     restart: always
-    depends_on:
-      - postgres
-    environment:
-      DATABASE_HOST: postgres
-      DATABASE_PORT: 5432
-      DATABASE_USER: postgres
-      DATABASE_PASSWORD: postgres
-      DATABASE_NAME: pesayangu
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./scripts:/usr/src/app/scripts
-      - ./app_monitoring_logs:/usr/src/app/app_monitoring_logs
+    expose:
+      - "3000"
 
-  # --- Nginx ---
   nginx:
     image: nginx:alpine
-    container_name: pesayangu_nginx
-    restart: always
+    container_name: nginx_proxy
     ports:
       - "80:80"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./public:/usr/share/nginx/html:ro
+      - ../nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - app
-
-volumes:
-  postgres_data:
+    restart: always
