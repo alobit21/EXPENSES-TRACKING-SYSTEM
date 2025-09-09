@@ -10,8 +10,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: pesayangu
-    ports:
-      - "5436:5432"
+    ports: []
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
