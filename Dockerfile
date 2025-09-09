@@ -1,9 +1,10 @@
 # Use official Node.js image
-FROM node:18-slim
+FROM node:18
 
 WORKDIR /usr/src/app
 
 COPY package*.json ./
+
 
 # Install dependencies (including dev, so we can build)
 RUN npm install
