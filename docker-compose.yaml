@@ -1,6 +1,24 @@
 version: "3.9"
 
 services:
+  postgres:
+    image: postgres:15
+    container_name: pesayangu_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: pesayangu
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   app:
     build: .
     container_name: expenses_app
@@ -10,10 +28,8 @@ services:
     volumes:
       - ./:/usr/src/app
     depends_on:
-      - postgres
-      - nginx
-    networks:
-      - expenses_network
+      postgres:
+        condition: service_healthy
 
   nginx:
     image: nginx:alpine
@@ -24,27 +40,8 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./:/usr/src/app:ro
-    networks:
-      - expenses_network
-
-  postgres:
-    image: postgres:15-alpine
-    container_name: pesayangu_postgres
-    restart: always
-    environment:
-      POSTGRES_DB: pesayangu
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - expenses_network
+    depends_on:
+      - app
 
 volumes:
   postgres_data:
-
-networks:
-  expenses_network:
-    driver: bridge
