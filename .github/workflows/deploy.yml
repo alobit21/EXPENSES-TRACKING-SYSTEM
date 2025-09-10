@@ -3,57 +3,54 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main   # Run pipeline only when pushing to main
+      - main
 
 jobs:
-  build:
+  build-test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repo
         uses: actions/checkout@v3
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: 18
 
       - name: Install dependencies
         run: npm install
 
-      # - name: Run tests
-      #   run: npm run test --if-present
-
       - name: Run tests
         run: npm run test -- --passWithNoTests
 
+  docker:
+    runs-on: ubuntu-latest
+    needs: build-test
 
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-      - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/expenses-app:latest .
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
-      - name: Log in to DockerHub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Push Docker image
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/expenses-app:latest
+      - name: Build and push Docker image
+        run: docker buildx build --platform linux/amd64 -t ${{ secrets.DOCKERHUB_USERNAME }}/expenses-tracking-system:latest . --push
 
   deploy:
     runs-on: ubuntu-latest
-    needs: build
+    needs: docker
 
     steps:
-      - name: SSH into EC2 and Deploy
-        uses: appleboy/ssh-action@v1.0.0
+      - name: Deploy on EC2
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/expenses-app:latest
-            docker stop expenses_app || true
-            docker rm expenses_app || true
-            docker run -d --name expenses_app -p 8080:3000 --env-file ~/EXPENSES-TRACKING-SYSTEM/.env ${{ secrets.DOCKERHUB_USERNAME }}/expenses-app:latest
+            cd ~/EXPENSES-TRACKING-SYSTEM
+            docker-compose pull
+            docker-compose up -d --build
+            docker system prune -f
