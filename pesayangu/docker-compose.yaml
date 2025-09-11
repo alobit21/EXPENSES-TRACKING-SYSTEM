@@ -1,0 +1,55 @@
+services:
+  app:
+    build: .
+    container_name: expenses_app
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    networks:
+      - expenses_net
+
+    ports:
+      - "3000:3000"  
+    
+    
+
+  postgres:
+    image: postgres:15
+    container_name: pesayangu_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: pesayangu
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - expenses_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      retries: 5
+
+  nginx:
+    image: nginx:alpine
+    container_name: pesayangu_nginx
+    restart: always
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - app
+    networks:
+      - expenses_net
+
+volumes:
+  postgres_data:
+
+networks:
+  expenses_net:
+    driver: bridge
