@@ -10,8 +10,8 @@ services:
     networks:
       - expenses_net
 
-    ports:
-      - "3000:3000"  
+    # ports:
+    #   - "3000:3000"  
     
     
 
