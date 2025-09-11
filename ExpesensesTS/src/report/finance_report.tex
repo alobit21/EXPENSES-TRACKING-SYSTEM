@@ -1,0 +1,200 @@
+% Setting up the document class and geometry
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{graphicx}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{parskip}
+\usepackage{natbib}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{datetime2}
+
+% Configuring header and footer
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Financial Report}
+\fancyhead[R]{\today}
+\fancyfoot[C]{Page \thepage\ of \pageref{LastPage}}
+
+% Defining colors for styling
+\definecolor{lightgray}{RGB}{220,220,220}
+\definecolor{green}{RGB}{0,128,0}
+\definecolor{red}{RGB}{200,0,0}
+\definecolor{blue}{RGB}{0,0,200}
+
+% Setting up fonts
+\usepackage{mathpazo}
+\renewcommand{\familydefault}{\rmdefault}
+
+\begin{document}
+
+% Title page
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    \Huge{\textbf{Financial Report}} \\
+    \vspace{0.5cm}
+    \Large{Personal Finance Overview} \\
+    \vspace{1cm}
+    \normalsize{Generated on \today} \\
+    \vspace{2cm}
+    \normalsize{Prepared for: Your Name} \\
+    \vfill
+\end{titlepage}
+
+% Table of Contents
+\tableofcontents
+\newpage
+
+% Financial Overview Section
+\section{Financial Overview}
+This section provides a snapshot of your financial health, including total income, expenses, available balance, and progress toward financial goals.
+
+\subsection{Summary}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Total Income:} \$Your Total Income
+    \item \textbf{Total Expenses:} \$Your Total Expenses
+    \item \textbf{Available Balance:} \$Your Available Balance
+\end{itemize}
+
+% Alert
+\ifx\YourAlert\undefined
+\else
+\subsection{Alert}
+\begin{itemize}[leftmargin=*]
+    \item \textcolor{red}{\YourAlert}
+\end{itemize}
+\fi
+
+\subsection{Expenses by Category}
+\begin{longtable}{l r}
+    \toprule
+    \textbf{Category} & \textbf{Total Amount (\$)} \\
+    \midrule
+    \endhead
+    % Replace with actual data
+    Your Category 1 & Your Amount 1 \\
+    Your Category 2 & Your Amount 2 \\
+    \bottomrule
+    \caption{Expenses by Category}
+    \label{tab:expenses_by_category}
+\end{longtable}
+
+\subsection{Recent Transactions}
+\subsubsection{Recent Incomes}
+\begin{longtable}{p{5cm} r p{3cm}}
+    \toprule
+    \textbf{Description} & \textbf{Amount (\$)} & \textbf{Date} \\
+    \midrule
+    \endhead
+    % Replace with actual data
+    Your Income Description 1 & Your Income Amount 1 & Your Income Date 1 \\
+    Your Income Description 2 & Your Income Amount 2 & Your Income Date 2 \\
+    \bottomrule
+    \caption{Recent Incomes}
+    \label{tab:recent_incomes}
+\end{longtable}
+
+\subsubsection{Recent Expenses}
+\begin{longtable}{p{4cm} p{3cm} r p{3cm}}
+    \toprule
+    \textbf{Description} & \textbf{Category} & \textbf{Amount (\$)} & \textbf{Date} \\
+    \midrule
+    \endhead
+    % Replace with actual data
+    Your Expense Description 1 & Your Category 1 & Your Expense Amount 1 & Your Expense Date 1 \\
+    Your Expense Description 2 & Your Category 2 & Your Expense Amount 2 & Your Expense Date 2 \\
+    \bottomrule
+    \caption{Recent Expenses}
+    \label{tab:recent_expenses}
+\end{longtable}
+
+\subsection{Financial Goals}
+\begin{longtable}{p{4cm} r r p{3cm}}
+    \toprule
+    \textbf{Title} & \textbf{Current Amount (\$)} & \textbf{Target Amount (\$)} & \textbf{Deadline} \\
+    \midrule
+    \endhead
+    % Replace with actual data
+    Your Goal Title 1 & Your Current Amount 1 & Your Target Amount 1 & Your Deadline 1 \\
+    Your Goal Title 2 & Your Current Amount 2 & Your Target Amount 2 & Your Deadline 2 \\
+    \bottomrule
+    \caption{Financial Goals}
+    \label{tab:financial_goals}
+\end{longtable}
+
+% Monthly Income vs Expense Section
+\section{Monthly Income vs Expense}
+This section details your income, expenses, and net balance on a monthly basis.
+
+\begin{longtable}{l r r r}
+    \toprule
+    \textbf{Month} & \textbf{Income (\$)} & \textbf{Expense (\$)} & \textbf{Net Balance (\$)} \\
+    \midrule
+    \endhead
+    % Replace with actual data
+    Your Month 1 & Your Income 1 & Your Expense 1 & Your Net Balance 1 \\
+    Your Month 2 & Your Income 2 & Your Expense 2 & Your Net Balance 2 \\
+    \bottomrule
+    \caption{Monthly Income vs Expense}
+    \label{tab:monthly_income_expense}
+\end{longtable}
+
+% Monthly Category Expenses Section
+\section{Monthly Category Expenses}
+This section breaks down expenses by category for each month.
+
+% Example for one month with a pie chart
+\subsection{Your Month 1}
+\begin{longtable}{l r}
+    \toprule
+    \textbf{Category} & \textbf{Total Spent (\$)} \\
+    \midrule
+    % Replace with actual data
+    Your Category 1 & Your Amount 1 \\
+    Your Category 2 & Your Amount 2 \\
+    \bottomrule
+    \caption{Expenses for Your Month 1}
+    \label{tab:expenses_month_1}
+\end{longtable}
+
+% Pie chart for the month
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            hide axis,
+            scale only axis,
+            height=5cm,
+            width=5cm
+        ]
+        \addplot[
+            draw=none,
+            fill=blue!30,
+            start angle=0,
+            end angle=Your Angle 1
+        ] {1};
+        \addplot[
+            draw=none,
+            fill=red!30,
+            start angle=Your Angle 1,
+            end angle=Your Angle 2
+        ] {1};
+        \end{axis}
+    \end{tikzpicture}
+    \caption{Pie Chart for Your Month 1 Expenses}
+    \label{fig:pie_month_1}
+\end{figure}
+
+\end{document}
