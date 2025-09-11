@@ -1,26 +1,25 @@
-# Use full Node.js image to avoid crypto issues
-FROM node:20
+# Stage 1: Build NestJS backend
+FROM node:20 AS build
 
-# Set working directory
 WORKDIR /usr/src/app
 
-# Copy package files
 COPY package*.json ./
-
-# Install dependencies
 RUN npm install
 
-# Install Nest CLI globally
+# Install Nest CLI globally (needed for build)
 RUN npm install -g @nestjs/cli
 
-# Copy project files
 COPY . .
-
-# Build application
 RUN npm run build
 
-# Expose port
-EXPOSE 3000
+# Stage 2: Run production
+FROM node:20
 
-# Run production
-CMD ["npm", "run", "start:prod"]
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+COPY --from=build /usr/src/app/dist ./dist
+RUN npm install --production
+
+EXPOSE 3000
+CMD ["node", "dist/main.js"]

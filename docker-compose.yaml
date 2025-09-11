@@ -1,5 +1,6 @@
+version: "3.9"
+
 services:
-  # === Backend ===
   backend:
     build:
       context: ./pesayangu
@@ -8,41 +9,31 @@ services:
     restart: always
     env_file:
       - ./pesayangu/.env
-    depends_on:
-      - postgres
     networks:
       - expenses_net
 
-  # === Frontend + Nginx ===
   frontend:
     build:
-      context: ./ExpensesTS
-      dockerfile: Dockerfile
+      context: .              # project root
+      dockerfile: ./ExpensesTS/Dockerfile
     container_name: expenses_frontend
+    restart: always
+    networks:
+      - expenses_net
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: expenses_nginx
     restart: always
     ports:
       - "80:80"
+    # volumes:
+    #   - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
+      - frontend
       - backend
     networks:
       - expenses_net
-
-  # === Database ===
-  postgres:
-    image: postgres:15
-    container_name: expenses_postgres
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: pesayangu
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - expenses_net
-
-volumes:
-  postgres_data:
 
 networks:
   expenses_net:
