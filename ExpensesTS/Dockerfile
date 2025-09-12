@@ -1,25 +1,16 @@
-# Frontend build-only image
-FROM node:20-alpine
+# Stage 1: Build the frontend
+FROM node:20-alpine AS build
 
-# Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy package files and install dependencies
 COPY package*.json ./
-
-# Install dependencies
 RUN npm install --legacy-peer-deps
 
-# Copy all frontend source code
+# Copy source files
 COPY . .
 
-# Build frontend assets (outputs to /app/dist)
+# Build the frontend
 RUN npm run build:frontend
 
-EXPOSE 5173
-
-
-
-
-# This image only contains the build output
-# No ports exposed, no CMD — it's for producing artifacts
+# Output: /app/dist contains the static site
