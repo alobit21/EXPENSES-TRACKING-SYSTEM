@@ -1,35 +1,35 @@
+version: '3.8'
+
 services:
-  # === Backend ===
   backend:
-    image: codewithmac/expenses-backend:latest
-    container_name: expenses_backend
-    restart: always
-    networks:
-      - expenses_net
+    build:
+      context: ./pesayangu
+      dockerfile: Dockerfile
+    container_name: pesayangu
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
 
-  # === Frontend ===
   frontend:
-    image: codewithmac/expenses-frontend:latest
-    container_name: expenses_frontend
-    restart: always
-    networks:
-      - expenses_net
+    build:
+      context: ./ExpensesTS
+      dockerfile: Dockerfile
+    container_name: expenses-frontend
+    # this service is just for building assets
+    # we won't map ports because it doesn't serve anything
+    command: ["true"]   # prevents container from staying alive unnecessarily
 
-  # === Nginx Reverse Proxy ===
   nginx:
     image: nginx:alpine
-    container_name: expenses_nginx
-    restart: always
+    container_name: expenses-nginx
     ports:
       - "80:80"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - backend
       - frontend
-    networks:
-      - expenses_net
-
-networks:
-  expenses_net:
-    driver: bridge
+    volumes:
+      # Mount frontend build output into nginx
+      - ./ExpensesTS/dist:/usr/share/nginx/html
+      # Use your custom nginx.conf
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro

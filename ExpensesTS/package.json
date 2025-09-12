@@ -3,12 +3,15 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc -b || true && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
-  },
+"scripts": {
+  "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+  "backend": "nest start",
+  "frontend": "vite",
+  "build": "npm run build:frontend && npm run build:backend",
+  "build:frontend": "vite build",
+  "build:backend": "tsc -b"
+},
+
   "dependencies": {
     "@apollo/client": "^4.0.2",
     "chartjs": "^0.3.24",

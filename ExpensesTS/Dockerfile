@@ -1,28 +1,25 @@
-# Stage 1: Build React app
-FROM node:18-slim AS build
+# Frontend build-only image
+FROM node:20-alpine
 
+# Set working directory
 WORKDIR /app
 
-# Copy package files and install dependencies
-COPY ExpensesTS/package*.json ./
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
 RUN npm install --legacy-peer-deps
 
-# Copy frontend source code
-COPY ExpensesTS/. .
+# Copy all frontend source code
+COPY . .
 
-# Build React app
-RUN npm run build
+# Build frontend assets (outputs to /app/dist)
+RUN npm run build:frontend
 
-# Stage 2: Serve with Nginx
-FROM nginx:stable-alpine
+EXPOSE 5173
 
-# Copy Nginx config from project root
-COPY nginx/nginx.conf /etc/nginx/nginx.conf
 
-# Copy built frontend
-COPY --from=build /app/dist /usr/share/nginx/html
 
-COPY nginx/nginx.conf /etc/nginx/nginx.conf
 
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+# This image only contains the build output
+# No ports exposed, no CMD — it's for producing artifacts

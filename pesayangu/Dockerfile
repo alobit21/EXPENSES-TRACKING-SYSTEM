@@ -1,25 +1,20 @@
-# Stage 1: Build NestJS backend
-FROM node:20 AS build
+FROM node:20-alpine
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
+# Copy backend package.json
 COPY package*.json ./
-RUN npm install
 
-# Install Nest CLI globally (needed for build)
-RUN npm install -g @nestjs/cli
+# Install dependencies
+RUN npm install --legacy-peer-deps
 
+# Copy backend source code
 COPY . .
-RUN npm run build
 
-# Stage 2: Run production
-FROM node:20
-
-WORKDIR /usr/src/app
-
-COPY package*.json ./
-COPY --from=build /usr/src/app/dist ./dist
-RUN npm install --production
+# Build backend - use the correct script name
+RUN npm run build  # This runs "nest build"
 
 EXPOSE 3000
-CMD ["node", "dist/main.js"]
+
+# Start backend in production mode
+CMD ["npm", "run", "start:prod"]  # This runs "node dist/main"
