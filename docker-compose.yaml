@@ -1,37 +1,32 @@
-version: "3.9"
-
 services:
+  # === Backend ===
   backend:
-    build:
-      context: ./pesayangu
-      dockerfile: Dockerfile
+    image: codewithmac/expenses-backend:latest
     container_name: expenses_backend
     restart: always
-    env_file:
-      - ./pesayangu/.env
     networks:
       - expenses_net
 
+  # === Frontend ===
   frontend:
-    build:
-      context: .              # project root
-      dockerfile: ./ExpensesTS/Dockerfile
+    image: codewithmac/expenses-frontend:latest
     container_name: expenses_frontend
     restart: always
     networks:
       - expenses_net
 
+  # === Nginx Reverse Proxy ===
   nginx:
-    image: nginx:stable-alpine
+    image: nginx:alpine
     container_name: expenses_nginx
     restart: always
     ports:
       - "80:80"
-    # volumes:
-    #   - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
-      - frontend
       - backend
+      - frontend
     networks:
       - expenses_net
 
