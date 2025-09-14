@@ -24,8 +24,12 @@ services:
     container_name: expenses_nginx
     ports:
       - "80:80"
+    # volumes:
+    #   - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx:/etc/nginx:ro
+      - ./ExpensesTS/dist:/usr/share/nginx/html:ro
+
     depends_on:
       - frontend
       - backend
