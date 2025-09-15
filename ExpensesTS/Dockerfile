@@ -1,16 +1,15 @@
-# Stage 1: Build the frontend
 FROM node:20
 
 WORKDIR /app
 
-# Copy package files and install dependencies
-COPY package*.json ./
-RUN npm install --legacy-peer-deps
+# Install serve to serve static files
+RUN npm install -g serve
 
-# Copy source files
-COPY . .
+# Copy only the prebuilt static files
+COPY dist ./dist
 
-# Build the frontend
-RUN npm run build:frontend
+EXPOSE 8080
+CMD ["serve", "-s", "dist", "-l", "8080"]
 
-# Output: /app/dist contains the static site
+
+
