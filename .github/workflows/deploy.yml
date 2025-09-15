@@ -39,7 +39,7 @@ jobs:
           cd ExpensesTS
           npm run test -- --passWithNoTests || echo "No frontend tests"
 
-   docker:
+  docker:   # 👈 fixed indentation
     runs-on: ubuntu-latest
     needs: build-test
     steps:
