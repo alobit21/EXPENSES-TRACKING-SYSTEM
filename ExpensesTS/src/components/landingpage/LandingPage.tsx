@@ -70,26 +70,28 @@ const LandingPage: React.FC = () => {
               description: 'Download customizable financial reports in just a few clicks.',
             },
           ].map((feature, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.2 }}
-              animate={{
-                scale: [1, 1.1, 1],
-              }}
-              transition={{
-                scale: {
-                  duration: 1.5,
-                  repeat: Infinity,
-                  repeatDelay: 1,
-                  delay: index * 0.5, // Stagger the pulse
-                },
-              }}
-              whileHover={{ scale: 1.1, transition: { duration: 0.3 } }}
-              className="bg-gray-50 p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300"
-            >
+<motion.div
+  key={index}
+  initial={{ opacity: 0, y: 20 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true }}
+  animate={{
+    scale: [1, 1.1, 1],
+  }}
+  transition={{
+    duration: 0.6,
+    delay: index * 0.2,
+    scale: {
+      duration: 1.5,
+      repeat: Infinity,
+      repeatDelay: 1,
+      delay: index * 0.5, // Stagger the pulse
+    },
+  }}
+  whileHover={{ scale: 1.1, transition: { duration: 0.3 } }}
+  className="bg-gray-50 p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300"
+>
+
               {feature.icon}
               <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
               <p className="text-gray-600">{feature.description}</p>
