@@ -6,6 +6,8 @@
     "@testing-library/jest-dom": "^6.8.0",
     "@testing-library/react": "^16.3.0",
     "concurrently": "^9.2.1",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "test": "echo \"No tests defined\" && exit 0"
+
   }
 }
