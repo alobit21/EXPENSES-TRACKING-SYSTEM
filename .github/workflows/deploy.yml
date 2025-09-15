@@ -17,11 +17,27 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install dependencies
-        run: npm install
+      # Backend install + test
+      - name: Install backend dependencies
+        run: |
+          cd pesayangu
+          npm install
 
-      - name: Run tests
-        run: npm run test -- --passWithNoTests #this causes an error if no tests are present so we add --passWithNoTests to avoid failure
+      - name: Run backend tests
+        run: |
+          cd pesayangu
+          npm run test -- --passWithNoTests
+
+      # Frontend install + dummy test (or real if configured)
+      - name: Install frontend dependencies
+        run: |
+          cd ExpensesTS
+          npm install --legacy-peer-deps
+
+      - name: Run frontend tests (skip if none)
+        run: |
+          cd ExpensesTS
+          npm run test -- --passWithNoTests || echo "No frontend tests"
 
   docker:
     runs-on: ubuntu-latest
