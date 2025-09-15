@@ -30,8 +30,11 @@ services:
       - postgres
     networks:
       - expenses_net
-    expose:
-      - "3000"
+    ports:
+      - "3000:3000"
+    
+    env_file:
+      - .env
 
   frontend:
     build:
@@ -48,7 +51,7 @@ services:
     image: nginx:alpine
     container_name: expenses_nginx
     ports:
-      - "80:80"
+      - "8080:80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./ExpensesTS/dist:/usr/share/nginx/html:ro
