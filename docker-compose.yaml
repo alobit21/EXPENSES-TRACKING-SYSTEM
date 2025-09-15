@@ -3,7 +3,7 @@ services:
     build:
       context: ./pesayangu
       dockerfile: Dockerfile
-    image: ${{ secrets.DOCKERHUB_USERNAME }}/expenses-backend:latest
+    image: codewithmac/expenses-backend:latest
     container_name: backend
     ports:
       - "3000:3000"
@@ -14,7 +14,7 @@ services:
     build:
       context: ./ExpensesTS
       dockerfile: Dockerfile
-    image: ${{ secrets.DOCKERHUB_USERNAME }}/expenses-frontend:latest
+    image: codewithmac/expenses-frontend:latest
     container_name: frontend
     depends_on:
       - backend
