@@ -1,7 +1,7 @@
 // src/App.tsx
  
 import { useAuth } from "../context/AuthContext";
-import FinanceOverview from "../report/FinanceOverview";
+// import FinanceOverview from "../report/FinanceOverview";
 import MonthlyCategoryExpenses from "../report/MonthlyCategoryExpenses";
 import MonthlyIncomeExpense from "../report/MonthlyIncomeExpense";
 
