@@ -195,7 +195,7 @@ const GoalList: React.FC = () => {
         <div className="text-center py-8 sm:py-12 text-gray-500">
           <Target size={40} className="mx-auto mb-3 text-gray-300 sm:size-12" />
           <p className="text-base sm:text-lg">No goals found</p>
-          <p className="text-xs sm:text-sm">Create your first financial goal to get started!</p>
+          <p className="text-xs sm:text-sm">Create youryyyyy first financial goal to get started!</p>
         </div>
       )}
     </div>
