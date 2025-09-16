@@ -1,13 +1,5 @@
 import React from 'react';
-import {
-  Trash2,
-  Edit,
-  Plus,
-  Target,
-  Calendar,
-  DollarSign,
-  TrendingUp,
-} from 'lucide-react';
+import { Trash2, Edit, Plus, Target, Calendar, DollarSign, TrendingUp } from 'lucide-react';
 import { useGoals } from '../../hooks/useGoals';
 import type { Goal } from '../../types/goal';
 import { format } from 'date-fns';
@@ -20,8 +12,9 @@ const GoalList: React.FC = () => {
   const [contributingGoal, setContributingGoal] = React.useState<Goal | null>(null);
   const [showForm, setShowForm] = React.useState(false);
 
-  const calculateProgress = (goal: Goal): number =>
-    (goal.currentAmount / goal.targetAmount) * 100;
+  const calculateProgress = (goal: Goal): number => {
+    return (goal.currentAmount / goal.targetAmount) * 100;
+  };
 
   const getDaysUntilDeadline = (deadline?: string): number | null => {
     if (!deadline) return null;
@@ -45,21 +38,19 @@ const GoalList: React.FC = () => {
   const completedGoals = goals.filter(goal => goal.currentAmount >= goal.targetAmount).length;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      {/* Header */}
-      <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
+    <div className="max-w-6xl mx-auto p-4 sm:p-6">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Financial Goals</h1>
-          <p className="text-sm sm:text-base text-gray-600">
-            {completedGoals} of {totalGoals} goals completed
-          </p>
+          <p className="text-gray-600 text-sm sm:text-base">{completedGoals} of {totalGoals} goals completed</p>
         </div>
         <button
           onClick={() => setShowForm(true)}
-          className="w-full sm:w-auto bg-indigo-600 text-white px-4 py-2 text-sm sm:text-base rounded-lg flex items-center justify-center gap-2 hover:bg-indigo-700 transition-colors"
+          className="bg-indigo-600 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg flex items-center gap-2 hover:bg-indigo-700 w-full sm:w-auto justify-center"
         >
-          <Plus size={20} />
-          New Goal
+          <Plus size={18} className="sm:size-5" />
+          <span className="text-sm sm:text-base">New Goal</span>
         </button>
       </div>
 
@@ -77,7 +68,6 @@ const GoalList: React.FC = () => {
           }}
         />
       )}
-
       {editingGoal && (
         <GoalForm
           goal={editingGoal}
@@ -85,7 +75,6 @@ const GoalList: React.FC = () => {
           onSuccess={() => setEditingGoal(null)}
         />
       )}
-
       {contributingGoal && (
         <ContributionForm
           goal={contributingGoal}
@@ -94,8 +83,8 @@ const GoalList: React.FC = () => {
         />
       )}
 
-      {/* Goal Cards */}
-      <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+      {/* Goals Grid */}
+      <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
         {goals.map((goal) => {
           const progress = calculateProgress(goal);
           const daysUntilDeadline = getDaysUntilDeadline(goal.deadline);
@@ -106,18 +95,18 @@ const GoalList: React.FC = () => {
               key={goal.id}
               className="bg-white rounded-xl shadow-md p-4 sm:p-6 border border-gray-200 hover:shadow-lg transition-shadow"
             >
-              {/* Title & Actions */}
+              {/* Goal Header */}
               <div className="flex justify-between items-start mb-4">
-                <h3 className="font-semibold text-gray-800 text-base sm:text-lg">
+                <h3 className="font-semibold text-gray-800 text-base sm:text-lg break-words pr-2">
                   {goal.title}
                 </h3>
-                <div className="flex gap-2">
+                <div className="flex gap-1 sm:gap-2 shrink-0">
                   <button
                     onClick={() => setEditingGoal(goal)}
                     className="text-blue-600 hover:text-blue-800 p-1"
                     aria-label="Edit goal"
                   >
-                    <Edit size={16} />
+                    <Edit size={16} className="sm:size-4" />
                   </button>
                   <button
                     onClick={() => {
@@ -128,7 +117,7 @@ const GoalList: React.FC = () => {
                     className="text-red-600 hover:text-red-800 p-1"
                     aria-label="Delete goal"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={16} className="sm:size-4" />
                   </button>
                 </div>
               </div>
@@ -136,28 +125,28 @@ const GoalList: React.FC = () => {
               {/* Progress Bar */}
               <div className="mb-4">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-gray-600">Progress</span>
-                  <span className="text-sm font-semibold">{progress.toFixed(1)}%</span>
+                  <span className="text-xs sm:text-sm text-gray-600">Progress</span>
+                  <span className="text-xs sm:text-sm font-semibold">{progress.toFixed(1)}%</span>
                 </div>
-                <div className="w-full h-2 sm:h-3 bg-gray-200 rounded-full">
+                <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
-                    className={`h-2 sm:h-3 rounded-full ${getProgressColor(progress)}`}
+                    className={`h-2 rounded-full ${getProgressColor(progress)}`}
                     style={{ width: `${Math.min(progress, 100)}%` }}
                   ></div>
                 </div>
               </div>
 
               {/* Amounts */}
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div className="text-center p-3 bg-gray-50 rounded-lg">
-                  <DollarSign size={20} className="mx-auto mb-1 text-green-600" />
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-4">
+                <div className="text-center p-2 sm:p-3 bg-gray-50 rounded-lg">
+                  <DollarSign size={18} className="mx-auto mb-1 text-green-600 sm:size-5" />
                   <div className="text-base sm:text-lg font-bold text-green-600">
                     ${goal.currentAmount.toFixed(2)}
                   </div>
                   <div className="text-xs text-gray-500">Saved</div>
                 </div>
-                <div className="text-center p-3 bg-gray-50 rounded-lg">
-                  <Target size={20} className="mx-auto mb-1 text-blue-600" />
+                <div className="text-center p-2 sm:p-3 bg-gray-50 rounded-lg">
+                  <Target size={18} className="mx-auto mb-1 text-blue-600 sm:size-5" />
                   <div className="text-base sm:text-lg font-bold text-blue-600">
                     ${goal.targetAmount.toFixed(2)}
                   </div>
@@ -167,29 +156,31 @@ const GoalList: React.FC = () => {
 
               {/* Deadline */}
               {goal.deadline && (
-                <div className="flex flex-wrap items-center gap-2 mb-4 p-3 bg-orange-50 rounded-lg">
-                  <Calendar size={16} className="text-orange-600" />
-                  <span className="text-sm text-orange-700">
+                <div className="flex items-center gap-2 mb-4 p-2 sm:p-3 bg-orange-50 rounded-lg">
+                  <Calendar size={14} className="text-orange-600 sm:size-4" />
+                  <span className="text-xs sm:text-sm text-orange-700">
                     {daysUntilDeadline && daysUntilDeadline > 0
                       ? `${daysUntilDeadline} days left`
                       : 'Deadline passed'}
                   </span>
-                  <span className="text-xs text-orange-600">
+                  <span className="text-xs text-orange-600 hidden xs:inline">
                     {format(new Date(goal.deadline), 'MMM dd, yyyy')}
                   </span>
                 </div>
               )}
 
               {/* Action Button */}
-              {!isCompleted ? (
+              {!isCompleted && (
                 <button
                   onClick={() => setContributingGoal(goal)}
-                  className="w-full bg-indigo-600 text-white py-2 px-4 text-sm sm:text-base rounded-lg flex items-center justify-center gap-2 hover:bg-indigo-700 transition-colors"
+                  className="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg flex items-center justify-center gap-2 hover:bg-indigo-700 text-sm sm:text-base"
                 >
-                  <TrendingUp size={16} />
-                  Contribute
+                  <TrendingUp size={16} className="sm:size-4" />
+                  <span>Contribute</span>
                 </button>
-              ) : (
+              )}
+
+              {isCompleted && (
                 <div className="w-full bg-green-100 text-green-800 py-2 px-4 rounded-lg text-center text-sm sm:text-base">
                   🎉 Goal Achieved!
                 </div>
@@ -201,10 +192,10 @@ const GoalList: React.FC = () => {
 
       {/* Empty State */}
       {goals.length === 0 && (
-        <div className="text-center py-12 text-gray-500 px-4 sm:px-0">
-          <Target size={48} className="mx-auto mb-4 text-gray-300" />
-          <p className="text-lg">No goals found</p>
-          <p className="text-sm">Create your first financial goal to get started!</p>
+        <div className="text-center py-8 sm:py-12 text-gray-500">
+          <Target size={40} className="mx-auto mb-3 text-gray-300 sm:size-12" />
+          <p className="text-base sm:text-lg">No goals found</p>
+          <p className="text-xs sm:text-sm">Create your first financial goal to get started!</p>
         </div>
       )}
     </div>
