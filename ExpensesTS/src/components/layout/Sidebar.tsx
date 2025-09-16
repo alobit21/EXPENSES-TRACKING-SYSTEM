@@ -31,7 +31,7 @@ export default function Sidebar({ children }: { children: ReactNode }) {
   src="/assets/logo.svg"
   className={`
     overflow-hidden transition-all duration-300 ease-in-out
-    ${expanded ? "w-24 sm:w-32 md:w-40" : "w-0"}
+    ${expanded ? "w-24 sm:w-24 md:w-24" : "w-0"}
     h-auto max-h-10 sm:max-h-12 md:max-h-16
   `}
   alt="Logo"
