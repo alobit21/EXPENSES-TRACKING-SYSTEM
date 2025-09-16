@@ -47,7 +47,7 @@ const GoalList: React.FC = () => {
         </div>
         <button
           onClick={() => setShowForm(true)}
-          className="bg-indigo-600 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg flex items-center gap-2 hover:bg-indigo-700 w-full sm:w-auto justify-center"
+          className="bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg flex items-center gap-2 hover:bg-indigo-700 w-full sm:w-auto justify-center"
         >
           <Plus size={18} className="sm:size-5" />
           <span className="text-sm sm:text-base">New Goal</span>
@@ -195,7 +195,7 @@ const GoalList: React.FC = () => {
         <div className="text-center py-8 sm:py-12 text-gray-500">
           <Target size={40} className="mx-auto mb-3 text-gray-300 sm:size-12" />
           <p className="text-base sm:text-lg">No goals found</p>
-          <p className="text-xs sm:text-sm">Create youryyyyy first financial goal to get started!</p>
+          <p className="text-xs sm:text-sm">Create your first financial goal to get started!</p>
         </div>
       )}
     </div>
