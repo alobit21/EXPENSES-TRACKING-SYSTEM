@@ -10,6 +10,19 @@ interface AuthContextType {
   logout: () => void;
 }
 
+interface LoginData {
+  login: {
+    accessToken: string;
+    user: {
+      id: string;
+      name: string;
+      email: string;
+      // add other user fields you use
+    };
+  };
+}
+
+
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -26,7 +39,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string) => {
     const { data } = await loginMutation({ variables: { email, password } });
     
-    const { accessToken, user } = data.login;
+const { accessToken, user } = (data as LoginData).login;
 
     localStorage.setItem("accessToken", accessToken);
     localStorage.setItem("user", JSON.stringify(user));

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, DollarSign, Calendar, Tag, CreditCard } from 'lucide-react';
 import { useExpenses } from '../../hooks/useExpenses';
 import { useCategories } from '../../hooks/useCategories';
-import { formatDateForGraphQL, formatDateForInput, isValidDate } from '../../utils/dateFormatter';
+import { formatDateForGraphQL, isValidDate } from '../../utils/dateFormatter';
 import { type CreateExpenseInput, type Expense, PaymentMethod } from '../../types/expense';
 
 interface ExpenseFormProps {

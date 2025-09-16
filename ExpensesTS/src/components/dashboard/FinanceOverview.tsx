@@ -2,7 +2,7 @@ import React, { useMemo, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { GET_FINANCE_OVERVIEW } from '../../api/finance/queries';
 import { useQuery } from '@apollo/client/react';
-import { DollarSign, Tag, AlertTriangle, Calendar } from 'lucide-react';
+import { DollarSign,AlertTriangle,   } from 'lucide-react';
 import GoalsProgress from './GoalsProgress';
 
 interface FinanceOverviewData {

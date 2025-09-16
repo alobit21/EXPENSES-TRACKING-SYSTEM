@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
  
 import { useQuery } from '@apollo/client/react';
-import { DollarSign, Download, TrendingUp, TrendingDown } from 'lucide-react';
+import { DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { GET_MONTHLY_INCOME_EXPENSE } from '../api/finance/queries';
 import { downloadCSV, downloadJSON, downloadPDF } from '../utils/downloadReport';

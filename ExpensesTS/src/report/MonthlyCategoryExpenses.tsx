@@ -1,6 +1,6 @@
 import { useQuery } from '@apollo/client/react';
 import React, { useRef } from 'react';
-import { DollarSign, Download } from 'lucide-react';
+import { DollarSign } from 'lucide-react';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { GET_MONTHLY_CATEGORY_EXPENSES } from '../api/finance/queries';

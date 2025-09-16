@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Target, Calendar, DollarSign } from 'lucide-react';
 import { useGoals } from '../../hooks/useGoals';
-import type{ Goal, CreateGoalInput, UpdateGoalInput } from '../../types/goal';
+import type{ Goal, CreateGoalInput } from '../../types/goal';
 import { formatDateForInput, isValidDate } from '../../utils/dateFormatter';
 
 interface GoalFormProps {

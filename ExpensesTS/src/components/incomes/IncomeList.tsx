@@ -17,6 +17,11 @@ import {
   Legend,
 } from 'recharts';
 
+
+
+
+
+
 const IncomeList: React.FC = () => {
   const { incomes, loading, error, deleteIncome } = useIncomes();
   const [editingIncome, setEditingIncome] = useState<Income | null>(null);
@@ -34,28 +39,34 @@ const IncomeList: React.FC = () => {
   const maxIncome = incomes.length > 0 ? Math.max(...incomes.map((i) => i.amount)) : 0;
 
   // Chart data: monthly trends for BarChart
-  const barChartData = useMemo(() => {
-    const monthly: Record<string, number> = incomes.reduce((acc, income) => {
-      const monthKey = format(startOfMonth(new Date(income.date)), 'yyyy-MM');
-      acc[monthKey] = (acc[monthKey] || 0) + income.amount;
-      return acc;
-    }, {});
-    return Object.entries(monthly)
-      .map(([month, amount]) => ({ month, amount }))
-      .sort((a, b) => a.month.localeCompare(b.month));
-  }, [incomes]);
+ 
 
-  // Pie chart data: distribution by description
-  const pieChartData = useMemo(() => {
-    const byDescription: Record<string, number> = incomes.reduce((acc, income) => {
-      const key = income.description || 'No Description';
-      acc[key] = (acc[key] || 0) + income.amount;
-      return acc;
-    }, {});
-    return Object.entries(byDescription)
-      .map(([description, amount]) => ({ name: description, value: amount }))
-      .sort((a, b) => b.value - a.value);
-  }, [incomes]);
+
+const barChartData = useMemo(() => {
+  const monthly = incomes.reduce<Record<string, number>>((acc, income: Income) => {
+    const monthKey = format(startOfMonth(new Date(income.date)), 'yyyy-MM');
+    acc[monthKey] = (acc[monthKey] ?? 0) + income.amount; // safer nullish coalescing
+    return acc;
+  }, {});
+
+  return Object.entries(monthly)
+    .map(([month, amount]) => ({ month, amount }))
+    .sort((a, b) => a.month.localeCompare(b.month));
+}, [incomes]);
+
+// Pie chart data: distribution by description
+const pieChartData = useMemo(() => {
+  const byDescription = incomes.reduce<Record<string, number>>((acc, income: Income) => {
+    const key = income.description || 'No Description';
+    acc[key] = (acc[key] ?? 0) + income.amount; // nullish coalescing
+    return acc;
+  }, {});
+
+  return Object.entries(byDescription)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value);
+}, [incomes]);
+
 
   // Colors for charts
   const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#6B7280'];
@@ -196,7 +207,7 @@ const IncomeList: React.FC = () => {
                 outerRadius={80}
                 fillOpacity={0.8}
               >
-                {pieChartData.map((entry, index) => (
+                {pieChartData.map((_, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="#fff" strokeWidth={1} />
                 ))}
               </Pie>
@@ -382,7 +393,7 @@ const IncomeList: React.FC = () => {
             />
           )}
 
-          {editingIncome && (
+          {editingIncome?.id && (
             <IncomeForm
               income={editingIncome}
               onClose={() => setEditingIncome(null)}

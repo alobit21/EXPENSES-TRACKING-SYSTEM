@@ -6,6 +6,9 @@ export interface Income {
   user?: User;
 }
 
+
+ 
+
 export interface Category {
   id: string;
   name: string;

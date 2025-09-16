@@ -14,7 +14,7 @@ export const downloadPDF = async (element: HTMLElement, options: DownloadOptions
     scale: 2,
     useCORS: true,
     logging: false,
-  });
+  } as any);
 
   const imgData = canvas.toDataURL('image/png');
   const pdf = new jsPDF('p', 'mm', 'a4');
