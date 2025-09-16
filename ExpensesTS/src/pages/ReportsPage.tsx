@@ -7,7 +7,7 @@ import MonthlyIncomeExpense from "../report/MonthlyIncomeExpense";
 
  
 
-const App: React.FC = () => {
+const ReportPage: React.FC = () => {
   const { user, login } = useAuth();
 
   if (!user) {
@@ -24,11 +24,11 @@ const App: React.FC = () => {
   return (
     <div>
        
-      <FinanceOverview />
+      {/* <FinanceOverview /> */}
       <MonthlyCategoryExpenses />
       <MonthlyIncomeExpense />
     </div>
   );
 };
 
-export default App;
+export default ReportPage;
