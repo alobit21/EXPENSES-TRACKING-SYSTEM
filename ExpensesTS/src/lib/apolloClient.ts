@@ -2,7 +2,6 @@ import { ApolloClient, InMemoryCache, createHttpLink } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 
 const httpLink = createHttpLink({
-  // uri: "http://localhost:3000/graphql", // NestJS GraphQL endpoint
   uri: "http://51.21.246.100:3000/graphql",
 
 });
