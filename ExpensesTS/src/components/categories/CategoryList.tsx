@@ -43,7 +43,7 @@ const CategoryList: React.FC = () => {
           className="bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg flex items-center gap-2 hover:bg-indigo-700 w-full sm:w-auto justify-center"
   >
     <Plus size={18} className="md:size-5" />
-    <span className="hidden sm:inline">Add Category</span>
+    <span className=" sm:inline">Add Category</span>
   </button>
           
         </div>
