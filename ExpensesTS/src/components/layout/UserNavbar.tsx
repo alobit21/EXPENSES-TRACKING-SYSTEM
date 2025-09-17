@@ -27,7 +27,7 @@ const UserNavbar: React.FC = () => {
     >
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         {/* Logo */}
-        <div className="text-xl sm:text-center flex font-bold text-green-600">FinanceMaster</div>
+        <div className="text-xl left-8 flex font-bold text-green-600">FinanceMaster</div>
 
         {/* User Info and Dropdown */}
         <div className="relative">
