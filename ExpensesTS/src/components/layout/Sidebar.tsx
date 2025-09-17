@@ -50,20 +50,31 @@ const Sidebar = forwardRef(function Sidebar(
         md:translate-x-0
       `}
     >
-      <nav className="h-full flex flex-col bg-white border-r shadow-sm w-64">
+<nav
+  className={`
+    h-full flex flex-col bg-white border-r shadow-sm
+    transition-all duration-300 ease-in-out
+    ${expanded ? "w-64" : "w-20"} 
+  `}
+>
         {/* Logo and toggle */}
         <div className="p-4 pb-2 flex justify-between items-center">
-          <img
-            src="/assets/logo.svg"
-            className={`overflow-hidden transition-all duration-300 ease-in-out ${expanded ? "w-24" : "w-0"} h-24 max-h-24`}
-            alt="Logo"
-          />
-          <button
-            onClick={() => setExpanded((curr) => !curr)}
-            className="hidden md:block p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100"
-          >
-            {expanded ? <ChevronFirst /> : <ChevronLast />}
-          </button>
+         <img
+  src="/assets/logo.svg"
+  className={`
+    transition-all duration-300 ease-in-out
+    ${expanded ? "w-24 opacity-100" : "w-0 opacity-0"}
+  `}
+  alt="Logo"
+/>
+
+        <button
+  onClick={() => setExpanded((curr) => !curr)}
+  className="p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 hidden md:block"
+>
+  {expanded ? <ChevronFirst /> : <ChevronLast />}
+</button>
+
 
         </div>
 
@@ -138,9 +149,14 @@ export function SidebarItem({
       `}
     >
       {icon}
-      <span className={`overflow-hidden transition-all ${expanded ? "w-52 ml-3" : "w-0"}`}>
-        {text}
-      </span>
+     <span
+  className={`overflow-hidden transition-all duration-300 ease-in-out ${
+    expanded ? "w-52 ml-3 opacity-100" : "w-0 opacity-0"
+  }`}
+>
+  {text}
+</span>
+
       {alert && (
         <div className={`absolute right-2 w-2 h-2 rounded bg-indigo-400 ${expanded ? "" : "top-2"}`} />
       )}
