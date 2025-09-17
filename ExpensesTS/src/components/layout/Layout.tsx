@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react"
 import { Outlet, useNavigate, useLocation } from "react-router-dom"
-import { Menu } from "lucide-react"
+import { Menu,X } from "lucide-react"
 import Sidebar from "./Sidebar"
 import { SidebarItem } from "./Sidebar"
 import { Home, BarChart, Settings, Tag, DollarSign, Receipt, Target } from "lucide-react"
@@ -35,12 +35,14 @@ export default function Layout() {
   return (
     <div className="flex h-screen relative">
       {/* Hamburger menu for small screens */}
-      <button
-        className="absolute top-4 left-4 z-50 md:hidden p-2 bg-white rounded shadow"
-        onClick={() => setIsMobileOpen((prev) => !prev)}
-      >
-        <Menu size={24} />
-      </button>
+ 
+<button
+  className="absolute top-6 left-4 z-50 md:hidden p-2 bg-white rounded shadow transition-all"
+  onClick={() => setIsMobileOpen((prev) => !prev)}
+>
+  {isMobileOpen ? <X size={24} /> : <Menu size={24} />}
+</button>
+
 
       {/* Backdrop for mobile sidebar */}
       {isMobileOpen && (
