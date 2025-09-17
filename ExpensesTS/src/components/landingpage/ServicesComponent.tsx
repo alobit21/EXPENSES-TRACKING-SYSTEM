@@ -37,7 +37,7 @@ export default function LandingShowcase() {
   return (
     <section
       className="py-20 px-6 bg-gradient-to-b from-white/80 to-slate-50/90 relative bg-cover bg-center"
-      style={{ backgroundImage: "url('/public/assets/javascript.webp')" }}
+      style={{ backgroundImage: "url('/assets/javascript.webp')" }}
     >
       <div className="absolute inset-0  backdrop-blur-sm" />
       <div className="relative z-10">

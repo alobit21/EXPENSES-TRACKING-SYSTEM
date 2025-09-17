@@ -7,7 +7,7 @@ const HeroSection = () => {
             <section
         className="py-20 px-4 sm:px-6 lg:px-8 text-center relative bg-cover bg-center"
         style={{
-          backgroundImage: "url(' /public/assets/2.jpg'",
+          backgroundImage: "url('/assets/2.jpg')",
         }}
       >
         {/* Overlay for readability */}
