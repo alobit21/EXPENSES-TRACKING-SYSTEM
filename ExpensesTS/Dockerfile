@@ -18,5 +18,7 @@ RUN npm install -g serve
 # Copy built dist folder from build stage
 COPY --from=build /app/dist ./dist
 
+RUN NODE_OPTIONS="--max-old-space-size=4096" npm run build
+
 EXPOSE 8080
 CMD ["serve", "-s", "dist", "-l", "8080"]
