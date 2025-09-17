@@ -3,15 +3,16 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "scripts": {
-    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
-    "backend": "nest start",
-    "frontend": "vite",
-    "build": "npm run build:frontend && npm run build:backend",
-    "build:frontend": "vite build",
-    "build:backend": "tsc -b",
-    "test": "echo \"No tests defined\" && exit 0"
-  },
+ "scripts": {
+  "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+  "backend": "nest start",
+  "frontend": "vite",
+  "build": "NODE_OPTIONS='--max-old-space-size=4096' npm run build:frontend && npm run build:backend",
+  "build:frontend": "vite build",
+  "build:backend": "tsc -b",
+  "test": "echo \"No tests defined\" && exit 0"
+},
+
   "dependencies": {
     "@apollo/client": "^4.0.2",
     "chart.js": "^4.5.0",
