@@ -78,7 +78,7 @@ const Navbar: React.FC = () => {
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className={`focus:outline-none ${scrolled ? 'text-gray-700' : 'text-white'}`}
+              className={`focus:outline-none ${scrolled ? 'text-gray-200' : 'text-gray-900'}`}
             >
               {isOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
