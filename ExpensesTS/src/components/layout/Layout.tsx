@@ -11,6 +11,10 @@ export default function Layout() {
   const location = useLocation()
   const [isMobileOpen, setIsMobileOpen] = useState(false)
   const sidebarRef = useRef<HTMLDivElement>(null)
+const goTo = (path: string) => {
+  navigate(path)
+  setIsMobileOpen(false)
+}
 
   // Close sidebar when clicking outside
   useEffect(() => {
@@ -54,13 +58,13 @@ export default function Layout() {
 
       {/* Sidebar */}
       <Sidebar isMobileOpen={isMobileOpen} ref={sidebarRef}>
-        <SidebarItem icon={<Home size={20} />} text="Dashboard" active={location.pathname === "/dashboard"} onClick={() => navigate("/dashboard")} />
-        <SidebarItem icon={<Tag size={20} />} text="Categories" active={location.pathname === "/categories"} onClick={() => navigate("/categories")} />
-        <SidebarItem icon={<DollarSign size={20} />} text="Incomes" active={location.pathname === "/incomes"} onClick={() => navigate("/incomes")} />
-        <SidebarItem icon={<Receipt size={20} />} text="Expenses" active={location.pathname === "/expenses"} onClick={() => navigate("/expenses")} />
-        <SidebarItem icon={<Target size={20} />} text="Goals" active={location.pathname === "/goals"} onClick={() => navigate("/goals")} />
-        <SidebarItem icon={<BarChart size={20} />} text="Reports" active={location.pathname === "/reports"} onClick={() => navigate("/reports")} />
-        <SidebarItem icon={<Settings size={20} />} text="Settings" active={location.pathname === "/settings"} onClick={() => navigate("/settings")} />
+        <SidebarItem icon={<Home size={20} />} text="Dashboard" active={location.pathname === "/dashboard"} onClick={() =>  goTo("/dashboard")  } />
+        <SidebarItem icon={<Tag size={20} />} text="Categories" active={location.pathname === "/categories"} onClick={() => goTo("/categories")} />
+        <SidebarItem icon={<DollarSign size={20} />} text="Incomes" active={location.pathname === "/incomes"} onClick={() => goTo("/incomes")} />
+        <SidebarItem icon={<Receipt size={20} />} text="Expenses" active={location.pathname === "/expenses"} onClick={() => goTo("/expenses")} />
+        <SidebarItem icon={<Target size={20} />} text="Goals" active={location.pathname === "/goals"} onClick={() => goTo("/goals")} />
+        <SidebarItem icon={<BarChart size={20} />} text="Reports" active={location.pathname === "/reports"} onClick={() => goTo("/reports")} />
+        <SidebarItem icon={<Settings size={20} />} text="Settings" active={location.pathname === "/settings"} onClick={() => goTo("/settings")} />
       </Sidebar>
 
       {/* Main Content */}
