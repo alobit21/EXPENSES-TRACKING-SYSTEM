@@ -106,19 +106,26 @@ export function SidebarItem({
   text,
   active,
   alert,
-  onClick
+  onClick,
+  onClose
 }: {
   icon: ReactNode
   text: string
   active?: boolean
   alert?: boolean
   onClick?: () => void
+  onClose?: () => void
 }) {
   const { expanded } = useContext(SidebarContext)
 
+  const handleClick = () => {
+    onClick?.()
+    onClose?.()
+  }
+
   return (
     <li
-      onClick={onClick}
+      onClick={handleClick}
       className={`
         relative flex items-center py-2 px-3 my-1
         font-medium rounded-md cursor-pointer
@@ -135,11 +142,7 @@ export function SidebarItem({
         {text}
       </span>
       {alert && (
-        <div
-          className={`absolute right-2 w-2 h-2 rounded bg-indigo-400 ${
-            expanded ? "" : "top-2"
-          }`}
-        />
+        <div className={`absolute right-2 w-2 h-2 rounded bg-indigo-400 ${expanded ? "" : "top-2"}`} />
       )}
       {!expanded && (
         <div
@@ -156,3 +159,4 @@ export function SidebarItem({
     </li>
   )
 }
+
