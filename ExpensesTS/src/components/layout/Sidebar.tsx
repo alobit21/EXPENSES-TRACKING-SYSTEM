@@ -1,5 +1,15 @@
-import { MoreVertical, ChevronLast, ChevronFirst } from "lucide-react"
-import { useContext, createContext, useState, type ReactNode } from "react"
+import {
+  MoreVertical,
+  ChevronLast,
+  ChevronFirst
+} from "lucide-react"
+import {
+  useContext,
+  createContext,
+  useState,
+  forwardRef,
+  type ReactNode
+} from "react"
 import { useAuth } from "../../context/AuthContext"
 
 interface SidebarContextType {
@@ -8,15 +18,16 @@ interface SidebarContextType {
 
 const SidebarContext = createContext<SidebarContextType>({ expanded: true })
 
-export default function Sidebar({
-  children,
-  isMobileOpen,
-   
-}: {
-  children: ReactNode
-  isMobileOpen?: boolean
-  onClose?: () => void
-}) {
+const Sidebar = forwardRef(function Sidebar(
+  {
+    children,
+    isMobileOpen
+  }: {
+    children: ReactNode
+    isMobileOpen?: boolean
+  },
+  ref: React.Ref<HTMLDivElement>
+) {
   const [expanded, setExpanded] = useState(true)
   const { user, logout } = useAuth()
   const [showMenu, setShowMenu] = useState(false)
@@ -32,6 +43,7 @@ export default function Sidebar({
 
   return (
     <aside
+      ref={ref}
       className={`
         h-screen fixed md:static z-40 transition-transform duration-300
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"} 
@@ -39,9 +51,13 @@ export default function Sidebar({
       `}
     >
       <nav className="h-full flex flex-col bg-white border-r shadow-sm w-64">
-        {/* Top section */}
+        {/* Logo and toggle */}
         <div className="p-4 pb-2 flex justify-between items-center">
-          <img src="/assets/logo.svg" className={`${expanded ? "w-24" : "w-0"} transition-all`} alt="Logo" />
+          <img
+            src="/assets/logo.svg"
+            className={`overflow-hidden transition-all duration-300 ease-in-out ${expanded ? "w-24" : "w-0"} h-auto max-h-10`}
+            alt="Logo"
+          />
           <button
             onClick={() => setExpanded((curr) => !curr)}
             className="p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100"
@@ -80,15 +96,16 @@ export default function Sidebar({
       </nav>
     </aside>
   )
-}
+})
 
+export default Sidebar
 
 export function SidebarItem({
   icon,
   text,
   active,
   alert,
-  onClick,
+  onClick
 }: {
   icon: ReactNode
   text: string
@@ -97,7 +114,7 @@ export function SidebarItem({
   onClick?: () => void
 }) {
   const { expanded } = useContext(SidebarContext)
-  
+
   return (
     <li
       onClick={onClick}
@@ -110,14 +127,10 @@ export function SidebarItem({
             ? "bg-gradient-to-tr from-indigo-200 to-indigo-100 text-indigo-800"
             : "hover:bg-indigo-50 text-gray-600"
         }
-    `}
+      `}
     >
       {icon}
-      <span
-        className={`overflow-hidden transition-all ${
-          expanded ? "w-52 ml-3" : "w-0"
-        }`}
-      >
+      <span className={`overflow-hidden transition-all ${expanded ? "w-52 ml-3" : "w-0"}`}>
         {text}
       </span>
       {alert && (
@@ -127,15 +140,14 @@ export function SidebarItem({
           }`}
         />
       )}
-
       {!expanded && (
         <div
           className={`
-          absolute left-full rounded-md px-2 py-1 ml-6
-          bg-indigo-100 text-indigo-800 text-sm
-          invisible opacity-20 -translate-x-3 transition-all
-          group-hover:visible group-hover:opacity-100 group-hover:translate-x-0
-      `}
+            absolute left-full rounded-md px-2 py-1 ml-6
+            bg-indigo-100 text-indigo-800 text-sm
+            invisible opacity-20 -translate-x-3 transition-all
+            group-hover:visible group-hover:opacity-100 group-hover:translate-x-0
+          `}
         >
           {text}
         </div>
@@ -143,4 +155,3 @@ export function SidebarItem({
     </li>
   )
 }
-

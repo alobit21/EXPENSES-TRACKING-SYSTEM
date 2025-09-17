@@ -1,30 +1,57 @@
+import { useState, useEffect, useRef } from "react"
+import { Outlet, useNavigate, useLocation } from "react-router-dom"
+import { Menu } from "lucide-react"
 import Sidebar from "./Sidebar"
 import { SidebarItem } from "./Sidebar"
 import { Home, BarChart, Settings, Tag, DollarSign, Receipt, Target } from "lucide-react"
-import { Outlet, useNavigate, useLocation } from "react-router-dom"
 import UserNavbar from "./UserNavbar"
-
-import { useState } from "react"
-import { Menu } from "lucide-react" // Add a hamburger icon
 
 export default function Layout() {
   const navigate = useNavigate()
   const location = useLocation()
   const [isMobileOpen, setIsMobileOpen] = useState(false)
+  const sidebarRef = useRef<HTMLDivElement>(null)
+
+  // Close sidebar when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        sidebarRef.current &&
+        !sidebarRef.current.contains(event.target as Node)
+      ) {
+        setIsMobileOpen(false)
+      }
+    }
+
+    if (isMobileOpen) {
+      document.addEventListener("mousedown", handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [isMobileOpen])
 
   return (
-    <div className="flex h-screen">
-      {/* Mobile toggle button */}
+    <div className="flex h-screen relative">
+      {/* Hamburger menu for small screens */}
       <button
         className="absolute top-4 left-4 z-50 md:hidden p-2 bg-white rounded shadow"
-        onClick={() => setIsMobileOpen(true)}
+        onClick={() => setIsMobileOpen((prev) => !prev)}
       >
         <Menu size={24} />
       </button>
 
+      {/* Backdrop for mobile sidebar */}
+      {isMobileOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-30 z-30 md:hidden"
+          onClick={() => setIsMobileOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <Sidebar isMobileOpen={isMobileOpen} onClose={() => setIsMobileOpen(false)}>
-        {/* Sidebar items */}
+      <Sidebar isMobileOpen={isMobileOpen} ref={sidebarRef}>
         <SidebarItem icon={<Home size={20} />} text="Dashboard" active={location.pathname === "/dashboard"} onClick={() => navigate("/dashboard")} />
         <SidebarItem icon={<Tag size={20} />} text="Categories" active={location.pathname === "/categories"} onClick={() => navigate("/categories")} />
         <SidebarItem icon={<DollarSign size={20} />} text="Incomes" active={location.pathname === "/incomes"} onClick={() => navigate("/incomes")} />
@@ -46,6 +73,3 @@ export default function Layout() {
     </div>
   )
 }
-
-
-
