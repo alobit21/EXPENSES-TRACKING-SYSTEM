@@ -1,10 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  // Detect scrolling
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 10) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const navItems = [
     { name: 'Home', to: '/' },
@@ -18,22 +33,29 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="bg-white shadow-md sticky top-0 z-50">
-      {/* Desktop and Mobile Navbar */}
+    <nav
+      className={`sticky top-0 z-50 transition-all duration-300 backdrop-blur-sm ${
+        scrolled ? 'text-green-500 shadow-md' : 'bg-transparent'
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
-          <div className="text-2xl font-bold text-green-600">
+          <div className={`text-2xl font-bold transition-colors duration-300 ${
+            scrolled ? 'text-green-600' : 'text-green-500'
+          }`}>
             FinanceMaster
           </div>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-6">
             {navItems.map((item) => (
               <motion.a
                 key={item.name}
                 href={item.to}
-                className="text-gray-700 hover:text-green-600 transition-colors duration-200"
+                className={`transition-colors duration-300 ${
+                  scrolled ? 'text-gray-200 hover:text-green-600' : 'text-gray-700 hover:text-green-300'
+                }`}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -42,7 +64,11 @@ const Navbar: React.FC = () => {
             ))}
             <Link
               to="/signup"
-              className="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200"
+              className={`px-4 py-2 rounded-lg transition-all duration-200 ${
+                scrolled
+                  ? 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
+                  : 'bg-green-600 text-white hover:bg-green-500'
+              }`}
             >
               Get Started
             </Link>
@@ -52,7 +78,7 @@ const Navbar: React.FC = () => {
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="text-gray-700 hover:text-green-600 focus:outline-none"
+              className={`focus:outline-none ${scrolled ? 'text-gray-700' : 'text-white'}`}
             >
               {isOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
