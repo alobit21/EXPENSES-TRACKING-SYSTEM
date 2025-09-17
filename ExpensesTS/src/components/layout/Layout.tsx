@@ -65,7 +65,7 @@ export default function Layout() {
 
       {/* Main Content */}
       <main className="flex-1 bg-gray-50 overflow-y-auto">
-        <div className="flex flex-col min-h-screen top-12">
+        <div className="flex flex-col min-h-screen">
           <UserNavbar />
           <main className="flex-1 bg-gray-50 overflow-y-auto">
             <Outlet />
