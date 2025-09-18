@@ -35,7 +35,7 @@ const HeroSection = () => {
             transition={{ delay: 0.4, duration: 0.8 }}
           >
             <Link
-              to="/signup"
+              to="/login"
               className="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-md"
             >
               Get Started Free
