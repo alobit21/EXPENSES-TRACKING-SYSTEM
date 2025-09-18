@@ -23,7 +23,7 @@ const UserNavbar: React.FC = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="bg-white shadow-md p-4 mb-6"
+      className="bg-white shadow-md p-4 mb-6 fixed top-0 w-full z-30"
     >
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         {/* Logo */}
