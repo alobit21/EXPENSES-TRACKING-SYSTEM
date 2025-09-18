@@ -60,7 +60,7 @@ const Sidebar = forwardRef(function Sidebar(
         {/* Logo and toggle */}
         <div className="p-4 pb-2 flex justify-between items-center">
          <img
-  src="/assets/logo.svg"
+  src="/logo.svg"
   className={`
     transition-all duration-300 ease-in-out
     ${expanded ? "w-24 opacity-100" : "w-0 opacity-0"}
