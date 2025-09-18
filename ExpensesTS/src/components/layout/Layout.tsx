@@ -71,7 +71,7 @@ const goTo = (path: string) => {
       <main className="flex-1 bg-gray-50 overflow-y-auto">
         <div className="flex flex-col min-h-screen">
           <UserNavbar />
-          <main className="flex-1 bg-gray-50 overflow-y-auto">
+          <main className="flex-1 bg-gray-50 overflow-y-auto mb-6">
             <Outlet />
           </main>
         </div>
