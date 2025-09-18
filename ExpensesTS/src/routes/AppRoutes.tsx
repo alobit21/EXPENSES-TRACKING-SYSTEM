@@ -32,11 +32,11 @@ export default function AppRoutes() {
       <Routes>
         {/* Public routes */}
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/home" element={<LandingPage />} />
+        <Route path="/" element={<LandingPage />} />
 
         {/* Protected routes */}
         <Route
-          path="/"
+          path="/dashboard"
           element={
             <PrivateRoute>
               <Layout />
@@ -44,7 +44,7 @@ export default function AppRoutes() {
           }
         >
           {/* Default redirect to dashboard */}
-          <Route index element={<Navigate to="home" replace />} />
+          <Route index element={<Navigate to="/" replace />} />
 
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="reports" element={<ReportsPage />} />

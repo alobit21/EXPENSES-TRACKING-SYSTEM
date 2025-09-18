@@ -25,7 +25,7 @@ const features = [
 export default function WhyChooseUs() {
   return (
     <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white to-slate-100">
-      <h2 className="text-4xl font-extrabold text-center text-gray-800 mb-16">Why Choose Us?</h2>
+      <h2 className="text-4xl font-extrabold text-center text-gray-800 mb-16">The System Helps You In</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-7xl mx-auto">
         {features.map((feature, index) => (
           <motion.div
