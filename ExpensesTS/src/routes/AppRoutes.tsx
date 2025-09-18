@@ -44,7 +44,7 @@ export default function AppRoutes() {
           }
         >
           {/* Default redirect to dashboard */}
-          <Route index element={<Navigate to="home" replace />} />
+          <Route index element={<Navigate to="/" replace />} />
 
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="reports" element={<ReportsPage />} />
