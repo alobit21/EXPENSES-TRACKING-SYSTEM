@@ -29,34 +29,34 @@ function PrivateRoute({ children }: { children: JSX.Element }) {
 
 export default function AppRoutes() {
   return (
-    <Routes>
-      {/* Public routes */}
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/" element={<LandingPage />} />
+      <Routes>
+        {/* Public routes */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/home" element={<LandingPage />} />
 
-      {/* Protected routes */}
-      <Route
-        path="/dashboard"
-        element={
-          <PrivateRoute>
-            <Layout />
-          </PrivateRoute>
-        }
-      >
-        {/* Default child of /dashboard */}
-        <Route index element={<DashboardPage />} />
+        {/* Protected routes */}
+        <Route
+          path="/"
+          element={
+            <PrivateRoute>
+              <Layout />
+            </PrivateRoute>
+          }
+        >
+          {/* Default redirect to dashboard */}
+          <Route index element={<Navigate to="home" replace />} />
 
-        <Route path="reports" element={<ReportsPage />} />
-        <Route path="settings" element={<SettingsPage />} />
-        <Route path="categories" element={<CategoriesPage />} />
-        <Route path="incomes" element={<IncomesPage />} />
-        <Route path="expenses" element={<ExpensesPage />} />
-        <Route path="goals" element={<GoalsPage />} />
-      </Route>
+          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="reports" element={<ReportsPage />} />
+          <Route path="settings" element={<SettingsPage />} />
+          <Route path="categories" element={<CategoriesPage />} />
+          <Route path="incomes" element={<IncomesPage />} />
+          <Route path="expenses" element={<ExpensesPage />} />
+          <Route path="goals" element={<GoalsPage />} />
+        </Route>
 
-      {/* Catch-all redirects to landing page */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        {/* Catch-all redirects to login */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
   );
 }
-
