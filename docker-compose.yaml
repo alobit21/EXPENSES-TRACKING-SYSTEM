@@ -5,13 +5,15 @@ services:
     image: postgres:15
     container_name: postgres
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: pesayangu
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - expenses_net
+    env_file:
+      - .env
 
   backend:
     build:
@@ -20,12 +22,12 @@ services:
     image: codewithmac/expenses-backend:latest
     container_name: backend
     environment:
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USERNAME: postgres
-      DB_PASSWORD: postgres
-      DB_DATABASE: pesayangu
-      NODE_ENV: production
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DATABASE: ${DB_DATABASE}
+      NODE_ENV: ${NODE_ENV}
     depends_on:
       - postgres
     networks:
@@ -60,7 +62,6 @@ services:
       - backend
     networks:
       - expenses_net
-
 
 volumes:
   postgres_data:
