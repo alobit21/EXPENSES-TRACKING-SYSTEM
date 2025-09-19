@@ -88,37 +88,46 @@ const Navbar: React.FC = () => {
         {/* Mobile Menu */}
         <AnimatePresence>
           {isOpen && (
-            <motion.div
-              initial="closed"
-              animate="open"
-              exit="closed"
-              variants={menuVariants}
-              className="md:hidden fixed inset-0 bg-white shadow-lg p-6"
-            >
-             <div className="flex flex-col items-center space-y-6 mt-12 
-                bg-white/90 backdrop-blur-md rounded-3xl p-8 shadow-2xl">
-  {navItems.map((item) => (
-    <motion.a
-      key={item.name}
-      href={item.to}
-      className="text-gray-800 hover:text-green-600 text-lg font-medium transition-colors duration-200"
+<motion.div
+  initial="closed"
+  animate="open"
+  exit="closed"
+  variants={menuVariants}
+  className="md:hidden fixed inset-0 bg-white shadow-lg p-6"
+>
+  {/* Close button */}
+  <div className="flex justify-end">
+    <button
       onClick={() => setIsOpen(false)}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
+      className="text-gray-800 hover:text-green-600 transition-colors duration-200"
     >
-      {item.name}
-    </motion.a>
-  ))}
-  <Link
-    to="/signup"
-    className="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-md"
-    onClick={() => setIsOpen(false)}
-  >
-    Get Started
-  </Link>
-</div>
+      <X size={28} />
+    </button>
+  </div>
 
-            </motion.div>
+  <div className="flex flex-col items-center space-y-6 mt-6 bg-white/90 backdrop-blur-md rounded-3xl p-8 shadow-2xl">
+    {navItems.map((item) => (
+      <motion.a
+        key={item.name}
+        href={item.to}
+        className="text-gray-800 hover:text-green-600 text-lg font-medium transition-colors duration-200"
+        onClick={() => setIsOpen(false)}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        {item.name}
+      </motion.a>
+    ))}
+    <Link
+      to="/signup"
+      className="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-md"
+      onClick={() => setIsOpen(false)}
+    >
+      Get Started
+    </Link>
+  </div>
+</motion.div>
+
           )}
         </AnimatePresence>
       </div>
