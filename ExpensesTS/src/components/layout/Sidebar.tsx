@@ -45,7 +45,7 @@ const Sidebar = forwardRef(function Sidebar(
     <aside
       ref={ref}
       className={`
-        h-screen mt-12 md:mt-24 fixed md:static z-40 transition-transform duration-300
+        h-screen mt-16 md:mt-24 fixed md:static z-40 transition-transform duration-300
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"} 
         md:translate-x-0
       `}
