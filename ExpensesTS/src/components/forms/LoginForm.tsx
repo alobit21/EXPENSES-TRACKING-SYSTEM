@@ -119,7 +119,7 @@ function LoginForm() {
       await login(email, password);
       toast.success("Logged in successfully!");
 
-      window.location.href = "/dashboard";
+      window.location.href = "/app";
     } catch (err) {
       toast.error("Login failed. Check credentials.");
     } finally {
