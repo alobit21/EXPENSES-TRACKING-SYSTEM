@@ -42,71 +42,81 @@ const Sidebar = forwardRef(function Sidebar(
   }
 
   return (
-    <aside
-      ref={ref}
-      className={`
-        h-screen fixed md:static z-40 transition-transform duration-300
-        ${isMobileOpen ? "translate-x-0" : "-translate-x-full"} 
-        md:translate-x-0
-      `}
-    >
-<nav
+<aside
+  ref={ref}
   className={`
-    h-full flex flex-col bg-white border-r shadow-sm
-    transition-all duration-300 ease-in-out
-    ${expanded ? "w-64" : "w-20"} 
+    fixed top-16 bottom-0 z-30 
+    transition-transform duration-300
+    ${isMobileOpen ? "translate-x-0" : "-translate-x-full"} 
+    md:translate-x-0
   `}
 >
-        {/* Logo and toggle */}
-        <div className="p-4 pb-2 flex justify-between items-center">
-         <img
-  src="/logo.svg"
-  className={`
-    transition-all duration-300 ease-in-out
-    ${expanded ? "w-24 opacity-100" : "w-0 opacity-0"}
-  `}
-  alt="Logo"
-/>
+  <nav
+    className={`
+      h-full flex flex-col bg-white border-r shadow-sm
+      transition-all duration-300 ease-in-out
+      ${expanded ? "w-64" : "w-20"} 
+    `}
+  >
+    {/* Logo and toggle */}
+    <div className="p-4 pb-2 flex justify-between items-center">
+      <img
+        src="/logo.svg"
+        className={`
+          transition-all duration-300 ease-in-out
+          ${expanded ? "w-24 opacity-100" : "w-0 opacity-0"}
+        `}
+        alt="Logo"
+      />
 
+      <button
+        onClick={() => setExpanded((curr) => !curr)}
+        className="p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 hidden md:block"
+      >
+        {expanded ? <ChevronFirst /> : <ChevronLast />}
+      </button>
+    </div>
+
+    {/* Sidebar items */}
+    <SidebarContext.Provider value={{ expanded }}>
+      <ul className="flex-1 px-3 overflow-y-auto">{children}</ul>
+    </SidebarContext.Provider>
+
+    {/* User info */}
+    <div className="border-t flex p-3 relative">
+      <div className="w-10 h-10 rounded-md bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold">
+        {getInitials(user?.name)}
+      </div>
+      <div
+        className={`flex justify-between items-center transition-all ${
+          expanded ? "w-52 ml-3" : "w-0"
+        }`}
+      >
+        <div className="leading-4">
+          <h4 className="font-semibold">{user?.name ?? "N/A"}</h4>
+          <span className="text-xs text-gray-600">{user?.email ?? "N/A"}</span>
+        </div>
         <button
-  onClick={() => setExpanded((curr) => !curr)}
-  className="p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 hidden md:block"
->
-  {expanded ? <ChevronFirst /> : <ChevronLast />}
-</button>
-
-
+          className="ml-2 p-1 rounded hover:bg-gray-200"
+          onClick={() => setShowMenu(!showMenu)}
+        >
+          <MoreVertical size={20} />
+        </button>
+      </div>
+      {showMenu && (
+        <div className="absolute bottom-14 right-3 bg-white shadow-lg rounded-md w-32">
+          <button
+            className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+            onClick={logout}
+          >
+            Logout
+          </button>
         </div>
+      )}
+    </div>
+  </nav>
+</aside>
 
-        {/* Sidebar items */}
-        <SidebarContext.Provider value={{ expanded }}>
-          <ul className="flex-1 px-3">{children}</ul>
-        </SidebarContext.Provider>
-
-        {/* User info */}
-        <div className="border-t flex p-3 relative">
-          <div className="w-10 h-10 rounded-md bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold">
-            {getInitials(user?.name)}
-          </div>
-          <div className={`flex justify-between items-center transition-all ${expanded ? "w-52 ml-3" : "w-0"}`}>
-            <div className="leading-4">
-              <h4 className="font-semibold">{user?.name ?? "N/A"}</h4>
-              <span className="text-xs text-gray-600">{user?.email ?? "N/A"}</span>
-            </div>
-            <button className="ml-2 p-1 rounded hover:bg-gray-200" onClick={() => setShowMenu(!showMenu)}>
-              <MoreVertical size={20} />
-            </button>
-          </div>
-          {showMenu && (
-            <div className="absolute bottom-14 right-3 bg-white shadow-lg rounded-md w-32">
-              <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onClick={logout}>
-                Logout
-              </button>
-            </div>
-          )}
-        </div>
-      </nav>
-    </aside>
   )
 })
 
