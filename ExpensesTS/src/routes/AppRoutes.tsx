@@ -45,8 +45,8 @@ export default function AppRoutes() {
         }
       >
         {/* Default redirect to dashboard */}
-        <Route index element={<Navigate to="dashboard" replace />} />
-        <Route path="dashboard" element={<DashboardPage />} />
+        <Route index element={<Navigate to="app/dashboard" replace />} />
+        <Route path="app/dashboard" element={<DashboardPage />} />
         <Route path="reports" element={<ReportsPage />} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="categories" element={<CategoriesPage />} />

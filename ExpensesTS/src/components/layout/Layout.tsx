@@ -58,14 +58,15 @@ const goTo = (path: string) => {
 
       {/* Sidebar */}
       <Sidebar isMobileOpen={isMobileOpen} ref={sidebarRef}>
-        <SidebarItem icon={<Home size={20} />} text="Dashboard" active={location.pathname === "/dashboard"} onClick={() =>  goTo("/dashboard")  } />
-        <SidebarItem icon={<Tag size={20} />} text="Categories" active={location.pathname === "/categories"} onClick={() => goTo("/categories")} />
-        <SidebarItem icon={<DollarSign size={20} />} text="Incomes" active={location.pathname === "/incomes"} onClick={() => goTo("/incomes")} />
-        <SidebarItem icon={<Receipt size={20} />} text="Expenses" active={location.pathname === "/expenses"} onClick={() => goTo("/expenses")} />
-        <SidebarItem icon={<Target size={20} />} text="Goals" active={location.pathname === "/goals"} onClick={() => goTo("/goals")} />
-        <SidebarItem icon={<BarChart size={20} />} text="Reports" active={location.pathname === "/reports"} onClick={() => goTo("/reports")} />
-        <SidebarItem icon={<Settings size={20} />} text="Settings" active={location.pathname === "/settings"} onClick={() => goTo("/settings")} />
+        <SidebarItem icon={<Home size={20} />} text="Dashboard" active={location.pathname === "/app/dashboard"} onClick={() => goTo("/app/dashboard")} />
+        <SidebarItem icon={<Tag size={20} />} text="Categories" active={location.pathname === "/app/categories"} onClick={() => goTo("/app/categories")} />
+        <SidebarItem icon={<DollarSign size={20} />} text="Incomes" active={location.pathname === "/app/incomes"} onClick={() => goTo("/app/incomes")} />
+        <SidebarItem icon={<Receipt size={20} />} text="Expenses" active={location.pathname === "/app/expenses"} onClick={() => goTo("/app/expenses")} />
+        <SidebarItem icon={<Target size={20} />} text="Goals" active={location.pathname === "/app/goals"} onClick={() => goTo("/app/goals")} />
+        <SidebarItem icon={<BarChart size={20} />} text="Reports" active={location.pathname === "/app/reports"} onClick={() => goTo("/app/reports")} />
+        <SidebarItem icon={<Settings size={20} />} text="Settings" active={location.pathname === "/app/settings"} onClick={() => goTo("/app/settings")} />
       </Sidebar>
+
 
       {/* Main Content */}
       <main className="flex-1 bg-gray-50 overflow-y-auto">
