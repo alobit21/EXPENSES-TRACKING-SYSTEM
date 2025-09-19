@@ -552,12 +552,14 @@ tail -f /home/ubuntu/deploy_logs/deploy_$(date +"%Y-%m-%d")_*.txt
     • Clean old logs periodically if needed.
 
 
+# 🚀 Frontend Deployment Guide
 
-# FrontEnd Deployment
+## 1. Dockerizing the Frontend
 
-     1. Dockerizing FrontEnd by creating the Dockerfile inside the project
+Create a `Dockerfile` inside your frontend project (e.g., `ExpensesTS/`):
 
-     `# Stage 1: Build the app
+```dockerfile
+# Stage 1: Build the app
 FROM node:20 AS build
 WORKDIR /app
 
@@ -565,7 +567,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-# Copy all files and build
+# Copy all project files and build
 COPY . .
 RUN npm run build
 
@@ -579,39 +581,135 @@ COPY --from=build /app/dist ./dist
 
 EXPOSE 8080
 CMD ["serve", "-s", "dist", "-l", "8080"]
-``
+```
 
-# Setting nginx and frontend in docker-compose.yaml
+👉 This multi-stage build ensures the final image is small, serving only static assets with the `serve` package.
 
-  ``frontend:
-    build:
-      context: ./ExpensesTS
-      dockerfile: Dockerfile
-    image: codewithmac/expenses-frontend:latest
-    container_name: frontend
-    depends_on:
-      - backend
-    networks:
-      - expenses_net
+---
 
-  nginx:
-    image: nginx:alpine
-    container_name: expenses_nginx
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./ExpensesTS/dist:/usr/share/nginx/html:ro
-      - /etc/letsencrypt/live/expenses.seranise.co.tz:/etc/letsencrypt/live/expenses.seranise.co.tz:ro
-      - /etc/letsencrypt/archive/expenses.seranise.co.tz:/etc/letsencrypt/archive/expenses.seranise.co.tz:ro
-    depends_on:
-      - frontend
-      - backend
-    networks:
-      - expenses_net
-      ``
+## 2. Configuring `docker-compose.yaml`
 
+Update your `docker-compose.yaml` to include both the **frontend** and **nginx** services:
 
+```yaml
+frontend:
+  build:
+    context: ./ExpensesTS
+    dockerfile: Dockerfile
+  image: codewithmac/expenses-frontend:latest
+  container_name: frontend
+  depends_on:
+    - backend
+  networks:
+    - expenses_net
 
+nginx:
+  image: nginx:alpine
+  container_name: expenses_nginx
+  ports:
+    - "80:80"
+    - "443:443"
+  volumes:
+    - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    - ./ExpensesTS/dist:/usr/share/nginx/html:ro
+    - /etc/letsencrypt/live/expenses.seranise.co.tz:/etc/letsencrypt/live/expenses.seranise.co.tz:ro
+    - /etc/letsencrypt/archive/expenses.seranise.co.tz:/etc/letsencrypt/archive/expenses.seranise.co.tz:ro
+  depends_on:
+    - frontend
+    - backend
+  networks:
+    - expenses_net
+```
 
+👉 Here:
+- `frontend` builds the React/Vue/TS app.  
+- `nginx` proxies traffic, serves static assets, and handles SSL termination.  
+
+---
+
+## 3. Securing the Domain with SSL (Let’s Encrypt)
+
+Install Certbot and generate certificates:
+
+```bash
+sudo apt update
+sudo apt install certbot python3-certbot-nginx -y
+sudo certbot --nginx -d expenses.seranise.co.tz
+```
+
+Test auto-renewal:
+
+```bash
+sudo certbot renew --dry-run
+```
+
+🔐 After setup, your app will be available at:  
+👉 https://expenses.seranise.co.tz  
+
+### Recommended Security Headers (add to `nginx.conf`):
+
+```nginx
+add_header X-Frame-Options SAMEORIGIN;
+add_header X-Content-Type-Options nosniff;
+add_header X-XSS-Protection "1; mode=block";
+add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+```
+
+---
+
+## 4. SSL Certificate Expiration Alerts
+
+To avoid unexpected downtime, create a script that reminds you **5 days before expiration**.
+
+### Example Script: `cert_reminder_test_email.sh`
+
+```bash
+#!/bin/bash
+
+# CONFIGURATION
+DOMAIN="expenses.seranise.co.tz"
+EMAIL="macapp5363@gmail.com"
+CERT_FILE="/etc/letsencrypt/live/$DOMAIN/fullchain.pem"
+
+# Get certificate expiration date
+EXPIRY_DATE=$(sudo openssl x509 -enddate -noout -in "$CERT_FILE" | cut -d= -f2)
+DAYS_LEFT=$(( ( $(date -d "$EXPIRY_DATE" +%s) - $(date +%s) ) / 86400 ))
+
+# Test mode: Always send an email
+SUBJECT="Test SSL Certificate Reminder for $DOMAIN"
+BODY="This is a test message from your SSL certificate reminder script.
+Certificate expires in $DAYS_LEFT days on $EXPIRY_DATE."
+
+echo -e "$BODY" | mail -s "$SUBJECT" "$EMAIL"
+
+echo "Test email sent to $EMAIL"
+```
+
+---
+
+## 5. Automating with Cron
+
+For **testing** (every minute):
+
+```bash
+sudo crontab -e
+```
+
+Add:
+
+```cron
+* * * * * /usr/local/bin/cert_reminder_test_email.sh
+```
+
+For **production** (check once daily at 9 AM):
+
+```cron
+0 9 * * * /usr/local/bin/cert_reminder.sh
+```
+
+---
+
+✅ With this setup:  
+- Frontend is containerized and served via `nginx`.  
+- Domain is secured with Let’s Encrypt.  
+- You’ll be notified before your SSL certificate expires.  
