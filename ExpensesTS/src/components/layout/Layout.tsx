@@ -58,7 +58,7 @@ const goTo = (path: string) => {
 
       {/* Sidebar */}
       <Sidebar isMobileOpen={isMobileOpen} ref={sidebarRef}>
-        <SidebarItem icon={<Home size={20} />} text="Dashboard" active={location.pathname === "/app/dashboard"} onClick={() => goTo("/app/dashboard")} />
+        <SidebarItem icon={<Home size={20} />} text="Dashboard" active={location.pathname === "/dashboard"} onClick={() => goTo("/dashboard")} />
         <SidebarItem icon={<Tag size={20} />} text="Categories" active={location.pathname === "/app/categories"} onClick={() => goTo("/app/categories")} />
         <SidebarItem icon={<DollarSign size={20} />} text="Incomes" active={location.pathname === "/app/incomes"} onClick={() => goTo("/app/incomes")} />
         <SidebarItem icon={<Receipt size={20} />} text="Expenses" active={location.pathname === "/app/expenses"} onClick={() => goTo("/app/expenses")} />
