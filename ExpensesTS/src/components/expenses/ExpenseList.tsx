@@ -36,6 +36,61 @@ const ExpenseList: React.FC = () => {
   const monthlyBudget = 1000;
   const budgetUsed = (totalExpenses / monthlyBudget) * 100;
 
+
+
+  const [sortBy, setSortBy] = React.useState<keyof Expense | null>(null);
+const [sortOrder, setSortOrder] = React.useState<"asc" | "desc">("asc");
+
+const handleSort = (key: keyof Expense) => {
+  if (sortBy === key) {
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+  } else {
+    setSortBy(key);
+    setSortOrder("asc");
+  }
+};
+
+const sortedExpenses = React.useMemo(() => {
+  let sorted = [...expenses];
+  if (sortBy) {
+    sorted.sort((a, b) => {
+      let aVal: string | number = "";
+      let bVal: string | number = "";
+
+      switch (sortBy) {
+        case "amount":
+          aVal = a.amount;
+          bVal = b.amount;
+          break;
+        case "date":
+          aVal = new Date(a.date).getTime();
+          bVal = new Date(b.date).getTime();
+          break;
+        case "category":
+          aVal = a.category?.name ?? "";
+          bVal = b.category?.name ?? "";
+          break;
+        case "description":
+          aVal = a.description ?? "";
+          bVal = b.description ?? "";
+          break;
+        case "paymentMethod":
+          aVal = a.paymentMethod ?? "";
+          bVal = b.paymentMethod ?? "";
+          break;
+        default:
+          return 0;
+      }
+
+      if (aVal < bVal) return sortOrder === "asc" ? -1 : 1;
+      if (aVal > bVal) return sortOrder === "asc" ? 1 : -1;
+      return 0;
+    });
+  }
+  return sorted;
+}, [expenses, sortBy, sortOrder]);
+
+
   // Pie chart data for category breakdown
   const pieChartData = {
     labels: Object.keys(categoryBreakdown),
@@ -224,69 +279,107 @@ const ExpenseList: React.FC = () => {
           </div>
         </div>
 
-        {/* Expense List */}
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-4 p-4 bg-gray-50 font-semibold text-gray-700 text-sm">
-            <div>Amount</div>
-            <div>Description</div>
-            <div>Date</div>
-            <div>Category</div>
-            <div className="hidden md:block">Payment Method</div>
-            <div className="hidden sm:block">Actions</div>
-          </div>
-          {expenses.map((expense) => (
-            <div
-              key={expense.id}
-              className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-4 p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200"
+{/* Expense List */}
+<div className="bg-white rounded-xl shadow-lg overflow-hidden">
+  <div className="overflow-x-auto">
+    <table className="min-w-full divide-y divide-gray-200">
+      <thead className="bg-gray-50 sticky top-0 z-10 shadow-sm">
+        <tr>
+          {[
+            { key: "amount", label: "Amount" },
+            { key: "description", label: "Description" },
+            { key: "date", label: "Date" },
+            { key: "category", label: "Category" },
+            { key: "paymentMethod", label: "Payment Method", hidden: "hidden md:table-cell" },
+            { key: "actions", label: "Actions" },
+          ].map((col) => (
+            <th
+              key={col.key}
+              className={`px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer select-none ${
+                col.hidden || ""
+              }`}
+              onClick={() => col.key !== "actions" && handleSort(col.key)}
             >
-              <div className="flex items-center gap-2 text-red-600 font-semibold">
-                <DollarSign size={16} />
-                ${expense.amount.toFixed(2)}
-              </div>
-              <div className="text-gray-700 truncate">{expense.description || 'No description'}</div>
-              <div className="flex items-center gap-2 text-gray-600">
-                <Calendar size={16} />
-                {format(new Date(expense.date), 'MMM dd, yyyy')}
-              </div>
-              <div className="flex items-center gap-2">
-                {expense.category ? (
-                  <>
-                    <Tag size={16} className="text-blue-500" />
-                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
-                      {expense.category.name}
-                    </span>
-                  </>
-                ) : (
-                  <span className="text-gray-400 text-xs">No category</span>
+              <div className="flex items-center gap-1">
+                {col.label}
+                {sortBy === col.key && (
+                  <span>{sortOrder === "asc" ? "▲" : "▼"}</span>
                 )}
               </div>
-              <div className="hidden md:flex items-center gap-2">
-                {getPaymentMethodIcon(expense.paymentMethod)}
-                <span className="text-xs text-gray-600">{getPaymentMethodText(expense.paymentMethod)}</span>
-              </div>
-              <div className="flex gap-2 flex-col ">
-                <button
-                  onClick={() => setEditingExpense(expense)}
-                  className="text-blue-600 hover:text-blue-800 p-1"
-                  aria-label="Edit expense"
-                >
-                  <Edit size={16} />
-                </button>
-                <button
-                  onClick={() => {
-                    if (window.confirm('Are you sure you want to delete this expense?')) {
-                      deleteExpense(expense.id);
-                    }
-                  }}
-                  className="text-red-600 hover:text-red-800 p-1"
-                  aria-label="Delete expense"
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            </div>
+            </th>
           ))}
-        </div>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-gray-100">
+        {sortedExpenses.map((expense) => (
+          <tr
+            key={expense.id}
+            className="hover:bg-gray-50 transition-colors duration-200"
+          >
+            {/* Amount */}
+            <td className="px-6 py-4 whitespace-nowrap text-red-600 font-semibold flex items-center gap-2">
+              <DollarSign size={16} />
+              ${expense.amount.toFixed(2)}
+            </td>
+            {/* Description */}
+            <td className="px-6 py-4 text-gray-700 truncate">
+              {expense.description || "No description"}
+            </td>
+            {/* Date */}
+            <td className="px-6 py-4 text-gray-600 flex items-center gap-2">
+              <Calendar size={16} />
+              {format(new Date(expense.date), "MMM dd, yyyy")}
+            </td>
+            {/* Category */}
+            <td className="px-6 py-4">
+              {expense.category ? (
+                <span className="inline-flex items-center gap-2">
+                  <Tag size={16} className="text-blue-500" />
+                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
+                    {expense.category.name}
+                  </span>
+                </span>
+              ) : (
+                <span className="text-gray-400 text-xs">No category</span>
+              )}
+            </td>
+            {/* Payment Method */}
+            <td className="px-6 py-4 hidden md:table-cell">
+              <div className="flex items-center gap-2">
+                {getPaymentMethodIcon(expense.paymentMethod)}
+                <span className="text-xs text-gray-600">
+                  {getPaymentMethodText(expense.paymentMethod)}
+                </span>
+              </div>
+            </td>
+            {/* Actions */}
+            <td className="px-6 py-4 text-right space-x-2">
+              <button
+                onClick={() => setEditingExpense(expense)}
+                className="text-blue-600 hover:text-blue-800"
+                aria-label="Edit expense"
+              >
+                <Edit size={16} />
+              </button>
+              <button
+                onClick={() => {
+                  if (window.confirm("Are you sure you want to delete this expense?")) {
+                    deleteExpense(expense.id);
+                  }
+                }}
+                className="text-red-600 hover:text-red-800"
+                aria-label="Delete expense"
+              >
+                <Trash2 size={16} />
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
+
 
         {expenses.length === 0 && (
           <div className="text-center py-12 bg-white rounded-xl shadow-lg">
