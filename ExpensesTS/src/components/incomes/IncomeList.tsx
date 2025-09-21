@@ -123,7 +123,9 @@ const pieChartData = useMemo(() => {
         </div>
       ) : (
         <>
-         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 sm:gap-0">
+              {/* <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 sm:gap-0"> */}
+  <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
+
   <div>
     <h1 className="text-2xl sm:text-3xl ml-2 font-extrabold text-gray-800 tracking-tight">
       Incomes
