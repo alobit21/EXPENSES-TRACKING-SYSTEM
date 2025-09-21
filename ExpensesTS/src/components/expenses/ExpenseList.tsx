@@ -264,7 +264,7 @@ const ExpenseList: React.FC = () => {
                 {getPaymentMethodIcon(expense.paymentMethod)}
                 <span className="text-xs text-gray-600">{getPaymentMethodText(expense.paymentMethod)}</span>
               </div>
-              <div className="hidden sm:flex gap-2">
+              <div className="flex gap-2 flex-col sm:flex-row">
                 <button
                   onClick={() => setEditingExpense(expense)}
                   className="text-blue-600 hover:text-blue-800 p-1"
