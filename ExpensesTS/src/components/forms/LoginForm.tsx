@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { BeatLoader } from "react-spinners";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 export default function AuthForms() {
   const [isLoginForm, setIsLoginForm] = useState(true);
@@ -112,14 +113,18 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e:any) => {
+  const navigate = useNavigate();
+  const handleSubmit = async (e: any) => {
+    
     e.preventDefault();
     setIsLoading(true);
     try {
       await login(email, password);
       toast.success("Logged in successfully!");
 
-      window.location.href = "/app";
+      // window.location.href = "/app";
+      navigate("/app");
+
     } catch (err) {
       toast.error("Login failed. Check credentials.");
     } finally {
