@@ -47,7 +47,7 @@ const GoalList: React.FC = () => {
         </div>
         <button
           onClick={() => setShowForm(true)}
-          className="bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg flex items-center gap-2 hover:bg-indigo-700 w-full sm:w-auto justify-center"
+              className="bg-gradient-to-r from-green-500 to-green-600 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-md"
         >
           <Plus size={18} className="sm:size-5" />
           <span className="text-sm sm:text-base">New Goal</span>

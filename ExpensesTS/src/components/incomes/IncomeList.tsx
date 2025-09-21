@@ -125,7 +125,7 @@ const pieChartData = useMemo(() => {
         <>
          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 sm:gap-0">
   <div>
-    <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-800 tracking-tight">
+    <h1 className="text-2xl sm:text-3xl ml-2 font-extrabold text-gray-800 tracking-tight">
       Incomes
     </h1>
     <p className="text-gray-500 text-sm mt-1">
@@ -135,7 +135,7 @@ const pieChartData = useMemo(() => {
 
   <button
     onClick={() => setShowForm(true)}
-    className="flex-shrink-0 bg-gradient-to-r from-green-500 to-green-600 text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg flex items-center gap-2 hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-md text-sm sm:text-base w-full sm:w-auto justify-center"
+              className="bg-gradient-to-r from-green-500 to-green-600 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-md"
   >
     <Plus size={20} />
     Add Income
