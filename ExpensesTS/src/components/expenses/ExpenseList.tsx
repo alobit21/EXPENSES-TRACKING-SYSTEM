@@ -50,6 +50,7 @@ const handleSort = (key: keyof Expense) => {
   }
 };
 
+
 const sortedExpenses = React.useMemo(() => {
   let sorted = [...expenses];
   if (sortBy) {
@@ -298,7 +299,7 @@ const sortedExpenses = React.useMemo(() => {
               className={`px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer select-none ${
                 col.hidden || ""
               }`}
-              onClick={() => col.key !== "actions" && handleSort(col.key)}
+              onClick={() => col.key !== "actions" && handleSort(col.key as keyof Expense)}
             >
               <div className="flex items-center gap-1">
                 {col.label}
