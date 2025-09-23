@@ -74,25 +74,28 @@ export default function StatsShowcase() {
   };
 
   return (
-    <section className="py-20 px-6 sm:px-10 lg:px-20 bg-gradient-to-br from-slate-50 to-white">
-      <div className="max-w-6xl mx-auto text-center">
-        <h2 className="text-4xl font-bold text-gray-800 mb-12">Our Impact in Numbers</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-          {stats.map((stat, i) => (
-            <div
-              key={i}
-              onMouseEnter={() => handleHover(i)}
-              className={`bg-white/80 backdrop-blur-md border-l-4 ${stat.color} border border-gray-200 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300`}
-            >
-              <div className="flex justify-center mb-4">{stat.icon}</div>
-              <h3 className="text-3xl font-bold text-gray-900">
-                {formatNumber(displayValues[i], stat.suffix)}
-              </h3>
-              <p className="text-gray-600 mt-2">{stat.label}</p>
-            </div>
-          ))}
+<section className="py-20 px-6 sm:px-10 lg:px-20 bg-gradient-to-br from-slate-50 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100">
+  <div className="max-w-6xl mx-auto text-center">
+    <h2 className="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-12">
+      Our Impact in Numbers
+    </h2>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+      {stats.map((stat, i) => (
+        <div
+          key={i}
+          onMouseEnter={() => handleHover(i)}
+          className={`bg-white/80 dark:bg-gray-800/70 backdrop-blur-md border-l-4 ${stat.color} border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300`}
+        >
+          <div className="flex justify-center mb-4">{stat.icon}</div>
+          <h3 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            {formatNumber(displayValues[i], stat.suffix)}
+          </h3>
+          <p className="text-gray-600 dark:text-gray-300 mt-2">{stat.label}</p>
         </div>
-      </div>
-    </section>
+      ))}
+    </div>
+  </div>
+</section>
+
   );
 }

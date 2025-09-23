@@ -24,30 +24,37 @@ const features = [
 
 export default function WhyChooseUs() {
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white to-slate-100">
-      <h2 className="text-4xl font-extrabold text-center text-gray-800 mb-16">The System Helps You In</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-7xl mx-auto">
-        {features.map((feature, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{
-              duration: 0.6,
-              delay: index * 0.3,
-            }}
-            whileHover={{ scale: 1.05 }}
-            className={`bg-white/80 backdrop-blur-md border border-gray-200 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 border-l-4 ${feature.color}`}
-          >
-            <div className="flex flex-col items-start">
-              {feature.icon}
-              <h3 className="text-2xl font-semibold text-gray-900 mb-3">{feature.title}</h3>
-              <p className="text-gray-600 leading-relaxed">{feature.description}</p>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-    </section>
+   <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white to-slate-100 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100">
+  <h2 className="text-4xl font-extrabold text-center text-gray-800 dark:text-gray-100 mb-16">
+    The System Helps You In
+  </h2>
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-7xl mx-auto">
+    {features.map((feature, index) => (
+      <motion.div
+        key={index}
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{
+          duration: 0.6,
+          delay: index * 0.3,
+        }}
+        whileHover={{ scale: 1.05 }}
+        className={`bg-white/80 dark:bg-gray-800/70 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 border-l-4 ${feature.color}`}
+      >
+        <div className="flex flex-col items-start">
+          {feature.icon}
+          <h3 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-3">
+            {feature.title}
+          </h3>
+          <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+            {feature.description}
+          </p>
+        </div>
+      </motion.div>
+    ))}
+  </div>
+</section>
+
   );
 }

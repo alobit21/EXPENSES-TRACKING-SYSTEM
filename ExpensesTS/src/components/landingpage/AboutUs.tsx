@@ -24,31 +24,38 @@ const aboutItems = [
 
 export default function AboutUs() {
   return (
-    <section className="py-20 px-6 sm:px-10 lg:px-20 bg-gradient-to-br from-white to-slate-100">
-      <div className="max-w-6xl mx-auto text-center">
-        <h2 className="text-4xl font-bold text-gray-800 mb-6">About Us</h2>
-        <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-12">
-          At <span className="font-semibold text-gray-800">FinanceMaster</span>, we're on a mission to simplify personal finance for everyone. 
-          Whether you're budgeting for your first paycheck or planning long-term goals, our tools empower you to take control of your financial future.
-        </p>
+   <section className="py-20 px-6 sm:px-10 lg:px-20 bg-gradient-to-br from-white to-slate-100 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100">
+  <div className="max-w-6xl mx-auto text-center">
+    <h2 className="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-6">
+      About Us
+    </h2>
+    <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-12">
+      At <span className="font-semibold text-gray-800 dark:text-gray-100">FinanceMaster</span>, we're on a mission to simplify personal finance for everyone. 
+      Whether you're budgeting for your first paycheck or planning long-term goals, our tools empower you to take control of your financial future.
+    </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-          {aboutItems.map((item, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.2 }}
-              className={`bg-white/80 backdrop-blur-md border border-gray-200 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 border-l-4 ${item.color}`}
-            >
-              {item.icon}
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">{item.title}</h3>
-              <p className="text-gray-600 leading-relaxed">{item.description}</p>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+      {aboutItems.map((item, index) => (
+        <motion.div
+          key={index}
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: index * 0.2 }}
+          className={`bg-white/80 dark:bg-gray-800/70 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 border-l-4 ${item.color}`}
+        >
+          {item.icon}
+          <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-2">
+            {item.title}
+          </h3>
+          <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+            {item.description}
+          </p>
+        </motion.div>
+      ))}
+    </div>
+  </div>
+</section>
+
   );
 }
