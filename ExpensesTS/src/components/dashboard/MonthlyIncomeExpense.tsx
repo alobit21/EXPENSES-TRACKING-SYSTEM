@@ -1,41 +1,53 @@
-import React, { useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { GET_MONTHLY_INCOME_EXPENSE } from '../../api/finance/queries';
-import { useQuery } from '@apollo/client/react';
-import { DollarSign } from 'lucide-react';
+import React, { useState } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { GET_MONTHLY_INCOME_EXPENSE } from "../../api/finance/queries";
+import { useQuery } from "@apollo/client/react";
+import { DollarSign } from "lucide-react";
 
 interface MonthlyIncomeExpenseData {
-  monthlyIncomeExpense: { month: string; totalIncome: number; totalExpense: number; netBalance: number }[];
+  monthlyIncomeExpense: {
+    month: string;
+    totalIncome: number;
+    totalExpense: number;
+    netBalance: number;
+  }[];
 }
 
 const MonthlyIncomeExpense: React.FC = () => {
   const { user } = useAuth();
-  const { loading, error, data } = useQuery<MonthlyIncomeExpenseData>(GET_MONTHLY_INCOME_EXPENSE, {
-    skip: !user,
-  });
+  const { loading, error, data } = useQuery<MonthlyIncomeExpenseData>(
+    GET_MONTHLY_INCOME_EXPENSE,
+    {
+      skip: !user,
+    }
+  );
 
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 5;
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-gray-100 to-gray-200">
-        <p className="text-xl text-gray-600">Please log in to view monthly income vs expense.</p>
+      <div className="flex items-center justify-center h-screen bg-gray-100 dark:bg-gray-900">
+        <p className="text-xl text-gray-600 dark:text-gray-300">
+          Please log in to view monthly income vs expense.
+        </p>
       </div>
     );
   }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-gray-100 to-gray-200">
-        <p className="text-xl text-gray-600 animate-pulse">Loading...</p>
+      <div className="flex items-center justify-center h-screen bg-gray-100 dark:bg-gray-900">
+        <p className="text-xl text-gray-600 dark:text-gray-400 animate-pulse">
+          Loading...
+        </p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-gray-100 to-gray-200">
+      <div className="flex items-center justify-center h-screen bg-gray-100 dark:bg-gray-900">
         <p className="text-xl text-red-500">Error: {error.message}</p>
       </div>
     );
@@ -52,25 +64,36 @@ const MonthlyIncomeExpense: React.FC = () => {
   const currentRows = sortedData.slice(startIndex, startIndex + rowsPerPage);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 py-8 px-1 sm:px-2 lg:px-8">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-8 px-1 sm:px-2 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h2 className="md:text-3xl text-xl font-extrabold text-gray-900 tracking-tight">Monthly Income vs Expense</h2>
-          <p className="mt-2 text-lg text-gray-600">Track your financial performance over time</p>
+          <h2 className="md:text-3xl text-xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">
+            Monthly Income vs Expense
+          </h2>
+          <p className="mt-2 text-lg text-gray-600 dark:text-gray-400">
+            Track your financial performance over time
+          </p>
         </div>
 
         {monthlyIncomeExpense.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-xl shadow-lg">
-            <DollarSign size={48} className="mx-auto mb-4 text-gray-300 animate-bounce" />
-            <p className="text-lg font-medium text-gray-600">No data found</p>
-            <p className="text-sm text-gray-500">Add income or expense records to get started!</p>
+          <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-xl shadow-lg">
+            <DollarSign
+              size={48}
+              className="mx-auto mb-4 text-gray-300 dark:text-gray-600 animate-bounce"
+            />
+            <p className="text-lg font-medium text-gray-600 dark:text-gray-300">
+              No data found
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Add income or expense records to get started!
+            </p>
           </div>
         ) : (
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="bg-gray-50 text-gray-700 font-semibold text-sm">
+                  <tr className="bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold text-sm">
                     <th className="p-4 text-left">Month</th>
                     <th className="p-4 text-left">Income</th>
                     <th className="p-4 text-left">Expense</th>
@@ -81,9 +104,11 @@ const MonthlyIncomeExpense: React.FC = () => {
                   {currentRows.map((item) => (
                     <tr
                       key={item.month}
-                      className="border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200"
+                      className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200"
                     >
-                      <td className="p-4 text-gray-700">{item.month}</td>
+                      <td className="p-4 text-gray-700 dark:text-gray-300">
+                        {item.month}
+                      </td>
                       <td className="p-4 text-green-600 font-semibold">
                         <div className="flex items-center gap-2">
                           <DollarSign size={16} />
@@ -98,7 +123,9 @@ const MonthlyIncomeExpense: React.FC = () => {
                       </td>
                       <td
                         className={`p-4 font-semibold ${
-                          item.netBalance >= 0 ? 'text-green-600' : 'text-red-600'
+                          item.netBalance >= 0
+                            ? "text-green-600"
+                            : "text-red-600"
                         }`}
                       >
                         <div className="flex items-center gap-2">
@@ -118,17 +145,19 @@ const MonthlyIncomeExpense: React.FC = () => {
                 <button
                   onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                  className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded disabled:opacity-50 text-gray-800 dark:text-gray-200"
                 >
                   Prev
                 </button>
-                <span className="text-gray-700">
+                <span className="text-gray-700 dark:text-gray-300">
                   Page {currentPage} of {totalPages}
                 </span>
                 <button
-                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                  }
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                  className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded disabled:opacity-50 text-gray-800 dark:text-gray-200"
                 >
                   Next
                 </button>
