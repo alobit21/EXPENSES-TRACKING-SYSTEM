@@ -67,16 +67,16 @@ const GoalForm: React.FC<GoalFormProps> = ({ goal, onClose, onSuccess }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-  <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+  <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center p-4 z-50">
+  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full transition-colors duration-300">
     {/* Header */}
-    <div className="flex justify-between items-center p-6 border-b">
-      <h2 className="text-xl font-semibold text-gray-800">
+    <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
+      <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
         {goal ? 'Edit Goal' : 'Create Goal'}
       </h2>
       <button
         onClick={onClose}
-        className="text-gray-400 hover:text-gray-600 disabled:cursor-not-allowed"
+        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:cursor-not-allowed"
         aria-label="Close"
         disabled={isSubmitting}
       >
@@ -88,17 +88,17 @@ const GoalForm: React.FC<GoalFormProps> = ({ goal, onClose, onSuccess }) => {
     <form onSubmit={handleSubmit} className="p-6 space-y-4">
       {/* Title */}
       <div>
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
           Goal Title
         </label>
         <div className="relative">
-          <Target className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <Target className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-300" size={20} />
           <input
             type="text"
             id="title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-300"
             placeholder="e.g., New Laptop, Vacation, Emergency Fund"
             required
             disabled={isSubmitting}
@@ -108,11 +108,11 @@ const GoalForm: React.FC<GoalFormProps> = ({ goal, onClose, onSuccess }) => {
 
       {/* Target Amount */}
       <div>
-        <label htmlFor="targetAmount" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="targetAmount" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
           Target Amount ($)
         </label>
         <div className="relative">
-          <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-300" size={20} />
           <input
             type="number"
             id="targetAmount"
@@ -120,7 +120,7 @@ const GoalForm: React.FC<GoalFormProps> = ({ goal, onClose, onSuccess }) => {
             min="0.01"
             value={targetAmount}
             onChange={(e) => setTargetAmount(e.target.value)}
-            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-300"
             placeholder="1000.00"
             required
             disabled={isSubmitting}
@@ -130,17 +130,17 @@ const GoalForm: React.FC<GoalFormProps> = ({ goal, onClose, onSuccess }) => {
 
       {/* Deadline */}
       <div>
-        <label htmlFor="deadline" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="deadline" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
           Deadline (Optional)
         </label>
         <div className="relative">
-          <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-300" size={20} />
           <input
             type="date"
             id="deadline"
             value={deadline}
             onChange={(e) => setDeadline(e.target.value)}
-            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-300"
             disabled={isSubmitting}
           />
         </div>
@@ -154,7 +154,7 @@ const GoalForm: React.FC<GoalFormProps> = ({ goal, onClose, onSuccess }) => {
         <button
           type="button"
           onClick={onClose}
-          className="px-4 py-2 text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300"
           disabled={isSubmitting}
         >
           Cancel
@@ -162,7 +162,7 @@ const GoalForm: React.FC<GoalFormProps> = ({ goal, onClose, onSuccess }) => {
         <button
           type="submit"
           disabled={isSubmitting || !title || !targetAmount}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300"
         >
           {isSubmitting ? 'Saving...' : goal ? 'Update' : 'Create'} Goal
         </button>
@@ -170,6 +170,7 @@ const GoalForm: React.FC<GoalFormProps> = ({ goal, onClose, onSuccess }) => {
     </form>
   </div>
 </div>
+
 
   );
 };
