@@ -165,254 +165,232 @@ const sortedExpenses = React.useMemo(() => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
+   <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-gray-800 py-8 px-4 sm:px-6 lg:px-8 text-gray-900 dark:text-gray-100">
+  <div className="max-w-7xl mx-auto">
+    {/* Header */}
+    <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
+      <div>
+        <h1 className="text-3xl font-extrabold tracking-tight">Expense Dashboard</h1>
+        <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">Track and manage your expenses</p>
+      </div>
+      <button
+        onClick={() => setShowForm(true)}
+        className="bg-gradient-to-r from-green-500 to-green-600 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-md"
+      >
+        <Plus size={20} />
+        Add Expense
+      </button>
+    </div>
+
+    {/* Summary Cards */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transform hover:scale-105 transition-transform duration-300">
+        <div className="flex items-center gap-4">
+          <DollarSign size={32} className="text-red-600" />
           <div>
-            <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
-              Expense Dashboard
-            </h1>
-            <p className="mt-2 text-lg text-gray-600">Track and manage your expenses</p>
-          </div>
-          <button
-            onClick={() => setShowForm(true)}
-              className="bg-gradient-to-r from-green-500 to-green-600 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-md"
-          >
-            <Plus size={20} />
-            Add Expense
-          </button>
-        </div>
-
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-lg p-6 transform hover:scale-105 transition-transform duration-300">
-            <div className="flex items-center gap-4">
-              <DollarSign size={32} className="text-red-600" />
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800">Total Expenses</h3>
-                <p className="text-2xl font-bold text-gray-900">${totalExpenses.toFixed(2)}</p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-xl shadow-lg p-6 transform hover:scale-105 transition-transform duration-300">
-            <div className="flex items-center gap-4">
-              <DollarSign size={32} className="text-green-600" />
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800">Average Expense</h3>
-                <p className="text-2xl font-bold text-gray-900">${averageExpense.toFixed(2)}</p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-xl shadow-lg p-6 transform hover:scale-105 transition-transform duration-300">
-            <div className="flex items-center gap-4">
-              <Tag size={32} className="text-blue-600" />
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800">Categories</h3>
-                <p className="text-2xl font-bold text-gray-900">{Object.keys(categoryBreakdown).length}</p>
-              </div>
-            </div>
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Total Expenses</h3>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">${totalExpenses.toFixed(2)}</p>
           </div>
         </div>
-
-        {/* Progress Container */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Monthly Budget</h3>
-          <div className="relative pt-1">
-            <div className="flex mb-2 items-center justify-between">
-              <span className="text-sm font-medium text-gray-600">Budget Used: {budgetUsed.toFixed(1)}%</span>
-              <span className="text-sm font-medium text-gray-600">${totalExpenses.toFixed(2)} / ${monthlyBudget}</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-4">
-              <div
-                className="bg-gradient-to-r from-red-600 to-red-400 h-4 rounded-full transition-all duration-500"
-                style={{ width: `${Math.min(budgetUsed, 100)}%` }}
-              ></div>
-            </div>
+      </div>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transform hover:scale-105 transition-transform duration-300">
+        <div className="flex items-center gap-4">
+          <DollarSign size={32} className="text-green-600" />
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Average Expense</h3>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">${averageExpense.toFixed(2)}</p>
           </div>
         </div>
-
-        {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Expense by Category</h3>
-            <div className="h-64">
-              <Pie
-                data={pieChartData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: { position: 'bottom' },
-                    tooltip: {
-                      callbacks: {
-                        label: (context) => `${context.label}: $${context.raw}`,
-                      },
-                    },
-                  },
-                }}
-              />
-            </div>
-          </div>
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Expenses Over Time</h3>
-            <div className="h-64">
-              <Bar
-                data={barChartData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  scales: {
-                    y: { beginAtZero: true, title: { display: true, text: 'Amount ($)' } },
-                    x: { title: { display: true, text: 'Date' } },
-                  },
-                  plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                      callbacks: {
-                        label: (context) => `$${context.raw}`,
-                      },
-                    },
-                  },
-                }}
-              />
-            </div>
+      </div>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transform hover:scale-105 transition-transform duration-300">
+        <div className="flex items-center gap-4">
+          <Tag size={32} className="text-blue-600" />
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Categories</h3>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{Object.keys(categoryBreakdown).length}</p>
           </div>
         </div>
+      </div>
+    </div>
 
-{/* Expense List */}
-<div className="bg-white rounded-xl shadow-lg overflow-hidden">
-  <div className="overflow-x-auto">
-    <table className="min-w-full divide-y divide-gray-200">
-      <thead className="bg-gray-50 sticky top-0 z-10 shadow-sm">
-        <tr>
-          {[
-            { key: "amount", label: "Amount" },
-            { key: "description", label: "Description" },
-            { key: "date", label: "Date" },
-            { key: "category", label: "Category" },
-            { key: "paymentMethod", label: "Payment Method", hidden: "hidden md:table-cell" },
-            { key: "actions", label: "Actions" },
-          ].map((col) => (
-            <th
-              key={col.key}
-              className={`px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer select-none ${
-                col.hidden || ""
-              }`}
-              onClick={() => col.key !== "actions" && handleSort(col.key as keyof Expense)}
-            >
-              <div className="flex items-center gap-1">
-                {col.label}
-                {sortBy === col.key && (
-                  <span>{sortOrder === "asc" ? "▲" : "▼"}</span>
-                )}
-              </div>
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-gray-100">
-        {sortedExpenses.map((expense) => (
-          <tr
-            key={expense.id}
-            className="hover:bg-gray-50 transition-colors duration-200"
-          >
-            {/* Amount */}
-            <td className="px-6 py-4 whitespace-nowrap text-red-600 font-semibold flex items-center gap-2">
-              <DollarSign size={16} />
-              ${expense.amount.toFixed(2)}
-            </td>
-            {/* Description */}
-            <td className="px-6 py-4 text-gray-700 truncate">
-              {expense.description || "No description"}
-            </td>
-            {/* Date */}
-            <td className="px-6 py-4 text-gray-600 flex items-center gap-2">
-              <Calendar size={16} />
-              {format(new Date(expense.date), "MMM dd, yyyy")}
-            </td>
-            {/* Category */}
-            <td className="px-6 py-4">
-              {expense.category ? (
-                <span className="inline-flex items-center gap-2">
-                  <Tag size={16} className="text-blue-500" />
-                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
-                    {expense.category.name}
-                  </span>
-                </span>
-              ) : (
-                <span className="text-gray-400 text-xs">No category</span>
-              )}
-            </td>
-            {/* Payment Method */}
-            <td className="px-6 py-4 hidden md:table-cell">
-              <div className="flex items-center gap-2">
-                {getPaymentMethodIcon(expense.paymentMethod)}
-                <span className="text-xs text-gray-600">
-                  {getPaymentMethodText(expense.paymentMethod)}
-                </span>
-              </div>
-            </td>
-            {/* Actions */}
-            <td className="px-6 py-4 text-right space-x-2">
-              <button
-                onClick={() => setEditingExpense(expense)}
-                className="text-blue-600 hover:text-blue-800"
-                aria-label="Edit expense"
+    {/* Progress Container */}
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
+      <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Monthly Budget</h3>
+      <div className="relative pt-1">
+        <div className="flex mb-2 items-center justify-between">
+          <span className="text-sm font-medium text-gray-600 dark:text-gray-300">Budget Used: {budgetUsed.toFixed(1)}%</span>
+          <span className="text-sm font-medium text-gray-600 dark:text-gray-300">${totalExpenses.toFixed(2)} / ${monthlyBudget}</span>
+        </div>
+        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4">
+          <div
+            className="bg-gradient-to-r from-red-600 to-red-400 h-4 rounded-full transition-all duration-500"
+            style={{ width: `${Math.min(budgetUsed, 100)}%` }}
+          />
+        </div>
+      </div>
+    </div>
+
+    {/* Charts */}
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Expense by Category</h3>
+        <div className="h-64">
+          <Pie
+            data={pieChartData}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { position: 'bottom', labels: { color: 'white' } },
+                tooltip: {
+                  callbacks: { label: (context) => `${context.label}: $${context.raw}` },
+                },
+              },
+            }}
+          />
+        </div>
+      </div>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Expenses Over Time</h3>
+        <div className="h-64">
+          <Bar
+            data={barChartData}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                y: { beginAtZero: true, title: { display: true, text: 'Amount ($)' }, ticks: { color: '#fff' } },
+                x: { title: { display: true, text: 'Date' }, ticks: { color: '#fff' } },
+              },
+              plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: (context) => `$${context.raw}` } },
+              },
+            }}
+          />
+        </div>
+      </div>
+    </div>
+
+    {/* Expense Table */}
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead className="bg-gray-50 dark:bg-gray-700 sticky top-0 z-10 shadow-sm">
+            <tr>
+              {[
+                { key: "amount", label: "Amount" },
+                { key: "description", label: "Description" },
+                { key: "date", label: "Date" },
+                { key: "category", label: "Category" },
+                { key: "paymentMethod", label: "Payment Method", hidden: "hidden md:table-cell" },
+                { key: "actions", label: "Actions" },
+              ].map((col) => (
+                <th
+                  key={col.key}
+                  className={`px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer select-none ${
+                    col.hidden || "text-gray-600 dark:text-gray-300"
+                  }`}
+                  onClick={() => col.key !== "actions" && handleSort(col.key as keyof Expense)}
+                >
+                  <div className="flex items-center gap-1">
+                    {col.label}
+                    {sortBy === col.key && <span>{sortOrder === "asc" ? "▲" : "▼"}</span>}
+                  </div>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+            {sortedExpenses.map((expense) => (
+              <tr
+                key={expense.id}
+                className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
               >
-                <Edit size={16} />
-              </button>
-              <button
-                onClick={() => {
-                  if (window.confirm("Are you sure you want to delete this expense?")) {
-                    deleteExpense(expense.id);
-                  }
-                }}
-                className="text-red-600 hover:text-red-800"
-                aria-label="Delete expense"
-              >
-                <Trash2 size={16} />
-              </button>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+                <td className="px-6 py-4 whitespace-nowrap text-red-600 font-semibold flex items-center gap-2">
+                  <DollarSign size={16} />
+                  ${expense.amount.toFixed(2)}
+                </td>
+                <td className="px-6 py-4 truncate">{expense.description || "No description"}</td>
+                <td className="px-6 py-4 flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                  <Calendar size={16} />
+                  {format(new Date(expense.date), "MMM dd, yyyy")}
+                </td>
+                <td className="px-6 py-4">
+                  {expense.category ? (
+                    <span className="inline-flex items-center gap-2">
+                      <Tag size={16} className="text-blue-500" />
+                      <span className="bg-blue-100 dark:bg-blue-700 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full text-xs">
+                        {expense.category.name}
+                      </span>
+                    </span>
+                  ) : (
+                    <span className="text-gray-400 dark:text-gray-300 text-xs">No category</span>
+                  )}
+                </td>
+                <td className="px-6 py-4 hidden md:table-cell">
+                  <div className="flex items-center gap-2">
+                    {getPaymentMethodIcon(expense.paymentMethod)}
+                    <span className="text-xs text-gray-600 dark:text-gray-300">{getPaymentMethodText(expense.paymentMethod)}</span>
+                  </div>
+                </td>
+                <td className="px-6 py-4 text-right space-x-2">
+                  <button
+                    onClick={() => setEditingExpense(expense)}
+                    className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200"
+                  >
+                    <Edit size={16} />
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (window.confirm("Are you sure you want to delete this expense?")) {
+                        deleteExpense(expense.id);
+                      }
+                    }}
+                    className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {expenses.length === 0 && (
+      <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-xl shadow-lg">
+        <DollarSign size={48} className="mx-auto mb-4 text-gray-300 dark:text-gray-500 animate-bounce" />
+        <p className="text-lg font-medium text-gray-600 dark:text-gray-300">No expenses found</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Add your first expense to get started!</p>
+      </div>
+    )}
+
+    {/* Expense Form Modals */}
+    {showForm && (
+      <ExpenseForm
+        expense={null}
+        onClose={() => {
+          setShowForm(false);
+          setEditingExpense(null);
+        }}
+        onSuccess={() => {
+          setShowForm(false);
+          setEditingExpense(null);
+        }}
+      />
+    )}
+    {editingExpense && (
+      <ExpenseForm
+        expense={editingExpense}
+        onClose={() => setEditingExpense(null)}
+        onSuccess={() => setEditingExpense(null)}
+      />
+    )}
   </div>
 </div>
 
-
-        {expenses.length === 0 && (
-          <div className="text-center py-12 bg-white rounded-xl shadow-lg">
-            <DollarSign size={48} className="mx-auto mb-4 text-gray-300 animate-bounce" />
-            <p className="text-lg font-medium text-gray-600">No expenses found</p>
-            <p className="text-sm text-gray-500">Add your first expense to get started!</p>
-          </div>
-        )}
-
-        {/* Expense Form Modals */}
-        {showForm && (
-          <ExpenseForm
-            expense={null}
-            onClose={() => {
-              setShowForm(false);
-              setEditingExpense(null);
-            }}
-            onSuccess={() => {
-              setShowForm(false);
-              setEditingExpense(null);
-            }}
-          />
-        )}
-        {editingExpense && (
-          <ExpenseForm
-            expense={editingExpense}
-            onClose={() => setEditingExpense(null)}
-            onSuccess={() => setEditingExpense(null)}
-          />
-        )}
-      </div>
-    </div>
   );
 };
 

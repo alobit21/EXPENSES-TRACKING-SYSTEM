@@ -78,149 +78,147 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ expense, onClose, onSuccess }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-        <div className="flex justify-between items-center p-6 border-b">
-          <h2 className="text-xl font-semibold text-gray-800">
-            {expense ? 'Edit Expense' : 'Add Expense'}
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-            aria-label="Close"
+<div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center p-4 z-50 transition-colors duration-300">
+  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full transition-colors duration-300">
+    <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700 transition-colors duration-300">
+      <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100 transition-colors duration-300">
+        {expense ? 'Edit Expense' : 'Add Expense'}
+      </h2>
+      <button
+        onClick={onClose}
+        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-300"
+        aria-label="Close"
+        disabled={isSubmitting}
+      >
+        <X size={24} />
+      </button>
+    </div>
+
+    <form onSubmit={handleSubmit} className="p-6 space-y-4">
+      {/* Amount */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+          Amount
+        </label>
+        <div className="relative">
+          <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-300" size={20} />
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors duration-300"
+            placeholder="0.00"
+            required
+            disabled={isSubmitting}
+          />
+        </div>
+      </div>
+
+      {/* Description */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+          Description
+        </label>
+        <input
+          type="text"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors duration-300"
+          placeholder="Expense description"
+          disabled={isSubmitting}
+        />
+      </div>
+
+      {/* Date */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+          Date
+        </label>
+        <div className="relative">
+          <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-300" size={20} />
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors duration-300"
+            required
+            disabled={isSubmitting}
+          />
+        </div>
+        {dateError && <p className="text-red-500 text-sm mt-1">{dateError}</p>}
+      </div>
+
+      {/* Category */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+          Category
+        </label>
+        <div className="relative">
+          <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-300" size={20} />
+          <select
+            value={categoryId}
+            onChange={(e) => setCategoryId(e.target.value)}
+            className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors duration-300"
             disabled={isSubmitting}
           >
-            <X size={24} />
-          </button>
+            <option value="">Select a category</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
         </div>
-
-        <form onSubmit={handleSubmit} className="p-6">
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2">
-                Amount
-              </label>
-              <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                <input
-                  type="number"
-                  id="amount"
-                  step="0.01"
-                  min="0"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-                  placeholder="0.00"
-                  required
-                  disabled={isSubmitting}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                Description
-              </label>
-              <input
-                type="text"
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-                placeholder="Expense description"
-                disabled={isSubmitting}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
-                Date
-              </label>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                <input
-                  type="date"
-                  id="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-                  required
-                  disabled={isSubmitting}
-                />
-              </div>
-              {dateError && (
-                <p className="text-red-500 text-sm mt-1">{dateError}</p>
-              )}
-            </div>
-
-            <div>
-              <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-                Category
-              </label>
-              <div className="relative">
-                <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                <select
-                  id="category"
-                  value={categoryId}
-                  onChange={(e) => setCategoryId(e.target.value)}
-                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-                  disabled={isSubmitting}
-                >
-                  <option value="">Select a category</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="paymentMethod" className="block text-sm font-medium text-gray-700 mb-2">
-                Payment Method
-              </label>
-              <div className="relative">
-                <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                <select
-                  id="paymentMethod"
-                  value={paymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-                  required
-                  disabled={isSubmitting}
-                >
-                  <option value={PaymentMethod.CASH}>Cash</option>
-                  <option value={PaymentMethod.CREDIT_CARD}>Credit Card</option>
-                  <option value={PaymentMethod.DEBIT_CARD}>Debit Card</option>
-                  <option value={PaymentMethod.MOBILE_PAYMENT}>Mobile Payment</option>
-                  <option value={PaymentMethod.BANK_TRANSFER}>Bank Transfer</option>
-                  <option value={PaymentMethod.OTHER}>Other</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-6">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800 disabled:opacity-50"
-              disabled={isSubmitting}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting || !amount || !date}
-              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? 'Saving...' : expense ? 'Update' : 'Add'} Expense
-            </button>
-          </div>
-        </form>
       </div>
-    </div>
+
+      {/* Payment Method */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+          Payment Method
+        </label>
+        <div className="relative">
+          <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-300" size={20} />
+          <select
+            value={paymentMethod}
+            onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+            className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors duration-300"
+            required
+            disabled={isSubmitting}
+          >
+            {Object.values(PaymentMethod).map((method) => (
+              <option key={method} value={method}>
+                {method.replace('_', ' ')}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div className="flex justify-end gap-3 pt-6">
+        <button
+          type="button"
+          onClick={onClose}
+          className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 disabled:opacity-50 transition-colors duration-300"
+          disabled={isSubmitting}
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={isSubmitting || !amount || !date}
+          className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300"
+        >
+          {isSubmitting ? 'Saving...' : expense ? 'Update' : 'Add'} Expense
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
   );
 };
 
