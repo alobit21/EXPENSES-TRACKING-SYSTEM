@@ -3,17 +3,17 @@ import { User } from 'lucide-react';
 
 const testimonials = [
   {
-    name: 'Jane Doe',
+    name: 'Atanas Patrick',
     text: 'This app has transformed how I manage my finances. The reports are a game-changer!',
     rating: 5,
   },
   {
-    name: 'John Smith',
+    name: 'Nila Galus',
     text: 'Simple, intuitive, and packed with features. Highly recommend it!',
     rating: 5,
   },
   {
-    name: 'Alice Johnson',
+    name: 'Jackson Kawawa',
     text: 'The goal tracking feature keeps me motivated every month. Fantastic app!',
     rating: 5,
   },
