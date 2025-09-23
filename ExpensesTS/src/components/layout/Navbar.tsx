@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -32,7 +32,6 @@ const ResponsiveNavbar: React.FC<ResponsiveNavbarProps> = ({
   const [scrolled, setScrolled] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
-
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
@@ -41,11 +40,8 @@ const ResponsiveNavbar: React.FC<ResponsiveNavbarProps> = ({
 
   useEffect(() => {
     const root = window.document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
+    if (theme === 'dark') root.classList.add('dark');
+    else root.classList.remove('dark');
     localStorage.setItem('theme', theme);
   }, [theme]);
 
@@ -63,7 +59,7 @@ const ResponsiveNavbar: React.FC<ResponsiveNavbarProps> = ({
       }`}
     >
       <div className="max-w-screen-xl mx-auto px-4 py-4 flex justify-between items-center">
-        {/* Logo and Brand */}
+        {/* Left: Logo/Brand */}
         <NavLink to="/" className="flex items-center space-x-3">
           {logo && <img src={logo} alt="Logo" className="h-8" />}
           <span
@@ -76,6 +72,14 @@ const ResponsiveNavbar: React.FC<ResponsiveNavbarProps> = ({
             {brand}
           </span>
         </NavLink>
+
+        {/* Center: Theme toggle (always visible) */}
+        <button
+          onClick={toggleTheme}
+          className="ml-4 p-2 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+        >
+          {theme === 'dark' ? <Sun size={18} className="text-yellow-400" /> : <Moon size={18} className="text-gray-800" />}
+        </button>
 
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center space-x-6 justify-center flex-grow">
@@ -98,23 +102,17 @@ const ResponsiveNavbar: React.FC<ResponsiveNavbarProps> = ({
           ))}
         </div>
 
-        {/* CTA Button + Theme Toggle */}
-        <div className="hidden md:flex items-center">
+        {/* CTA Button */}
+        <div className="hidden md:flex items-center ml-4">
           <NavLink
             to={ctaLink}
             className="px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-green-600 text-white dark:from-green-600 dark:to-green-700 hover:from-green-600 hover:to-green-700 transition-all duration-200"
           >
             {ctaText}
           </NavLink>
-           <button
-      onClick={toggleTheme}
-      className="ml-4 px-3 py-2 rounded-lg border border-gray-400 dark:border-gray-600 text-gray-800 dark:text-gray-200"
-    >
-      {theme === 'dark' ? '☀️' : '🌙'}
-    </button>
         </div>
 
-        {/* Mobile Toggle */}
+        {/* Mobile Menu Toggle */}
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="md:hidden text-gray-800 dark:text-gray-200 focus:outline-none ml-2"
@@ -152,6 +150,7 @@ const ResponsiveNavbar: React.FC<ResponsiveNavbarProps> = ({
                   {item.name}
                 </NavLink>
               ))}
+
               <NavLink
                 to={ctaLink}
                 className="bg-gradient-to-r from-green-500 dark:from-green-600 to-green-600 dark:to-green-700 text-white px-6 py-3 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-md w-full text-center"
@@ -159,14 +158,6 @@ const ResponsiveNavbar: React.FC<ResponsiveNavbarProps> = ({
               >
                 {ctaText}
               </NavLink>
-
-              {/* Mobile Theme Toggle */}
-               <button
-      onClick={toggleTheme}
-      className="ml-4 px-3 py-2 rounded-lg border border-gray-400 dark:border-gray-600 text-gray-800 dark:text-gray-200"
-    >
-      {theme === 'dark' ? '☀️' : '🌙'}
-    </button>
             </div>
           </motion.div>
         )}
