@@ -151,13 +151,7 @@ const ResponsiveNavbar: React.FC<ResponsiveNavbarProps> = ({
                 </NavLink>
               ))}
 
-              <NavLink
-                to={ctaLink}
-                className="bg-gradient-to-r from-green-500 dark:from-green-600 to-green-600 dark:to-green-700 text-white px-6 py-3 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-md w-full text-center"
-                onClick={() => setIsOpen(false)}
-              >
-                {ctaText}
-              </NavLink>
+             
             </div>
           </motion.div>
         )}
