@@ -51,7 +51,7 @@ export default async function handler(
         email,
         passwordHash: hashedPassword,
         displayName: displayName || username,
-        role: 'ADMIN' // Default role
+        role: 'READER' // Default role
       }
     })
 

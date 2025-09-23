@@ -18,6 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         coverImage: true,
         author: { select: { id: true, displayName: true, username: true, avatarUrl: true } },
         publishedAt: true,
+        allowComments: true, // ✅ Add this line
       },
     })
     if (!post) return res.status(404).json({ message: "Post not found" })

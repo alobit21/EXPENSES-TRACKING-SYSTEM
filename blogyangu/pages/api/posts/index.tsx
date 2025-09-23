@@ -6,6 +6,15 @@ import { authOptions } from "../auth/[...nextauth]"
 import formidable from "formidable"
 import fs from "fs"
 import path from "path"
+import { Post, User, Comment, Like } from "@prisma/client";
+
+
+
+type Fields<T> = {
+  [key: string]: T[];
+};
+
+
 
 export const config = {
   api: { bodyParser: false },
@@ -27,147 +36,126 @@ async function makeUniqueSlug(title: string, postId?: number) {
 }
 
 // ---------------- Parse formidable form
-function parseForm(req: NextApiRequest): Promise<{ fields: formidable.Fields; files: formidable.Files }> {
-  const uploadDir = path.join(process.cwd(), "public", "uploads")
-  if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true })
+function parseForm(
+  req: NextApiRequest
+): Promise<{ fields: { [key: string]: string[] }; files: formidable.Files }> {
+  const uploadDir = path.join(process.cwd(), "public", "uploads");
+  if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
-  const form = formidable({ multiples: false, uploadDir, keepExtensions: true })
+  const form = formidable({ multiples: false, uploadDir, keepExtensions: true });
+
   return new Promise((resolve, reject) => {
-    form.parse(req, (err, fields, files) => {
-      if (err) reject(err)
-      else resolve({ fields, files })
-    })
-  })
+    form.parse(req, (err, rawFields, files) => {
+      if (err) return reject(err);
+
+      const fields: { [key: string]: string[] } = {};
+
+    for (const key in rawFields) {
+  const value = rawFields[key];
+  const normalized = Array.isArray(value) ? value : [value];
+  fields[key] = normalized.filter((v): v is string => typeof v === "string");
 }
 
+
+      if (files.coverImage) {
+        const file = Array.isArray(files.coverImage)
+          ? files.coverImage[0]
+          : files.coverImage;
+        const relativePath = `/uploads/${path.basename(file.filepath)}`;
+        fields.coverImage = [relativePath]; // ✅ safe assignment
+      }
+
+      resolve({ fields, files });
+    });
+  });
+}
+
+
+// ---------------- Main handler
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = await getServerSession(req, res, authOptions)
-  const role = session?.user?.role
-
-  // ---------------- GET posts
   if (req.method === "GET") {
-    const where =
-      role && ["ADMIN", "AUTHOR"].includes(role)
-        ? {} // see all posts
-        : { status: "PUBLISHED" } // public/readers see only published
+    try {
+      const posts = await prisma.post.findMany({
+        include: {
+          author: true,
+          comments: true,
+          likes: true,
+        },
+        orderBy: { publishedAt: "desc" },
+      })
 
-    const posts = await prisma.post.findMany({
-      where,
-      orderBy: { publishedAt: "desc" },
-      select: {
-        id: true,
-        title: true,
-        excerpt: true,
-        slug: true,
-        coverImage: true,
-        status: true,
-        metaDescription: true,
-        allowComments: true,
-        viewCount: true,
-        categoryId: true,
-        author: { select: { id: true, displayName: true, username: true, avatarUrl: true } },
-        publishedAt: true,
+     const postsWithCounts = posts.map((post: Post & {
+  author: User;
+  comments: Comment[];
+  likes: Like[];
+}) => ({
+  id: post.id,
+  title: post.title,
+  excerpt: post.excerpt,
+  slug: post.slug,
+  coverImage: post.coverImage,
+  author: {
+    id: post.author.id,
+    username: post.author.username,
+    displayName: post.author.displayName,
+    avatarUrl: post.author.avatarUrl,
+  },
+  publishedAt: post.publishedAt,
+  likeCount: post.likes.length,
+  commentCount: post.comments.length,
+}));
+
+
+      return res.status(200).json(postsWithCounts)
+    } catch (error) {
+      console.error("Error fetching posts:", error)
+      return res.status(500).json({ error: "Internal server error" })
+    }
+  }
+
+ if (req.method === "POST") {
+  try {
+    const session = await getServerSession(req, res, authOptions)
+    if (!session?.user?.id) {
+      return res.status(401).json({ error: "Unauthorized" })
+    }
+
+const { fields } = await parseForm(req)
+const title = Array.isArray(fields.title) ? fields.title[0] : fields.title
+const excerpt = Array.isArray(fields.excerpt) ? fields.excerpt[0] : fields.excerpt || null
+const coverImage = Array.isArray(fields.coverImage) ? fields.coverImage[0] : fields.coverImage || null
+const content = Array.isArray(fields.content) ? fields.content[0] : fields.content
+
+if (!title || typeof title !== "string") {
+  return res.status(400).json({ error: "Title is required" })
+}
+
+const slug = await makeUniqueSlug(title)
+
+
+    
+
+
+    const newPost = await prisma.post.create({
+      data: {
+        title,
+        excerpt,
+        slug,
+        content,
+        coverImage,
+        authorId: Number(session.user.id), // 🔑 check this matches your schema
+        publishedAt: new Date(),
       },
     })
-    return res.json(posts)
-  }
 
-  // ---------------- POST/PUT/DELETE require ADMIN or AUTHOR
-  if (!session || !["ADMIN", "AUTHOR"].includes(role ?? "")) {
-    return res.status(403).json({ message: "Forbidden" })
-  }
-
-  try {
-    const { fields, files } = await parseForm(req)
-
-    // normalize fields
-    const title = Array.isArray(fields.title) ? fields.title[0] : fields.title
-    const content = Array.isArray(fields.content) ? fields.content[0] : fields.content
-    const excerpt = Array.isArray(fields.excerpt) ? fields.excerpt[0] : fields.excerpt
-    const metaDescription = Array.isArray(fields.metaDescription) ? fields.metaDescription[0] : fields.metaDescription
-    const status = Array.isArray(fields.status) ? fields.status[0] : fields.status
-    const categoryIdRaw = Array.isArray(fields.categoryId) ? fields.categoryId[0] : fields.categoryId
-    const allowCommentsRaw = Array.isArray(fields.allowComments) ? fields.allowComments[0] : fields.allowComments
-
-    const coverFile = files.coverImage as formidable.File | undefined
-    const coverImagePath = coverFile?.filepath ? `/uploads/${path.basename(coverFile.filepath)}` : null
-
-    if (req.method === "POST") {
-      if (!title || !content) return res.status(400).json({ message: "Title and content required" })
-      const slug = await makeUniqueSlug(title)
-
-      const newPost = await prisma.post.create({
-        data: {
-          title,
-          content,
-          excerpt: excerpt || null,
-          metaDescription: metaDescription || null,
-          coverImage: coverImagePath,
-          categoryId: categoryIdRaw ? Number(categoryIdRaw) : null,
-          status: status || "DRAFT",
-          allowComments: allowCommentsRaw === "false" ? false : true,
-          slug,
-          authorId: parseInt(session.user.id),
-        },
-      })
-      return res.status(201).json(newPost)
-    }
-
-    if (req.method === "PUT") {
-      const postIdRaw = Array.isArray(fields.id) ? fields.id[0] : fields.id
-      if (!postIdRaw) return res.status(400).json({ message: "Post ID required" })
-      const postId = Number(postIdRaw)
-
-      const existing = await prisma.post.findUnique({ where: { id: postId } })
-      if (!existing) return res.status(404).json({ message: "Post not found" })
-
-      // AUTHOR can edit only own posts
-      if (session.user.role === "AUTHOR" && existing.authorId !== parseInt(session.user.id)) {
-        return res.status(403).json({ message: "Forbidden" })
-      }
-
-      const slug = title && title !== existing.title ? await makeUniqueSlug(title, postId) : existing.slug
-
-      const updatedPost = await prisma.post.update({
-        where: { id: postId },
-        data: {
-          title: title || existing.title,
-          content: content || existing.content,
-          excerpt: excerpt ?? existing.excerpt,
-          metaDescription: metaDescription ?? existing.metaDescription,
-          coverImage: coverImagePath || existing.coverImage,
-          categoryId: categoryIdRaw ? Number(categoryIdRaw) : existing.categoryId,
-          status: status || existing.status,
-          allowComments: allowCommentsRaw === undefined ? existing.allowComments : allowCommentsRaw === "true",
-          slug,
-        },
-      })
-      return res.json(updatedPost)
-    }
-
-    if (req.method === "DELETE") {
-      const postIdRaw = Array.isArray(fields.id) ? fields.id[0] : fields.id
-      if (!postIdRaw) return res.status(400).json({ message: "Post ID required" })
-      const postId = Number(postIdRaw)
-
-      const existing = await prisma.post.findUnique({ where: { id: postId } })
-      if (!existing) return res.status(404).json({ message: "Post not found" })
-
-      // AUTHOR can delete only own posts
-      if (session.user.role === "AUTHOR" && existing.authorId !== parseInt(session.user.id)) {
-        return res.status(403).json({ message: "Forbidden" })
-      }
-
-      await prisma.post.delete({ where: { id: postId } })
-      return res.status(204).end()
-    }
-
-    res.setHeader("Allow", ["GET", "POST", "PUT", "DELETE"])
-    return res.status(405).end(`Method ${req.method} Not Allowed`)
-  } catch (error) {
-    console.error(error)
-    return res.status(500).json({ message: "Server error" })
+    return res.status(201).json(newPost)
+  } catch (error: any) {
+    console.error("🔥 Error creating post:", error)
+    return res.status(500).json({ error: error.message || "Internal server error" })
   }
 }
 
 
+  res.setHeader("Allow", ["GET", "POST"])
+  return res.status(405).end(`Method ${req.method} Not Allowed`)
+}
