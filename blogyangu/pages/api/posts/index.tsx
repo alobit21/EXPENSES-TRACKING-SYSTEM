@@ -80,6 +80,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           author: true,
           comments: true,
           likes: true,
+          category: true,
         },
         orderBy: { publishedAt: "desc" },
       })
@@ -87,7 +88,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
      const postsWithCounts = posts.map((post: Post & {
   author: User;
   comments: Comment[];
-  likes: Like[];
+       likes: Like[];
+      category: { id: number; name: string } | null; // add this
 }) => ({
   id: post.id,
   title: post.title,
@@ -99,7 +101,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     username: post.author.username,
     displayName: post.author.displayName,
     avatarUrl: post.author.avatarUrl,
-  },
+       },
+  category: post.category ? { id: post.category.id, name: post.category.name } : null, // ✅ map category
   publishedAt: post.publishedAt,
   likeCount: post.likes.length,
   commentCount: post.comments.length,

@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useSession } from "next-auth/react"
-import { FaRegThumbsUp, FaRegCommentDots, FaEdit, FaTrash } from "react-icons/fa"
+import { FaRegThumbsUp, FaRegCommentDots, FaEdit, FaTrash, FaPlus } from "react-icons/fa"
+import PostForm from "@/components/PostForm"
+import { Category } from "@prisma/client"
 
 interface Author {
   id: number
@@ -27,6 +29,10 @@ interface Post {
   publishedAt: string | null
   likeCount: number
   commentCount: number
+    category?: {
+    id: number
+    name: string
+  } | null
 }
 
 export default function PostsPage() {
@@ -38,6 +44,25 @@ export default function PostsPage() {
   const [loading, setLoading] = useState(true)
   const { data: session } = useSession()
   const [imageErrors, setImageErrors] = useState<Record<number | string, boolean>>({})
+  const[showModal, setShowModal] = useState(false)
+
+
+  const [categories, setCategories] = useState<Category[]>([])
+
+useEffect(() => {
+  async function fetchCategories() {
+    try {
+      const res = await fetch("/api/categories")
+      if (res.ok) {
+        const data = await res.json()
+        setCategories(data)
+      }
+    } catch (err) {
+      console.error("Failed to fetch categories:", err)
+    }
+  }
+  fetchCategories()
+}, [])
 
   useEffect(() => {
     async function fetchPostsAndCounts() {
@@ -211,6 +236,8 @@ export default function PostsPage() {
     return author?.displayName || author?.username || "Unknown Author"
   }
 
+  
+
   const getAvatarUrl = (author: Author) => {
     return author?.avatarUrl || null
   }
@@ -237,8 +264,23 @@ export default function PostsPage() {
     <div className="min-h-screen bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         <header className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-4">Community Posts</h1>
-          <p className="text-gray-400 text-lg">Discover insights and discussions from our community</p>
+<div className="flex justify-between items-center mb-8">
+  <h1 className="text-4xl font-bold text-white">Community Posts</h1>
+
+  {/* Show button only for Admin or Author */}
+    {isAdminOrAuthor && (
+            <button
+              onClick={() => setShowModal(true)}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+            >
+              <FaPlus className="w-4 h-4" />
+              <span>Create New Post</span>
+            </button>
+          )}
+</div>
+
+<p className="text-gray-400 text-lg mb-4">Discover insights and discussions from our community</p>
+
         </header>
 
         {posts.length === 0 ? (
@@ -265,123 +307,201 @@ export default function PostsPage() {
                   </div>
                 ) : null}
                 
-                <div className="p-6">
-                  <Link href={`/posts/${post.id}`} className="group">
-                    <h2 className="text-xl font-semibold text-white group-hover:text-blue-400 transition-colors duration-200 line-clamp-2">
-                      {post.title}
-                    </h2>
-                  </Link>
-                  
-                  <p className="text-gray-300 mt-3 text-sm leading-relaxed line-clamp-3">
-                    {post.excerpt || "No excerpt provided."}
-                  </p>
-                  
-                  <div className="flex items-center mt-4 text-sm text-gray-400">
-                    <div className="flex items-center space-x-2">
-                      {getAvatarUrl(post.author) && !imageErrors[`author-${post.author.id}`] ? (
-                        <img
-                          src={getAvatarUrl(post.author)!}
-                          alt={getAuthorDisplay(post.author)}
-                          className="w-6 h-6 rounded-full border border-gray-600"
-                          onError={() => setImageErrors((prev) => ({ ...prev, [`author-${post.author.id}`]: true }))}
-                        />
-                      ) : (
-                        <div className="w-6 h-6 rounded-full bg-blue-900 flex items-center justify-center border border-gray-600">
-                          <span className="text-blue-300 text-xs font-medium">
-                            {getInitials(post.author)}
-                          </span>
-                        </div>
-                      )}
-                      <span>{getAuthorDisplay(post.author)}</span>
-                    </div>
-                    {post.publishedAt && (
-                      <span className="ml-4">
-                        {new Date(post.publishedAt).toLocaleDateString()}
-                      </span>
-                    )}
-                  </div>
+               <div className="p-6">
+  {/* Post Title */}
+  <Link href={`/posts/${post.id}`} className="group">
+    <h2 className="text-xl font-semibold text-white group-hover:text-blue-400 transition-colors duration-200 line-clamp-2">
+      {post.title}
+    </h2>
+  </Link>
 
-                  <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-700">
-                    <button
-                      onClick={() => handleLike(post.id)}
-                      className="flex items-center space-x-2 text-gray-400 hover:text-blue-400 transition-colors duration-200"
-                    >
-                      <FaRegThumbsUp className="w-4 h-4" />
-                      <span>{post.likeCount}</span>
-                    </button>
+  {/* Post Excerpt */}
+  <p className="text-gray-300 mt-3 text-sm leading-relaxed line-clamp-3 ">
+    {post.excerpt || "No excerpt provided."}
+  </p>
 
-                    <button
-                      onClick={() => handleToggleComments(post.id)}
-                      className="flex items-center space-x-2 text-gray-400 hover:text-green-400 transition-colors duration-200"
-                    >
-                      <FaRegCommentDots className="w-4 h-4" />
-                      <span>{post.commentCount}</span>
-                    </button>
-                  </div>
+ {/* Category, Author & Date */}
+<div className="flex flex-col md:flex-row md:items-center md:space-x-4 mt-2 text-sm text-gray-400">
+  
 
-                  {activeCommentPostId === post.id && (
-                    <div className="mt-6 pt-4 border-t border-gray-700">
-                      <textarea
-                        value={commentText}
-                        onChange={(e) => setCommentText(e.target.value)}
-                        rows={3}
-                        placeholder="Share your thoughts..."
-                        className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
-                      />
-                      
-                      <button
-                        onClick={() => handleSubmitComment(post.id)}
-                        disabled={!commentText.trim()}
-                        className="mt-3 w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-colors duration-200"
-                      >
-                        Post Comment
-                      </button>
+ {/* Category, Author & Date */}
+<div className="flex flex-col md:flex-row md:items-center md:space-x-4 mt-2 text-sm text-gray-400">
+  {/* Category */}
+  {post.category && (
+    <span>
+      Category: <span className="font-medium"><span className="text-yellow-600">{post.category.name}</span></span>
+    </span>
+  )}
 
-                      <div className="mt-6 space-y-4">
-                        {loadingComments ? (
-                          <div className="text-center text-gray-400 py-4">Loading comments...</div>
-                        ) : commentsByPost[post.id]?.length === 0 ? (
-                          <div className="text-center text-gray-400 py-4">
-                            No comments yet. Be the first to comment!
-                          </div>
-                        ) : (
-                          commentsByPost[post.id].map((comment) => (
-                            <CommentItem 
-                              key={comment.id} 
-                              comment={comment} 
-                              getAuthorDisplay={getAuthorDisplay} 
-                              getAvatarUrl={getAvatarUrl} 
-                              getInitials={getInitials} 
-                            />
-                          ))
-                        )}
-                      </div>
-                    </div>
-                  )}
+  {/* Author + Date (always in one row) */}
+  <div className="flex items-center space-x-3 mt-1 md:mt-0">
+    {/* Author */}
+    <div className="flex items-center space-x-2">
+      {getAvatarUrl(post.author) && !imageErrors[`author-${post.author.id}`] ? (
+        <img
+          src={getAvatarUrl(post.author)!}
+          alt={getAuthorDisplay(post.author)}
+          className="w-6 h-6 rounded-full border border-gray-600"
+          onError={() =>
+            setImageErrors((prev) => ({ ...prev, [`author-${post.author.id}`]: true }))
+          }
+        />
+      ) : (
+        <div className="w-6 h-6 rounded-full bg-blue-900 flex items-center justify-center border border-gray-600">
+          <span className="text-blue-300 text-xs font-medium">
+            {getInitials(post.author)}
+          </span>
+        </div>
+      )}
+      <span>{getAuthorDisplay(post.author)}</span>
+    </div>
 
-                  {isAdminOrAuthor && (
-                    <div className="flex space-x-3 mt-6 pt-4 border-t border-gray-700">
-                      <Link href={`/posts/edit/${post.id}`}>
-                        <button className="flex items-center space-x-2 bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
-                          <FaEdit className="w-3 h-3" />
-                          <span>Edit</span>
-                        </button>
-                      </Link>
-                      <button
-                        onClick={() => handleDeletePost(post.id)}
-                        className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors duration-200"
-                      >
-                        <FaTrash className="w-3 h-3" />
-                        <span>Delete</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
+    {/* Date */}
+    {post.publishedAt && (
+      <span>{new Date(post.publishedAt).toLocaleDateString()}</span>
+    )}
+  </div>
+</div>
+
+</div>
+
+
+  {/* Like & Comment Buttons */}
+  <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-700">
+    <button
+      onClick={() => handleLike(post.id)}
+      className="flex items-center space-x-2 text-gray-400 hover:text-blue-400 transition-colors duration-200"
+    >
+      <FaRegThumbsUp className="w-4 h-4" />
+      <span>{post.likeCount}</span>
+    </button>
+
+    <button
+      onClick={() => handleToggleComments(post.id)}
+      className="flex items-center space-x-2 text-gray-400 hover:text-green-400 transition-colors duration-200"
+    >
+      <FaRegCommentDots className="w-4 h-4" />
+      <span>{post.commentCount}</span>
+    </button>
+  </div>
+
+  {/* Comments Section */}
+  {activeCommentPostId === post.id && (
+    <div className="mt-6 pt-4 border-t border-gray-700">
+      {/* New Comment Input */}
+      <textarea
+        value={commentText}
+        onChange={(e) => setCommentText(e.target.value)}
+        rows={3}
+        placeholder="Share your thoughts..."
+        className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
+      />
+
+      <button
+        onClick={() => handleSubmitComment(post.id)}
+        disabled={!commentText.trim()}
+        className="mt-3 w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-colors duration-200"
+      >
+        Post Comment
+      </button>
+
+      {/* Comments List */}
+      <div className="mt-6 space-y-4">
+        {loadingComments ? (
+          <div className="text-center text-gray-400 py-4">
+            Loading comments...
+          </div>
+        ) : commentsByPost[post.id]?.length === 0 ? (
+          <div className="text-center text-gray-400 py-4">
+            No comments yet. Be the first to comment!
+          </div>
+        ) : (
+          commentsByPost[post.id].map((comment) => (
+            <CommentItem
+              key={comment.id}
+              comment={comment}
+              getAuthorDisplay={getAuthorDisplay}
+              getAvatarUrl={getAvatarUrl}
+              getInitials={getInitials}
+            />
+          ))
+        )}
+      </div>
+    </div>
+  )}
+
+  {/* Edit & Delete Buttons (Admin or Author) */}
+  {isAdminOrAuthor && (
+    <div className="flex space-x-3 mt-6 pt-4 border-t border-gray-700">
+      <Link href={`/posts/edit/${post.id}`}>
+        <button className="flex items-center space-x-2 bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg transition-colors duration-200">
+          <FaEdit className="w-3 h-3" />
+          <span>Edit</span>
+        </button>
+      </Link>
+      <button
+        onClick={() => handleDeletePost(post.id)}
+        className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+      >
+        <FaTrash className="w-3 h-3" />
+        <span>Delete</span>
+      </button>
+    </div>
+  )}
+</div>
+
               </article>
             ))}
           </div>
         )}
       </div>
+      {showModal && (
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div className="bg-gray-800 rounded-lg shadow-xl w-full max-w-3xl p-6 relative
+                    max-h-[90vh] overflow-y-auto">
+      <button
+        onClick={() => setShowModal(false)}
+        className="absolute top-4 right-4 text-gray-400 hover:text-gray-200"
+      >
+        ✕
+      </button>
+      <h2 className="text-2xl font-bold mb-4 text-white">Create New Post</h2>
+     <PostForm
+  categories={categories}
+  initialData={undefined}
+  onSubmit={async (formData) => {
+    try {
+      const res = await fetch("/api/posts", {
+        method: "POST",
+        body: formData,
+        headers: {
+          Authorization: `Bearer ${session?.user?.id}`,
+        },
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || "Failed to create post");
+      }
+
+      const post = await res.json();
+      alert(`Post created: ${post.title}`);
+
+      // Optionally update your posts state to show the new post immediately
+      setPosts((prev) => [post, ...prev]);
+
+      setShowModal(false); // close modal after success
+    } catch (err) {
+      console.error("Error creating post:", err);
+      alert(err instanceof Error ? err.message : "Something went wrong");
+    }
+  }}
+/>
+
+    </div>
+  </div>
+)}
+
     </div>
   )
 }
