@@ -88,6 +88,7 @@ export const authOptions: AuthOptions = {
       return true
     },
 
+    
     // Attach custom fields to JWT
     async jwt({ token, user }) {
       if (user?.id) {

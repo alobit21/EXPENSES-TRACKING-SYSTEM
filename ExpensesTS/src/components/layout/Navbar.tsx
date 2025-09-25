@@ -150,8 +150,6 @@ const ResponsiveNavbar: React.FC<ResponsiveNavbarProps> = ({
                   {item.name}
                 </NavLink>
               ))}
-
-             
             </div>
           </motion.div>
         )}
@@ -161,3 +159,4 @@ const ResponsiveNavbar: React.FC<ResponsiveNavbarProps> = ({
 };
 
 export default ResponsiveNavbar;
+
