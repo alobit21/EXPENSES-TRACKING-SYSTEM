@@ -37,22 +37,26 @@ export interface Post {
 }
 
 
+// In your types/posts.ts file
+// In your types/posts.ts file
+// @/types/posts.ts
+// In your types/posts.ts file
 export interface PostComponentProps {
   post: Post;
-  session: Session | null;
-  imageErrors: Record<number | string, boolean>;
-  setImageErrors: React.Dispatch<React.SetStateAction<Record<number | string, boolean>>>;
-  handleLike: (postId: number) => void;
-  handleToggleComments: (postId: number) => void;
-  activeCommentPostId: number | null;
-  commentText: string;
-  setCommentText: React.Dispatch<React.SetStateAction<string>>;
-  handleSubmitComment: (postId: number) => void;
-  loadingComments: boolean;
-  commentsByPost: Record<number, Comment[]>;
-  isAdminOrAuthor: boolean;
-  handleDeletePost: (postId: number) => void;
-  getAuthorDisplay: (author: Author) => string;
-  getAvatarUrl: (author: Author) => string | null;
-  getInitials: (author: Author) => string;
+  imageErrors?: { [key: string]: boolean };
+  setImageErrors?: React.Dispatch<React.SetStateAction<{ [key: string]: boolean }>>;
+  onLike?: (postId: number) => void; // Changed from handleLike
+  onToggleComments?: (postId: number) => void; // Changed from handleToggleComments
+  activeCommentPostId?: number | null;
+  commentText?: string;
+  setCommentText?: (text: string) => void;
+  handleSubmitComment?: (e: React.FormEvent) => void;
+  loadingComments?: boolean;
+  commentsByPost?: { [key: number]: Comment[] };
+  isAdminOrAuthor?: boolean;
+  handleDeletePost?: (postId: number) => void;
+  getAuthorDisplay?: (author: any) => string;
+  getAvatarUrl?: (author: any) => string | null;
+  getInitials?: (author: any) => string;
+  session?: any;
 }

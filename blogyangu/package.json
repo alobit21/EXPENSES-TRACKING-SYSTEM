@@ -20,6 +20,7 @@
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "formidable": "^3.5.4",
     "framer-motion": "^12.23.21",
     "lucide-react": "^0.544.0",
@@ -29,6 +30,10 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-icons": "^5.5.0",
+    "react-markdown": "^10.1.0",
+    "react-mde": "^11.5.0",
+    "remark-gfm": "^4.0.1",
+    "showdown": "^2.1.0",
     "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {

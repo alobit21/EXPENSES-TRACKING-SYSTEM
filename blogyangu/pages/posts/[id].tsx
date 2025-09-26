@@ -1,577 +1,602 @@
-import { useEffect, useState } from "react"
-import { useRouter } from "next/router"
-import Link from "next/link"
-import { useSession } from "next-auth/react"
+// pages/posts/[id].tsx
+import { GetServerSideProps } from 'next'
+import { useRouter } from 'next/router'
+import { useState, useEffect } from 'react'
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '../api/auth/[...nextauth]'
+import { prisma } from '../../lib/prisma'
+import { Post, User, Comment as PrismaComment, Like } from '@prisma/client'
+import { Session } from 'next-auth'
+import Link from 'next/link'
+import Image from 'next/image'
+import { FaRegThumbsUp, FaThumbsUp, FaRegComment, FaEdit, FaTrash, FaArrowLeft, FaReply } from 'react-icons/fa'
+import { useSession } from 'next-auth/react'
+import ReactMarkdown from 'react-markdown'
+import * as Showdown from "showdown"
 
+// Types matching your backend response
 interface Author {
   id: number
-  displayName: string | null
   username: string
-  avatarUrl?: string | null
-}
-
-interface Category {
-  id: number
-  name: string
-  slug: string
-}
-
-interface Tag {
-  id: number
-  name: string
-  slug: string
+  displayName: string | null
+  avatarUrl: string | null
 }
 
 interface Comment {
   id: number
   content: string
+  createdAt: string
   author: Author
   parentId: number | null
   replies: Comment[]
-  createdAt: string
+  _count: {
+    likes: number
+  }
 }
 
-interface Post {
+interface PostWithExtras {
   id: number
   title: string
-  content: string
-  excerpt?: string
   slug: string
-  coverImage?: string
-  status: string
-  publishedAt: string | null
+  excerpt: string | null
+  content: string
+  coverImage: string | null
+  publishedAt: Date | null
   author: Author
-  category?: Category
+  category: { id: number; name: string } | null
   likeCount: number
   commentCount: number
-  bookmarkCount: number
-  userLiked: boolean
-  userBookmarked: boolean
-  tags: Array<{
-    tag: Tag
-  }>
-  allowComments: boolean
-  viewCount: number
-  metaDescription?: string
+  likes: Like[]
 }
 
-export default function PostDetailPage() {
+interface Props {
+  post: PostWithExtras
+  initialComments: Comment[]
+}
+
+export default function PostDetail({ post, initialComments }: Props) {
   const router = useRouter()
-  const { id } = router.query
-  const { data: session } = useSession()
-  const [post, setPost] = useState<Post | null>(null)
-  const [comments, setComments] = useState<Comment[]>([])
-  const [newComment, setNewComment] = useState("")
-  const [replyingTo, setReplyingTo] = useState<number | null>(null)
-  const [replyContent, setReplyContent] = useState("")
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const { data: session, status } = useSession()
   const [imageError, setImageError] = useState(false)
+  const [commentText, setCommentText] = useState('')
+  const [replyingTo, setReplyingTo] = useState<number | null>(null)
+  const [replyText, setReplyText] = useState('')
+  const [loadingComments, setLoadingComments] = useState(false)
+  const [comments, setComments] = useState<Comment[]>(initialComments || [])
+  const [likes, setLikes] = useState<Like[]>(post.likes || [])
+  const [isLiking, setIsLiking] = useState(false)
+const converter = new Showdown.Converter()
 
-  useEffect(() => {
-    if (!id) return
+  // Check if current user has liked the post
+  const userLike = session ? likes.find(like => like.userId === parseInt(session.user.id)) : null
+  const likeCount = likes.length
 
-    async function fetchPost() {
-      try {
-        setLoading(true)
-        const res = await fetch(`/api/posts/${id}`)
-        if (res.ok) {
-          const data = await res.json()
-          setPost(data)
-        } else if (res.status === 404) {
-          setError("Post not found")
-        } else {
-          setError("Failed to load post")
-        }
-      } catch (err) {
-        setError("An error occurred")
-        console.error("Error fetching post:", err)
-      } finally {
-        setLoading(false)
-      }
-    }
+  // Check if user is admin or author
+  const isAdminOrAuthor = session?.user?.id && 
+    (session.user.role === 'ADMIN' || parseInt(session.user.id) === post.author.id)
+  
+  
+  
+  
+  
 
-    fetchPost()
-  }, [id])
-
-  useEffect(() => {
-    if (!id) return
-
-    async function fetchComments() {
-      try {
-        const res = await fetch(`/api/posts/${id}/comments`)
-        if (res.ok) {
-          const data = await res.json()
-          setComments(data)
-        }
-      } catch (err) {
-        console.error("Error fetching comments:", err)
-      }
-    }
-
-    fetchComments()
-  }, [id])
-
-  const getAuthorDisplay = (author: Author) => {
-    return author?.displayName || author?.username || "Unknown Author"
+  // Format date
+  const formatDate = (date: Date | string | null) => {
+    if (!date) return 'Not published'
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
   }
 
-  const getAvatarUrl = (author: Author) => {
-    return author?.avatarUrl || null
-  }
-
-  const getInitials = (author: Author) => {
-    const name = getAuthorDisplay(author)
-    return name.split(' ').map(word => word.charAt(0).toUpperCase()).join('').slice(0, 2)
-  }
-
+  // Handle like/unlike using your existing API
   const handleLike = async () => {
-    if (!session || !post) {
-      alert("Please login to like posts")
+    if (!session) {
+      router.push('/auth/signin')
       return
     }
 
+    setIsLiking(true)
     try {
-      const res = await fetch(`/api/posts/${post.id}/like`, {
-        method: "POST",
+      const response = await fetch('/api/likes', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.user.id}`
         },
+        body: JSON.stringify({ postId: post.id })
       })
 
-      if (res.ok) {
-        const result = await res.json()
-        setPost({
-          ...post,
-          userLiked: result.liked,
-          likeCount: result.liked ? post.likeCount + 1 : Math.max(0, post.likeCount - 1)
-        })
+      if (response.ok) {
+        const result = await response.json()
+        
+        if (result.liked) {
+          // Add like to local state
+          setLikes(prev => [...prev, {
+            id: Date.now(), // Temporary ID
+            userId: parseInt(session.user.id),
+            postId: post.id,
+            commentId: null,
+            createdAt: new Date()
+          }])
+        } else {
+          // Remove like from local state
+          setLikes(prev => prev.filter(like => 
+            !(like.userId === parseInt(session.user.id) && like.postId === post.id)
+          ))
+        }
       }
     } catch (error) {
-      console.error("Error toggling like:", error)
+      console.error('Error toggling like:', error)
+    } finally {
+      setIsLiking(false)
     }
   }
 
+  // Handle comment submission
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!session || !post || !newComment.trim()) return
+    if (!session || !commentText.trim()) return
 
+    setLoadingComments(true)
     try {
-      const res = await fetch(`/api/posts/${post.id}/comments`, {
-        method: "POST",
+      const response = await fetch(`/api/posts/${post.id}/comments`, {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.user.id}`
         },
-        body: JSON.stringify({
-          content: newComment.trim(),
-          parentId: replyingTo
-        })
+        body: JSON.stringify({ content: commentText })
       })
 
-      if (res.ok) {
-        const comment = await res.json()
-        if (replyingTo) {
-          setComments(comments.map(c => 
-            c.id === replyingTo 
-              ? { ...c, replies: [...c.replies, comment] }
-              : c
-          ))
-          setReplyingTo(null)
-          setReplyContent("")
-        } else {
-          setComments([comment, ...comments])
-        }
-        setNewComment("")
-        setPost({ ...post, commentCount: post.commentCount + 1 })
+      if (response.ok) {
+        const newComment = await response.json()
+        setComments(prev => [newComment, ...prev])
+        setCommentText('')
       }
     } catch (error) {
-      console.error("Error submitting comment:", error)
+      console.error('Error submitting comment:', error)
+    } finally {
+      setLoadingComments(false)
     }
   }
 
+  // Handle reply submission
   const handleSubmitReply = async (parentId: number) => {
-    if (!session || !post || !replyContent.trim()) return
+    if (!session || !replyText.trim()) return
 
+    setLoadingComments(true)
     try {
-      const res = await fetch(`/api/posts/${post.id}/comments`, {
-        method: "POST",
+      const response = await fetch(`/api/posts/${post.id}/comments`, {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.user.id}`
         },
-        body: JSON.stringify({
-          content: replyContent.trim(),
-          parentId
+        body: JSON.stringify({ 
+          content: replyText,
+          parentId: parentId
         })
       })
 
-      if (res.ok) {
-        const comment = await res.json()
-        setComments(comments.map(c => 
-          c.id === parentId 
-            ? { ...c, replies: [...c.replies, comment] }
-            : c
+      if (response.ok) {
+        const newReply = await response.json()
+        // Update the parent comment with the new reply
+        setComments(prev => prev.map(comment => 
+          comment.id === parentId 
+? { ...comment, replies: [...(comment.replies || []), newReply] }            : comment
         ))
+        setReplyText('')
         setReplyingTo(null)
-        setReplyContent("")
-        setPost({ ...post, commentCount: post.commentCount + 1 })
       }
     } catch (error) {
-      console.error("Error submitting reply:", error)
+      console.error('Error submitting reply:', error)
+    } finally {
+      setLoadingComments(false)
     }
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-blue-200 dark:border-blue-800 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-300 text-lg">Loading post...</p>
-        </div>
-      </div>
-    )
+  // Handle post deletion
+  const handleDelete = async () => {
+    if (!confirm('Are you sure you want to delete this post?')) return
+
+    try {
+      const response = await fetch(`/api/posts/${post.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session?.user.id}`
+        }
+      })
+
+      if (response.ok) {
+        router.push('/')
+      }
+    } catch (error) {
+      console.error('Error deleting post:', error)
+    }
   }
 
-  if (error || !post) {
+  if (router.isFallback) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4">
-        <div className="text-center max-w-md">
-          <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Post Not Found</h2>
-          <p className="text-gray-600 dark:text-gray-300 mb-6">{error || "The post you're looking for doesn't exist."}</p>
-          <Link 
-            href="/posts" 
-            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors"
-          >
-            ← Back to All Posts
-          </Link>
-        </div>
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <nav className="flex items-center gap-4 mb-8 pb-6 border-b border-gray-200 dark:border-gray-700">
-          <Link 
-            href="/posts" 
-            className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors"
-          >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Posts
-          </Link>
+    <div className="min-h-screen bg-gray-900 text-white">
+      {/* Back Button */}
+      <div className="container mx-auto px-4 py-6">
+        <Link 
+          href="/"
+          className="inline-flex items-center space-x-2 text-gray-400 hover:text-white transition-colors mb-6"
+        >
+          <FaArrowLeft className="w-4 h-4" />
+          <span>Back to Posts</span>
+        </Link>
+      </div>
+
+      {/* Main Content */}
+      <article className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* Header */}
+        <header className="mb-8">
           {post.category && (
-            <span className="text-gray-500 dark:text-gray-400 text-sm">
-              in <Link href={`/category/${post.category.slug}`} className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">{post.category.name}</Link>
+            <span className="inline-block bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium mb-4">
+              {post.category.name}
             </span>
           )}
-        </nav>
+          
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
+            {post.title}
+          </h1>
 
-        {/* Article */}
-        <article className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden mb-8">
-          {/* Header */}
-          <div className="p-8">
-            <header>
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 leading-tight mb-4">
-                {post.title}
-              </h1>
+          {post.excerpt && (
+            <p className="text-xl text-gray-300 mb-6">{post.excerpt}</p>
+          )}
+
+          {/* Author and Date */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
+                {post.author.avatarUrl && !imageError ? (
+                  <Image
+                    src={post.author.avatarUrl}
+                    alt={post.author.displayName || post.author.username}
+                    width={48}
+                    height={48}
+                    className="rounded-full"
+                    onError={() => setImageError(true)}
+                  />
+                ) : (
+                  <div className="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center">
+                    <span className="text-lg font-semibold">
+                      {(post.author.displayName || post.author.username).charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                )}
+                <div>
+                  <div className="font-semibold">
+                    {post.author.displayName || post.author.username}
+                  </div>
+                  <div className="text-gray-400 text-sm">
+                    {formatDate(post.publishedAt)}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Like and Comment Count */}
+            <div className="flex items-center space-x-6">
+              <button
+                onClick={handleLike}
+                disabled={isLiking || !session}
+                className={`flex items-center space-x-2 ${
+                  userLike ? 'text-red-500' : 'text-gray-400 hover:text-red-500'
+                } transition-colors ${!session ? 'opacity-50 cursor-not-allowed' : ''}`}
+                title={!session ? 'Please sign in to like' : ''}
+              >
+                {userLike ? <FaThumbsUp className="w-5 h-5" /> : <FaRegThumbsUp className="w-5 h-5" />}
+                <span>{likeCount}</span>
+              </button>
               
-              {post.metaDescription && (
-                <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
-                  {post.metaDescription}
-                </p>
-              )}
-
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 py-6 border-t border-b border-gray-100 dark:border-gray-700">
-                <div className="flex items-center gap-4">
-                  {getAvatarUrl(post.author) ? (
-                    <img 
-                      src={getAvatarUrl(post.author)!} 
-                      alt={getAuthorDisplay(post.author)}
-                      className="w-12 h-12 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600"
-                      onError={() => setImageError(true)}
-                    />
-                  ) : (
-                    <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center border-2 border-gray-200 dark:border-gray-600">
-                      <span className="text-blue-600 dark:text-blue-300 font-medium text-lg">
-                        {getInitials(post.author)}
-                      </span>
-                    </div>
-                  )}
-                  <div>
-                    <div className="font-semibold text-gray-900 dark:text-gray-100">
-                      {getAuthorDisplay(post.author)}
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                      {post.publishedAt && (
-                        <time dateTime={post.publishedAt}>
-                          {new Date(post.publishedAt).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}
-                        </time>
-                      )}
-                      {post.publishedAt && <span>•</span>}
-                      <span>{post.viewCount} views</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-6">
-                  <button
-                    onClick={handleLike}
-                    className={`flex items-center gap-2 transition-colors ${
-                      post.userLiked 
-                        ? 'text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300' 
-                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                    }`}
-                  >
-                    <svg className="w-5 h-5" fill={post.userLiked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                    <span className="font-medium">{post.likeCount}</span>
-                  </button>
-
-                  <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
-                    <span className="font-medium">{post.commentCount}</span>
-                  </div>
-                </div>
+              <div className="flex items-center space-x-2 text-gray-400">
+                <FaRegComment className="w-5 h-5" />
+                <span>{comments.length}</span>
               </div>
-            </header>
-
-            {/* Cover Image */}
-            {post.coverImage && !imageError ? (
-              <div className="my-8 rounded-lg overflow-hidden shadow-lg">
-                <img 
-                  src={post.coverImage} 
-                  alt={post.title}
-                  className="w-full h-96 object-cover"
-                  onError={() => setImageError(true)}
-                />
-              </div>
-            ) : post.coverImage && imageError ? (
-              <div className="my-8 rounded-lg overflow-hidden shadow-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center h-96">
-                <p className="text-gray-500 dark:text-gray-400 text-lg">Unable to load cover image</p>
-              </div>
-            ) : null}
-
-            {/* Content */}
-            <div 
-              className="prose prose-lg max-w-none text-gray-700 dark:text-gray-200 leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: post.content }}
-            />
-
-            {/* Tags */}
-            {post.tags && post.tags.length > 0 && (
-              <footer className="mt-8 pt-8 border-t border-gray-100 dark:border-gray-700">
-                <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">Tags</h3>
-                <div className="flex flex-wrap gap-2">
-                  {post.tags.map(({ tag }) => (
-                    <Link 
-                      key={tag.id}
-                      href={`/tag/${tag.slug}`}
-                      className="inline-flex items-center px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-full text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                    >
-                      #{tag.name}
-                    </Link>
-                  ))}
-                </div>
-              </footer>
-            )}
+            </div>
           </div>
-        </article>
+        </header>
+
+        {/* Cover Image */}
+        {post.coverImage && !imageError && (
+          <div className="mb-8">
+            <Image
+              src={post.coverImage}
+              alt={post.title}
+              width={800}
+              height={400}
+              className="w-full h-64 md:h-96 object-cover rounded-lg"
+              onError={() => setImageError(true)}
+            />
+          </div>
+        )}
+
+      {/* Content */}
+
+<div
+  className="prose prose-lg prose-invert max-w-none mb-12 [&_img]:max-w-xs [&_img]:mx-auto [&_img]:rounded-lg"
+  dangerouslySetInnerHTML={{ __html: converter.makeHtml(post.content) }}
+/>
+
+
+
+        {/* Actions (Edit/Delete for authors/admins) */}
+        {isAdminOrAuthor && (
+          <div className="flex space-x-4 mb-8 pt-6 border-t border-gray-700">
+            <Link href={`/posts/edit/${post.id}`}>
+              <button className="flex items-center space-x-2 bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg transition-colors">
+                <FaEdit className="w-4 h-4" />
+                <span>Edit Post</span>
+              </button>
+            </Link>
+            <button 
+              onClick={handleDelete}
+              className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              <FaTrash className="w-4 h-4" />
+              <span>Delete Post</span>
+            </button>
+          </div>
+        )}
 
         {/* Comments Section */}
-        <section className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-8">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-              Discussion ({post.commentCount})
-            </h2>
-            {!post.allowComments && (
-              <div className="px-4 py-2 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg text-sm font-medium">
-                Comments are disabled
-              </div>
-            )}
-          </div>
+        <section className="border-t border-gray-700 pt-8">
+          <h2 className="text-2xl font-bold mb-6">Comments ({comments.length})</h2>
 
-          {/* Comment Form */}
-          {post.allowComments && (
-            <div className="mb-8">
-              {session ? (
-                <form onSubmit={handleSubmitComment} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <label className="text-lg font-medium text-gray-900 dark:text-gray-100">Add a comment</label>
-                    {replyingTo && (
-                      <button
-                        type="button"
-                        onClick={() => setReplyingTo(null)}
-                        className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
-                      >
-                        Cancel Reply
-                      </button>
-                    )}
-                  </div>
-                  <textarea
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Share your thoughts..."
-                    rows={4}
-                    className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent resize-none transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-                    required
+          {/* Comment Form - Only show if user is logged in */}
+          {session ? (
+            <form onSubmit={handleSubmitComment} className="mb-8">
+              <div className="flex items-center space-x-3 mb-4">
+                {session.user.image ? (
+                  <Image
+                    src={session.user.image}
+                    alt={session.user.name || 'User'}
+                    width={40}
+                    height={40}
+                    className="rounded-full"
                   />
-                  <button
-                    type="submit"
-                    disabled={!newComment.trim()}
-                    className="mt-4 px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors"
-                  >
-                    Post Comment
-                  </button>
-                </form>
-              ) : (
-                <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-6 text-center">
-                  <p className="text-blue-800 dark:text-blue-300">
-                    Please <Link href="/auth/signin" className="font-semibold hover:underline">login</Link> to join the discussion
-                  </p>
+                ) : (
+                  <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                    <span className="text-white font-semibold">
+                      {(session.user.name || session.user.email || 'U').charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                )}
+                <div>
+                  <div className="font-semibold">{session.user.name || session.user.email}</div>
+                  <div className="text-gray-400 text-sm">Add a comment...</div>
                 </div>
-              )}
+              </div>
+              <textarea
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                placeholder="What are your thoughts?"
+                rows={4}
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg p-4 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+                disabled={loadingComments}
+              />
+              <div className="flex justify-end mt-2">
+                <button
+                  type="submit"
+                  disabled={!commentText.trim() || loadingComments}
+                  className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors"
+                >
+                  {loadingComments ? 'Posting...' : 'Post Comment'}
+                </button>
+              </div>
+            </form>
+          ) : (
+            <div className="text-center py-8 border border-gray-700 rounded-lg mb-8">
+              <p className="text-gray-400 mb-4">Please sign in to leave a comment</p>
+              <Link href="/auth/signin">
+                <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors">
+                  Sign In
+                </button>
+              </Link>
             </div>
           )}
 
           {/* Comments List */}
           <div className="space-y-6">
             {comments.length === 0 ? (
-              <div className="text-center py-12">
-                <svg className="w-16 h-16 text-gray-300 dark:text-gray-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-                <p className="text-gray-500 dark:text-gray-400 text-lg">No comments yet. Be the first to share your thoughts!</p>
-              </div>
+              <p className="text-gray-400 text-center py-8">No comments yet. Be the first to comment!</p>
             ) : (
               comments.map((comment) => (
-                <CommentItem
-                  key={comment.id}
-                  comment={comment}
+                <CommentItem 
+                  key={comment.id} 
+                  comment={comment} 
                   session={session}
-                  replyingTo={replyingTo}
-                  replyContent={replyContent}
-                  onSetReplyingTo={setReplyingTo}
-                  onSetReplyContent={setReplyContent}
+                  postId={post.id}
+                  onReply={() => setReplyingTo(comment.id)}
+                  isReplying={replyingTo === comment.id}
+                  replyText={replyText}
+                  setReplyText={setReplyText}
                   onSubmitReply={handleSubmitReply}
-                  getAuthorDisplay={getAuthorDisplay}
-                  getAvatarUrl={getAvatarUrl}
-                  getInitials={getInitials}
+                  onCancelReply={() => {
+                    setReplyingTo(null)
+                    setReplyText('')
+                  }}
                 />
               ))
             )}
           </div>
         </section>
-      </div>
+      </article>
     </div>
   )
 }
 
-interface CommentItemProps {
-  comment: Comment
-  session: any
-  replyingTo: number | null
-  replyContent: string
-  onSetReplyingTo: (id: number | null) => void
-  onSetReplyContent: (content: string) => void
-  onSubmitReply: (parentId: number) => void
-  getAuthorDisplay: (author: Author) => string
-  getAvatarUrl: (author: Author) => string | null
-  getInitials: (author: Author) => string
-}
-
+// Comment component with reply functionality
 function CommentItem({ 
   comment, 
   session, 
-  replyingTo, 
-  replyContent, 
-  onSetReplyingTo, 
-  onSetReplyContent, 
+  postId, 
+  onReply,
+  isReplying,
+  replyText,
+  setReplyText,
   onSubmitReply,
-  getAuthorDisplay,
-  getAvatarUrl,
-  getInitials
-}: CommentItemProps) {
-  const [imageError, setImageError] = useState(false)
+  onCancelReply
+}: { 
+  comment: Comment
+  session: Session | null
+  postId: number
+  onReply: () => void
+  isReplying: boolean
+  replyText: string
+  setReplyText: (text: string) => void
+  onSubmitReply: (parentId: number) => void
+  onCancelReply: () => void
+}) {
+  const [commentLikes, setCommentLikes] = useState<Like[]>([])
+  const [isLiking, setIsLiking] = useState(false)
+
+  const userLike = session ? commentLikes.find(like => like.userId === parseInt(session.user.id)) : null
+
+  const handleCommentLike = async () => {
+    if (!session) return
+
+    setIsLiking(true)
+    try {
+      const response = await fetch('/api/likes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.user.id}`
+        },
+        body: JSON.stringify({ commentId: comment.id, postId })
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        // Update local likes state
+        if (result.liked) {
+          setCommentLikes(prev => [...prev, {
+            id: Date.now(),
+            userId: parseInt(session.user.id),
+            commentId: comment.id,
+            postId: null,
+            createdAt: new Date()
+          }])
+        } else {
+          setCommentLikes(prev => prev.filter(like => 
+            !(like.userId === parseInt(session.user.id) && like.commentId === comment.id)
+          ))
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling comment like:', error)
+    } finally {
+      setIsLiking(false)
+    }
+  }
 
   return (
-    <div className="border-b border-gray-100 dark:border-gray-700 last:border-b-0 pb-6 last:pb-0">
-      {/* Main Comment */}
-      <div className="flex gap-4">
-        {getAvatarUrl(comment.author) && !imageError ? (
-          <img 
-            src={getAvatarUrl(comment.author)!} 
-            alt={getAuthorDisplay(comment.author)}
-            className="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-gray-200 dark:border-gray-600"
-            onError={() => setImageError(true)}
-          />
-        ) : (
-          <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center border border-gray-200 dark:border-gray-600 flex-shrink-0">
-            <span className="text-blue-600 dark:text-blue-300 font-medium">
-              {getInitials(comment.author)}
-            </span>
+    <div className="bg-gray-800 rounded-lg p-6">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center space-x-3">
+          {comment.author.avatarUrl ? (
+            <Image
+              src={comment.author.avatarUrl}
+              alt={comment.author.displayName || comment.author.username}
+              width={40}
+              height={40}
+              className="rounded-full"
+            />
+          ) : (
+            <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center">
+              <span className="text-sm font-semibold">
+                {(comment.author.displayName || comment.author.username).charAt(0).toUpperCase()}
+              </span>
+            </div>
+          )}
+          <div>
+            <div className="font-semibold">
+              {comment.author.displayName || comment.author.username}
+            </div>
+            <div className="text-gray-400 text-sm">
+              {formatDate(comment.createdAt)}
+            </div>
           </div>
-        )}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3 mb-2">
-            <span className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
-              {getAuthorDisplay(comment.author)}
-            </span>
-            <time className="text-xs text-gray-500 dark:text-gray-400">
-              {new Date(comment.createdAt).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-              })}
-            </time>
-          </div>
-          <p className="text-gray-700 dark:text-gray-200 leading-relaxed whitespace-pre-wrap">{comment.content}</p>
+        </div>
+        
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={handleCommentLike}
+            disabled={isLiking || !session}
+            className={`flex items-center space-x-1 ${
+              userLike ? 'text-red-500' : 'text-gray-400 hover:text-red-500'
+            } transition-colors ${!session ? 'opacity-50 cursor-not-allowed' : ''}`}
+            title={!session ? 'Please sign in to like' : ''}
+          >
+            {userLike ? <FaThumbsUp className="w-4 h-4" /> : <FaRegThumbsUp className="w-4 h-4" />}
+<span className="text-sm">{comment._count?.likes || 0}</span>          </button>
+          
           {session && (
             <button
-              onClick={() => onSetReplyingTo(replyingTo === comment.id ? null : comment.id)}
-              className="mt-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors"
+              onClick={onReply}
+              className="flex items-center space-x-1 text-gray-400 hover:text-blue-400 transition-colors"
             >
-              Reply
+              <FaReply className="w-3 h-3" />
+              <span className="text-sm">Reply</span>
             </button>
           )}
         </div>
       </div>
+      
+      <p className="text-gray-300 mb-4">{comment.content}</p>
 
       {/* Reply Form */}
-      {replyingTo === comment.id && (
-        <div className="ml-14 mt-4">
+      {isReplying && session && (
+        <div className="ml-6 mt-4">
+          <div className="flex items-center space-x-3 mb-2">
+            {session.user.image ? (
+              <Image
+                src={session.user.image}
+                alt={session.user.name || 'User'}
+                width={32}
+                height={32}
+                className="rounded-full"
+              />
+            ) : (
+              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                <span className="text-white text-xs font-semibold">
+                  {(session.user.name || session.user.email || 'U').charAt(0).toUpperCase()}
+                </span>
+              </div>
+            )}
+            <div className="text-sm text-gray-400">Replying as {session.user.name || session.user.email}</div>
+          </div>
           <textarea
-            value={replyContent}
-            onChange={(e) => onSetReplyContent(e.target.value)}
-            placeholder="Write your reply..."
+            value={replyText}
+            onChange={(e) => setReplyText(e.target.value)}
+            placeholder="Write a reply..."
             rows={3}
-            className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent resize-none text-sm transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            className="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
           />
-          <div className="flex gap-3 mt-3">
+          <div className="flex space-x-2 mt-2">
             <button
               onClick={() => onSubmitReply(comment.id)}
-              disabled={!replyContent.trim()}
-              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors"
+              disabled={!replyText.trim()}
+              className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white px-4 py-2 rounded text-sm transition-colors"
             >
               Post Reply
             </button>
             <button
-              onClick={() => onSetReplyingTo(null)}
-              className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+              onClick={onCancelReply}
+              className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded text-sm transition-colors"
             >
               Cancel
             </button>
@@ -580,39 +605,155 @@ function CommentItem({
       )}
 
       {/* Replies */}
-      {comment.replies && comment.replies.length > 0 && (
-        <div className="ml-14 mt-4 space-y-4 border-l-2 border-gray-100 dark:border-gray-700 pl-4">
-          {comment.replies.map((reply) => (
-            <div key={reply.id} className="flex gap-3">
-              {getAvatarUrl(reply.author) && !imageError ? (
-                <img 
-                  src={getAvatarUrl(reply.author)!} 
-                  alt={getAuthorDisplay(reply.author)}
-                  className="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-gray-200 dark:border-gray-600"
-                  onError={() => setImageError(true)}
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center border border-gray-200 dark:border-gray-600 flex-shrink-0">
-                  <span className="text-blue-600 dark:text-blue-300 font-medium text-sm">
-                    {getInitials(reply.author)}
-                  </span>
+      {comment.replies?.length > 0 && (
+        <div className="ml-6 mt-4 space-y-4">
+          {(comment.replies || []).map((reply) => (
+            <div key={reply.id} className="bg-gray-700 rounded-lg p-4">
+              <div className="flex items-center space-x-3 mb-2">
+                {reply.author.avatarUrl ? (
+                  <Image
+                    src={reply.author.avatarUrl}
+                    alt={reply.author.displayName || reply.author.username}
+                    width={32}
+                    height={32}
+                    className="rounded-full"
+                  />
+                ) : (
+                  <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
+                    <span className="text-xs font-semibold">
+                      {(reply.author.displayName || reply.author.username).charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                )}
+                <div>
+                  <div className="font-semibold text-sm">
+                    {reply.author.displayName || reply.author.username}
+                  </div>
+                  <div className="text-gray-400 text-xs">
+                    {formatDate(reply.createdAt)}
+                  </div>
                 </div>
-              )}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="font-semibold text-gray-900 dark:text-gray-100 text-sm">
-                    {getAuthorDisplay(reply.author)}
-                  </span>
-                  <time className="text-xs text-gray-500 dark:text-gray-400">
-                    {new Date(reply.createdAt).toLocaleDateString()}
-                  </time>
-                </div>
-                <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">{reply.content}</p>
               </div>
+              <p className="text-gray-300 text-sm">{reply.content}</p>
             </div>
           ))}
         </div>
       )}
     </div>
   )
+}
+
+// Re-add formatDate function for CommentItem
+function formatDate(date: Date | string | null) {
+  if (!date) return 'Unknown date'
+  return new Date(date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const session = await getServerSession(context.req, context.res, authOptions)
+  const { id } = context.params!
+
+  try {
+    const postId = parseInt(id as string)
+    
+    if (isNaN(postId)) {
+      return { notFound: true }
+    }
+
+    // Fetch post
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      include: {
+        author: true,
+        likes: true,
+        category: true,
+        _count: {
+          select: {
+            comments: {
+              where: { status: 'APPROVED' }
+            }
+          }
+        }
+      },
+    })
+
+    if (!post) {
+      return { notFound: true }
+    }
+
+    // Fetch comments separately using your API logic
+    const comments = await prisma.comment.findMany({
+      where: {
+        postId: postId,
+        status: 'APPROVED',
+        parentId: null,
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            displayName: true,
+            avatarUrl: true,
+          },
+        },
+        replies: {
+          include: {
+            author: {
+              select: {
+                id: true,
+                username: true,
+                displayName: true,
+                avatarUrl: true,
+              },
+            },
+            _count: {
+              select: { likes: true },
+            },
+          },
+          orderBy: { createdAt: 'asc' },
+        },
+        _count: {
+          select: { likes: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    })
+
+    const postWithExtras: PostWithExtras = {
+      id: post.id,
+      title: post.title,
+      slug: post.slug,
+      excerpt: post.excerpt,
+      content: post.content,
+      coverImage: post.coverImage,
+      publishedAt: post.publishedAt,
+      author: post.author ? {
+        id: post.author.id,
+        username: post.author.username,
+        displayName: post.author.displayName,
+        avatarUrl: post.author.avatarUrl,
+      } : { id: 0, username: "unknown", displayName: "Unknown", avatarUrl: null },
+      category: post.category ? { id: post.category.id, name: post.category.name } : null,
+      likeCount: post.likes.length,
+      commentCount: post._count.comments,
+      likes: post.likes,
+    }
+
+    return {
+      props: {
+        post: JSON.parse(JSON.stringify(postWithExtras)),
+        initialComments: JSON.parse(JSON.stringify(comments)),
+      },
+    }
+  } catch (error) {
+    console.error('Error fetching post:', error)
+    return { notFound: true }
+  }
 }

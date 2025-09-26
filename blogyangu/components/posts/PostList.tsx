@@ -33,9 +33,9 @@ export default function PostsList({
   commentsByPost,
   isAdminOrAuthor,
   session,
-  onToggleComments,
-  onSubmitComment,
-  onLike,
+  onToggleComments, // This is the prop name
+  onSubmitComment, // This is the prop name
+  onLike, // This is the prop name
   onDeletePost
 }: PostsListProps) {
   if (posts.length === 0) {
@@ -61,10 +61,10 @@ export default function PostsList({
     commentsByPost,
     isAdminOrAuthor,
     session,
-    onToggleComments,
-    onSubmitComment,
-    onLike,
-    onDeletePost,
+    onToggleComments, // Use the correct prop name
+    handleSubmitComment: onSubmitComment, // Map onSubmitComment to handleSubmitComment
+    onLike, // Use the correct prop name
+    handleDeletePost: onDeletePost, // Map onDeletePost to handleDeletePost
     getAuthorDisplay,
     getAvatarUrl,
     getInitials
@@ -95,7 +95,11 @@ export default function PostsList({
           <h2 className="text-2xl font-bold mb-6 text-white border-b border-gray-700 pb-2">More Posts</h2>
           <div className="space-y-8">
             {columnPosts.map((post) => (
-              <ColumnPost key={post.id} post={post} {...commonProps} />
+              <ColumnPost
+                key={post.id}
+                post={post}
+                {...commonProps}
+              />
             ))}
           </div>
         </section>

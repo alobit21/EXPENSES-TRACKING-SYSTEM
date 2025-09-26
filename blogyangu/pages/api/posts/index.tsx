@@ -96,12 +96,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   excerpt: post.excerpt,
   slug: post.slug,
   coverImage: post.coverImage,
-  author: {
-    id: post.author.id,
-    username: post.author.username,
-    displayName: post.author.displayName,
-    avatarUrl: post.author.avatarUrl,
-       },
+ author: post.author
+    ? {
+        id: post.author.id,
+        username: post.author.username,
+        displayName: post.author.displayName,
+        avatarUrl: post.author.avatarUrl,
+      }
+    : { id: 0, username: "unknown", displayName: "Unknown", avatarUrl: null },
   category: post.category ? { id: post.category.id, name: post.category.name } : null, // ✅ map category
   publishedAt: post.publishedAt,
   likeCount: post.likes.length,

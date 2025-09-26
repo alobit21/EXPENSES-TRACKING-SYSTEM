@@ -1,6 +1,20 @@
 
 
 import { Dispatch, SetStateAction } from "react"
+
+
+
+// Extend Prisma Post with UI-friendly fields
+export type PostWithExtras = Post & {
+  likeCount: number
+  commentCount: number
+}
+
+// Type for commentsByPost state
+export type CommentsByPost = Record<number, Comment[]>
+
+
+
 export interface Comment {
   id: number
   content: string

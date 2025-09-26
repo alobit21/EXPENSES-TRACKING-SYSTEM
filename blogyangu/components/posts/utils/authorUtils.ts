@@ -1,25 +1,28 @@
 import { Author } from "../types"
 
-// Helper function to ensure compatibility
-const safeGetDisplayName = (author: Author): string | null => {
-  // Handle both string | null and string | null | undefined
-  return author.displayName !== undefined ? author.displayName : null
+// Safely get the displayName
+const safeGetDisplayName = (author?: Author | null): string | null => {
+  return author?.displayName ?? null
 }
 
-export const getAuthorDisplay = (author: Author): string => {
+// Safely get the author’s display name for UI
+export const getAuthorDisplay = (author?: Author | null): string => {
+  if (!author) return "Unknown Author"
   const displayName = safeGetDisplayName(author)
-  return author?.name || displayName || author?.username || "Unknown Author"
+  return displayName || author.username || "Unknown Author"
 }
 
-export const getAvatarUrl = (author: Author): string | null => {
-  return author?.avatarUrl || null
+// Safely get avatar URL
+export const getAvatarUrl = (author?: Author | null): string | null => {
+  return author?.avatarUrl ?? null
 }
 
-export const getInitials = (author: Author): string => {
+// Safely get initials
+export const getInitials = (author?: Author | null): string => {
   const name = getAuthorDisplay(author)
   return name
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase())
-    .join('')
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase())
+    .join("")
     .slice(0, 2)
 }

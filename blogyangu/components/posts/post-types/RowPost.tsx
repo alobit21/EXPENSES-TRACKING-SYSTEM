@@ -3,7 +3,6 @@ import { FaEdit, FaTrash } from "react-icons/fa"
 import { PostProps } from "../types"
 import PostContent from "../PostContent"
 import CommentSection from "../CommentSection"
-
 export default function RowPost({ post, ...props }: PostProps) {
   return (
     <article className="bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 h-full flex flex-col">
@@ -33,6 +32,7 @@ export default function RowPost({ post, ...props }: PostProps) {
                 <FaEdit className="w-3 h-3" />
                 <span>Edit</span>
               </button>
+              
             </Link>
             <button
               onClick={() => props.onDeletePost(post.id)}

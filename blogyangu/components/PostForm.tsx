@@ -21,6 +21,16 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
+
+
+import ReactMde from "react-mde"
+import * as Showdown from "showdown"
+import "react-mde/lib/styles/css/react-mde-all.css"
+import ReactMarkdown from "react-markdown"
+
+import { Command } from "react-mde";
+
+
 interface Category {
   id: number
   name: string
@@ -60,8 +70,40 @@ export default function PostForm({ initialData, categories = [], onSubmit }: Pos
     metaDescription?: string
   }>({})
 
-
+// inside PostForm component
+const [selectedTab, setSelectedTab] = useState<"write" | "preview">("write")
+  const converter = new Showdown.Converter()
   
+const insertImageCommand: Command = {
+  icon: () => <span>🖼️</span>,
+  buttonProps: { "aria-label": "Insert image" },
+  execute: async ({ textApi }) => {
+    // Open file picker
+    const file: File | null = await new Promise((resolve) => {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+      input.onchange = () => resolve(input.files?.[0] || null);
+      input.click();
+    });
+
+    if (!file) return;
+
+    // Upload file to backend
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch("/api/upload", { method: "POST", body: formData });
+    const data = await res.json();
+
+    if (!data.url) return alert("Upload failed");
+
+    // Insert permanent URL
+    textApi.replaceSelection(`![${file.name}](${data.url})`);
+  },
+};
+
+
   // Clean up image preview URL to prevent memory leaks
   useEffect(() => {
     return () => {
@@ -248,29 +290,168 @@ export default function PostForm({ initialData, categories = [], onSubmit }: Pos
           </div>
 
           {/* Content Field */}
-          <div className="space-y-2">
-            <Label htmlFor="content" className="text-white">
-              Content <span className="text-red-400">*</span>
-            </Label>
-            <Textarea
-              id="content"
-              name="content"
-              value={content}
-              onChange={(e) => {
-                setContent(e.target.value)
-                setErrors((prev) => ({ ...prev, content: undefined }))
-              }}
-              rows={10}
-              className={`bg-gray-900 border-gray-600 text-white ${
-                errors.content ? "border-red-400" : ""
-              }`}
-              placeholder="Write your post content here..."
-              required
-            />
-            {errors.content && (
-              <p className="text-xs text-red-400">{errors.content}</p>
-            )}
-          </div>
+<div className="space-y-2">
+  <Label htmlFor="content" className="text-white">
+    Content <span className="text-red-400">*</span>
+  </Label>
+
+<div className="react-mde-wrapper bg-gray-900 text-white rounded border border-gray-600 w-full">
+ <ReactMde
+        value={content}
+        onChange={setContent}
+        selectedTab={selectedTab}
+        onTabChange={setSelectedTab}
+        generateMarkdownPreview={(markdown) =>
+          Promise.resolve(converter.makeHtml(markdown))
+        }
+        toolbarCommands={[
+          ["bold", "italic", "strikethrough"],
+          ["link", "quote", "code"],
+          ["unordered-list", "ordered-list"],
+          ["insert-image"],
+        ]}
+        commands={{ "insert-image": insertImageCommand }}
+        childProps={{
+          textArea: {
+            className: "bg-gray-900 text-white focus:outline-none w-full",
+          },
+        }}
+      />
+
+
+</div>
+
+
+  
+
+  {errors.content && (
+    <p className="text-xs text-red-400">{errors.content}</p>
+  )}
+</div>
+
+<style jsx global>{`
+  /* Main wrapper */
+  .react-mde-wrapper {
+  width: 100% !important;
+}
+
+.react-mde .mde-preview img {
+  max-width: 200px;   /* or use Tailwind classes if you want */
+  height: auto;
+  border-radius: 8px;
+  margin: 1rem auto;
+  display: block;
+}
+
+.prose img {
+  max-width: 200px;   /* or use max-width: 100% if you want responsiveness */
+  height: auto;
+  display: block;
+  margin: 1rem auto;  /* centers the image */
+  border-radius: 8px;
+}
+
+
+
+.react-mde {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+  /* Tabs */
+  .react-mde .mde-tabs {
+    background-color: #111827 !important;
+    border-bottom: 1px solid #374151 !important;
+  }
+
+  .react-mde .mde-tabs button {
+    background-color: transparent !important;
+    color: #9ca3af !important;
+    border: none !important;
+    padding: 8px 16px !important;
+  }
+
+  .react-mde .mde-tabs button.selected {
+    color: white !important;
+    border-bottom: 2px solid #3b82f6 !important;
+  }
+
+  /* Toolbar */
+  .react-mde .mde-header {
+    background-color: #1f2937 !important;
+    border-bottom: 1px solid #374151 !important;
+  }
+
+  .react-mde .mde-header .mde-header-group .mde-header-item button {
+    color: #d1d5db !important;
+    background-color: transparent !important;
+    border: none !important;
+    padding: 8px !important;
+    margin: 0 2px !important;
+    border-radius: 4px !important;
+    transition: background-color 0.2s ease;
+  }
+
+  .react-mde .mde-header .mde-header-item button:hover {
+    background-color: #374151 !important;
+    color: white !important;
+  }
+
+  .react-mde .mde-header .mde-header-item button svg {
+    fill: currentColor !important;
+    color: currentColor !important;
+    stroke: currentColor !important;
+  }
+
+  /* Dropdowns */
+  .react-mde .mde-header .mde-header-item select {
+    background-color: #1f2937 !important;
+    color: white !important;
+    border: 1px solid #4b5563 !important;
+  }
+
+  .react-mde .mde-header .mde-header-item select:focus {
+    outline: none !important;
+  }
+
+  /* Textarea */
+.react-mde .mde-text,
+.react-mde .mde-textarea {
+  width: 100% !important;
+  resize: vertical !important;
+  min-height: 200px !important; /* optional: gives breathing room */
+}
+
+  .react-mde .mde-textarea:focus {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  .react-mde .mde-textarea::placeholder {
+    color: #9ca3af !important;
+  }
+
+  /* Preview */
+  .react-mde .mde-preview {
+    background-color: #1f2937 !important;
+    color: white !important;
+    padding: 16px !important;
+  }
+
+  .react-mde .mde-preview a {
+    color: #3b82f6 !important;
+    text-decoration: underline;
+  }
+
+  .react-mde .mde-preview .mde-preview-content blockquote {
+    border-left: 4px solid #4b5563 !important;
+    color: #d1d5db !important;
+    padding-left: 12px !important;
+    margin-left: 0 !important;
+  }
+`}</style>
+
 
           {/* Category Field */}
           <div className="space-y-2">

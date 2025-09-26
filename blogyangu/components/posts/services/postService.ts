@@ -1,4 +1,5 @@
 import { Post } from "@prisma/client"
+import { useRouter } from "next/router"
 
 export class PostService {
   static async fetchCategories(setCategories: (categories: any[]) => void) {
@@ -10,6 +11,13 @@ export class PostService {
       }
     } catch (err) {
       console.error("Failed to fetch categories:", err)
+    }
+  }
+
+  private static showLoginAlert(router: any) {
+    const shouldLogin = confirm("Please login to like posts. Click OK to login.")
+    if (shouldLogin) {
+      router.push('/auth/signin')
     }
   }
 
@@ -94,87 +102,116 @@ export class PostService {
     }
   }
 
+
+  
   static async submitComment(
-    postId: number,
-    commentText: string,
-    session: any,
-    setCommentsByPost: (comments: Record<number, Comment[]>) => void,
-    setCommentText: (text: string) => void,
-    setActiveCommentPostId: (id: number | null) => void,
-    setPosts: (posts: Post[]) => void
-  ) {
-    if (!commentText.trim()) return
+  postId: number,
+  commentText: string,
+  session: any,
+  setCommentsByPost: (comments: Record<number, Comment[]>) => void,
+  setCommentText: (text: string) => void,
+  setActiveCommentPostId: (id: number | null) => void,
+  setPosts: (posts: Post[]) => void
+) {
+  if (!commentText.trim()) return
 
-    try {
-      const res = await fetch(`/api/posts/${postId}/comments`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.user?.id}`,
-        },
-        body: JSON.stringify({ content: commentText }),
-      })
+  // Add proper session validation
+  if (!session?.user?.id) {
+    alert("Please login to comment")
+    return
+  }
 
-      if (res.ok) {
-        const newComment = await res.json()
-        setCommentsByPost((prev) => ({
-          ...prev,
-          [postId]: [newComment, ...(prev[postId] || [])],
-        }))
-        setCommentText("")
-        setActiveCommentPostId(null)
-        setPosts((prev: Post[]) =>
-          prev.map((p) =>
-            p.id === postId
-              ? { ...p, commentCount: (p.commentCount || 0) + 1 }
-              : p
-          )
+  try {
+    const userId = parseInt(session.user.id)
+    if (isNaN(userId)) {
+      throw new Error("Invalid user ID")
+    }
+
+    const res = await fetch(`/api/posts/${postId}/comments`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userId}`, // Use the parsed userId
+      },
+      body: JSON.stringify({ content: commentText }),
+    })
+
+    if (res.ok) {
+      const newComment = await res.json()
+      setCommentsByPost((prev) => ({
+        ...prev,
+        [postId]: [newComment, ...(prev[postId] || [])],
+      }))
+      setCommentText("")
+      setActiveCommentPostId(null)
+      setPosts((prev: Post[]) =>
+        prev.map((p) =>
+          p.id === postId
+            ? { ...p, commentCount: (p.commentCount || 0) + 1 }
+            : p
         )
+      )
+    } else {
+      const error = await res.json()
+      // Handle 401 Unauthorized specifically
+      if (res.status === 401) {
+        throw new Error("Please login to comment")
       } else {
-        const error = await res.json()
         throw new Error(error?.error || "Failed to post comment")
       }
-    } catch (err) {
-      console.error("Comment error:", err)
-      alert(err instanceof Error ? err.message : "Something went wrong while posting your comment.")
     }
+  } catch (err) {
+    console.error("Comment error:", err)
+    alert(err instanceof Error ? err.message : "Something went wrong while posting your comment.")
   }
+}
 
-  static async likePost(postId: number, session: any, setPosts: (posts: Post[]) => void) {
-    if (!session) {
+ static async likePost(postId: number, session: any, setPosts: (posts: Post[]) => void, router?: any) {
+  if (!session?.user?.id) {
+    if (router) {
+      this.showLoginAlert(router)
+    } else {
       alert("Please login to like posts")
-      return
     }
-
-    try {
-      const res = await fetch("/api/likes", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.user?.id}`,
-        },
-        body: JSON.stringify({ postId }),
-      })
-
-      if (res.ok) {
-        const data = await res.json()
-        setPosts((prev: Post[]) =>
-          prev.map((p) =>
-            p.id === postId
-              ? {
-                  ...p,
-                  likeCount: data.liked
-                    ? (p.likeCount || 0) + 1
-                    : Math.max((p.likeCount || 0) - 1, 0),
-                }
-              : p
-          )
-        )
-      }
-    } catch (error) {
-      console.error("Like error:", error)
-    }
+    return
   }
+
+  try {
+    const userId = parseInt(session.user.id)
+    if (isNaN(userId)) {
+      throw new Error("Invalid user ID")
+    }
+
+    const res = await fetch("/api/likes", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userId}`, // Use parsed userId
+      },
+      body: JSON.stringify({ postId }),
+    })
+
+    if (res.ok) {
+      const data = await res.json()
+      setPosts((prev: Post[]) =>
+        prev.map((p) =>
+          p.id === postId
+            ? {
+                ...p,
+                likeCount: data.liked
+                  ? (p.likeCount || 0) + 1
+                  : Math.max((p.likeCount || 0) - 1, 0),
+              }
+            : p
+        )
+      )
+    } else if (res.status === 401) {
+      alert("Please login to like posts")
+    }
+  } catch (error) {
+    console.error("Like error:", error)
+  }
+}
 
   static async deletePost(
     postId: number, 
