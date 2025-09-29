@@ -1,25 +1,33 @@
 import { Session } from "next-auth"
 import { getAuthorDisplay, getAvatarUrl, getInitials } from "./utils/authorUtils"
-import { Post } from "@prisma/client"
+import { Post, Comment } from "./types"
 import FeaturedPost from "./post-types/FeaturedPost"
 import RowPost from "./post-types/RowPost"
 import ColumnPost from "./ColumnPost"
+import React from "react"
 
 interface PostsListProps {
   posts: Post[]
   imageErrors: Record<number | string, boolean>
-  setImageErrors: (errors: Record<number | string, boolean>) => void
+  setImageErrors: React.Dispatch<React.SetStateAction<Record<number | string, boolean>>>
   activeCommentPostId: number | null
   commentText: string
-  setCommentText: (text: string) => void
+  setCommentText: React.Dispatch<React.SetStateAction<string>>
   loadingComments: boolean
   commentsByPost: Record<number, Comment[]>
   isAdminOrAuthor: boolean
   session: Session | null
+  currentUserId?: number
   onToggleComments: (postId: number) => void
   onSubmitComment: (postId: number) => void
   onLike: (postId: number) => void
   onDeletePost: (postId: number) => void
+  onApproveComment?: (commentId: number, postId: number) => void
+  onReplyComment?: (postId: number, parentId: number, content: string) => void
+  onLikeComment?: (commentId: number, postId: number) => void
+  onDenyComment?: (commentId: number, postId: number, note: string) => void
+  onEditComment?: (commentId: number, postId: number, content: string) => void
+  onDeleteComment?: (commentId: number, postId: number) => void
 }
 
 export default function PostsList({
@@ -33,10 +41,17 @@ export default function PostsList({
   commentsByPost,
   isAdminOrAuthor,
   session,
+  currentUserId,
   onToggleComments, // This is the prop name
   onSubmitComment, // This is the prop name
   onLike, // This is the prop name
-  onDeletePost
+  onDeletePost,
+  onApproveComment,
+  onReplyComment,
+  onLikeComment,
+  onDenyComment,
+  onEditComment,
+  onDeleteComment
 }: PostsListProps) {
   if (posts.length === 0) {
     return (
@@ -61,10 +76,17 @@ export default function PostsList({
     commentsByPost,
     isAdminOrAuthor,
     session,
+    currentUserId,
     onToggleComments, // Use the correct prop name
-    handleSubmitComment: onSubmitComment, // Map onSubmitComment to handleSubmitComment
+    onSubmitComment, // Pass through directly
     onLike, // Use the correct prop name
-    handleDeletePost: onDeletePost, // Map onDeletePost to handleDeletePost
+    onDeletePost, // Pass through directly
+    onApproveComment,
+    onReplyComment,
+    onLikeComment,
+    onDenyComment,
+    onEditComment,
+    onDeleteComment,
     getAuthorDisplay,
     getAvatarUrl,
     getInitials
@@ -107,3 +129,5 @@ export default function PostsList({
     </div>
   )
 }
+
+

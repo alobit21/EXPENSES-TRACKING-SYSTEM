@@ -107,7 +107,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   category: post.category ? { id: post.category.id, name: post.category.name } : null, // ✅ map category
   publishedAt: post.publishedAt,
   likeCount: post.likes.length,
-  commentCount: post.comments.length,
+  commentCount: post.comments.filter((c) => c.status === "APPROVED").length,
 }));
 
 

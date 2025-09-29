@@ -8,7 +8,15 @@ export default function CommentSection({
   setCommentText, 
   onSubmitComment, 
   loadingComments, 
-  commentsByPost 
+  commentsByPost,
+  isAdminOrAuthor,
+  onApproveComment,
+  onReplyComment,
+  onLikeComment,
+  onDenyComment,
+  onEditComment,
+  onDeleteComment,
+  currentUserId
 }: CommentProps) {
   return (
     <>
@@ -19,14 +27,22 @@ export default function CommentSection({
         placeholder="Share your thoughts..."
         className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
       />
-
-      <button
-        onClick={() => onSubmitComment(post.id)}
-        disabled={!commentText.trim()}
-        className="mt-3 w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-colors duration-200"
-      >
-        Post Comment
-      </button>
+      <div className="mt-2 flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => setCommentText((t: string) => `${t}${t && !t.endsWith(' ') ? ' ' : ''}😊`)}
+          className="text-sm text-yellow-300 hover:text-yellow-200"
+        >
+          Add emoji
+        </button>
+        <button
+          onClick={() => onSubmitComment(post.id)}
+          disabled={!commentText.trim()}
+          className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg"
+        >
+          Post Comment
+        </button>
+      </div>
 
       <CommentList 
         post={post}
@@ -35,6 +51,14 @@ export default function CommentSection({
         getAuthorDisplay={getAuthorDisplay}
         getAvatarUrl={getAvatarUrl}
         getInitials={getInitials}
+        isAdminOrAuthor={isAdminOrAuthor}
+        onApproveComment={onApproveComment}
+        onReplyComment={onReplyComment}
+        onLikeComment={onLikeComment}
+        onDenyComment={onDenyComment}
+        onEditComment={onEditComment}
+        onDeleteComment={onDeleteComment}
+        currentUserId={currentUserId}
       />
     </>
   )

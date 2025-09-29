@@ -45,18 +45,21 @@ export interface PostComponentProps {
   post: Post;
   imageErrors?: { [key: string]: boolean };
   setImageErrors?: React.Dispatch<React.SetStateAction<{ [key: string]: boolean }>>;
-  onLike?: (postId: number) => void; // Changed from handleLike
-  onToggleComments?: (postId: number) => void; // Changed from handleToggleComments
+  onLike?: (postId: number) => void;
+  onToggleComments?: (postId: number) => void;
   activeCommentPostId?: number | null;
   commentText?: string;
-  setCommentText?: (text: string) => void;
-  handleSubmitComment?: (e: React.FormEvent) => void;
+  setCommentText?: React.Dispatch<React.SetStateAction<string>>;
+  onSubmitComment?: (postId: number) => void;
   loadingComments?: boolean;
-  commentsByPost?: { [key: number]: Comment[] };
+  commentsByPost?: Record<number, Comment[]>;
   isAdminOrAuthor?: boolean;
-  handleDeletePost?: (postId: number) => void;
+  onDeletePost?: (postId: number) => void;
+  onApproveComment?: (commentId: number, postId: number) => void;
+  onReplyComment?: (postId: number, parentId: number, content: string) => void;
+  onLikeComment?: (commentId: number, postId: number) => void;
   getAuthorDisplay?: (author: any) => string;
   getAvatarUrl?: (author: any) => string | null;
   getInitials?: (author: any) => string;
-  session?: any;
+  session?: Session | null;
 }

@@ -19,15 +19,21 @@ export interface Comment {
   id: number
   content: string
   author: Author
+  status?: "APPROVED" | "PENDING" | "SPAM" | "REJECTED"
+  parentId?: number | null
+  createdAt?: string | Date
+  likeCount?: number
+  moderationNote?: string | null
+  deletedAt?: string | Date | null
   replies?: Comment[]
 }
 
 export interface Post {
   id: number
   title: string
-  excerpt?: string
+  excerpt?: string | null
   slug: string
-  coverImage?: string
+  coverImage?: string | null
   author: Author
   publishedAt: string | null
   likeCount: number
@@ -45,6 +51,14 @@ export interface CommentListProps {
   getAuthorDisplay: (author: Author) => string
   getAvatarUrl: (author: Author) => string | null
   getInitials: (author: Author) => string
+  isAdminOrAuthor?: boolean
+  currentUserId?: number
+  onApproveComment?: (commentId: number, postId: number) => void
+  onReplyComment?: (postId: number, parentId: number, content: string) => void
+  onLikeComment?: (commentId: number, postId: number) => void
+  onDenyComment?: (commentId: number, postId: number, note: string) => void
+  onEditComment?: (commentId: number, postId: number, content: string) => void
+  onDeleteComment?: (commentId: number, postId: number) => void
 }
 
 export interface CommentItemProps {
@@ -52,6 +66,14 @@ export interface CommentItemProps {
   getAuthorDisplay: (author: Author) => string
   getAvatarUrl: (author: Author) => string | null
   getInitials: (author: Author) => string
+  isAdminOrAuthor?: boolean
+  currentUserId?: number
+  onApprove?: () => void
+  onReply?: (content: string) => void
+  onLike?: () => void
+  onDeny?: (note: string) => void
+  onEdit?: (content: string) => void
+  onDelete?: () => void
 }
 
 
@@ -65,10 +87,17 @@ export interface PostCommonProps {
   commentsByPost: Record<number, Comment[]>
   isAdminOrAuthor: boolean
   session: any
+  currentUserId?: number
   onToggleComments: (postId: number) => void
   onSubmitComment: (postId: number) => void
   onLike: (postId: number) => void
   onDeletePost: (postId: number) => void
+  onApproveComment?: (commentId: number, postId: number) => void
+  onReplyComment?: (postId: number, parentId: number, content: string) => void
+  onLikeComment?: (commentId: number, postId: number) => void
+  onDenyComment?: (commentId: number, postId: number, note: string) => void
+  onEditComment?: (commentId: number, postId: number, content: string) => void
+  onDeleteComment?: (commentId: number, postId: number) => void
 
   getAuthorDisplay: (author: Author) => string
   getAvatarUrl: (author: Author) => string | null

@@ -7,7 +7,15 @@ export default function CommentList({
   commentsByPost,
   getAuthorDisplay,
   getAvatarUrl,
-  getInitials
+  getInitials,
+  isAdminOrAuthor,
+  onApproveComment,
+  onReplyComment,
+  onLikeComment,
+  onDenyComment,
+  onEditComment,
+  onDeleteComment,
+  currentUserId,
 }: CommentListProps) {
   if (loadingComments) {
     return (
@@ -34,6 +42,14 @@ export default function CommentList({
           getAuthorDisplay={getAuthorDisplay}
           getAvatarUrl={getAvatarUrl}
           getInitials={getInitials}
+          isAdminOrAuthor={isAdminOrAuthor}
+          currentUserId={currentUserId}
+          onApprove={onApproveComment ? () => onApproveComment(comment.id, post.id) : undefined}
+          onReply={onReplyComment ? (content) => onReplyComment(post.id, comment.id, content) : undefined}
+          onLike={onLikeComment ? () => onLikeComment(comment.id, post.id) : undefined}
+          onDeny={onDenyComment ? (note) => onDenyComment(comment.id, post.id, note) : undefined}
+          onEdit={onEditComment ? (content) => onEditComment(comment.id, post.id, content) : undefined}
+          onDelete={onDeleteComment ? () => onDeleteComment(comment.id, post.id) : undefined}
         />
       ))}
     </div>

@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 import { FaPlus } from "react-icons/fa"
-import { Category, Post as PostType } from "@prisma/client"
+import { Category } from "@prisma/client"
+import { Post, Comment } from "./types"
 import { PostService } from "./services/postService"
 import LoadingSpinner from "../LoadingSpinner"
 import CreatePostModal from "./CreatePostModal"
 import PostList from "./PostList"
 
 export default function PostsPage() {
-  const [posts, setPosts] = useState<PostType[]>([])
+  const [posts, setPosts] = useState<Post[]>([])
   const [activeCommentPostId, setActiveCommentPostId] = useState<number | null>(null)
   const [commentText, setCommentText] = useState("")
   const [commentsByPost, setCommentsByPost] = useState<Record<number, Comment[]>>({})
@@ -59,6 +60,40 @@ const [imageErrors, setImageErrors] = useState<Record<string | number, boolean>>
     await PostService.deletePost(postId, setPosts, setCommentsByPost)
   }
 
+  const handleApproveComment = async (commentId: number, postId: number) => {
+    await PostService.approveComment(commentId, postId, setCommentsByPost as any, setPosts as any)
+  }
+
+  const handleReplyComment = async (postId: number, parentId: number, content: string) => {
+    await PostService.submitComment(
+      postId,
+      content,
+      session,
+      setCommentsByPost,
+      undefined,
+      undefined,
+      setPosts,
+      parentId
+    )
+  }
+
+  const handleLikeComment = async (commentId: number, postId: number) => {
+    await PostService.likeComment(commentId, postId, session, setCommentsByPost)
+  }
+
+  const handleDenyComment = async (commentId: number, postId: number, note: string) => {
+    await PostService.denyComment(commentId, postId, note, setCommentsByPost)
+  }
+
+  const handleEditComment = async (commentId: number, postId: number, content: string) => {
+    await PostService.editComment(commentId, postId, content, setCommentsByPost)
+  }
+
+  const handleDeleteComment = async (commentId: number, postId: number) => {
+    if (!confirm("Delete this comment?")) return
+    await PostService.deleteComment(commentId, postId, setCommentsByPost)
+  }
+
 const isAdminOrAuthor: boolean = session?.user?.role
   ? ["ADMIN", "AUTHOR"].includes(session.user.role)
   : false
@@ -103,6 +138,13 @@ const isAdminOrAuthor: boolean = session?.user?.role
           onSubmitComment={handleSubmitComment}
           onLike={handleLike}
           onDeletePost={handleDeletePost}
+          onApproveComment={handleApproveComment}
+          onReplyComment={handleReplyComment}
+          onLikeComment={handleLikeComment}
+          onDenyComment={handleDenyComment}
+          onEditComment={handleEditComment}
+          onDeleteComment={handleDeleteComment}
+          currentUserId={session?.user?.id ? Number(session.user.id) : undefined}
         />
       </div>
 

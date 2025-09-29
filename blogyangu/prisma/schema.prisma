@@ -98,6 +98,8 @@ model Comment {
   parentId  Int?
   replies   Comment[] @relation("CommentReplies")
   status    CommentStatus @default(APPROVED)
+  moderationNote String?
+  deletedAt DateTime?
   likes     Like[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -174,6 +176,7 @@ enum CommentStatus {
   APPROVED
   PENDING
   SPAM
+  REJECTED
 }
 
 enum SettingType {
