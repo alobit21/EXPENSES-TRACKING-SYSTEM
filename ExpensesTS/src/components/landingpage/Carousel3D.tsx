@@ -1,28 +1,34 @@
-import { useState, useEffect } from "react";
-import { motion, useMotionValue } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { motion, animate } from "framer-motion";
 
 const Carousel3D = () => {
   const [rotation, setRotation] = useState(0);
-  const dragX = useMotionValue(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const images = [
     "/assets/1.jpg",
     "/assets/2.jpg",
     "/assets/5.jpg",
-    "/assets/7.jpg",
-    "/assets/8.jpg",
+    "/assets/7.jpeg",
+    "/assets/8.jpeg",
   ];
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setRotation((prev) => prev + 360 / images.length);
-    }, 4000);
-
-    return () => clearInterval(interval);
-  }, [images.length]);
-
-  const radius = 500; // controls depth
   const angleStep = 360 / images.length;
+  const radius = 500; // controls depth
+
+  // Auto rotation (pauses when dragging)
+  useEffect(() => {
+    if (!isDragging) {
+      intervalRef.current = setInterval(() => {
+        setRotation((prev) => prev + angleStep);
+      }, 4000);
+    }
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [isDragging, angleStep]);
 
   return (
     <div
@@ -38,9 +44,26 @@ const Carousel3D = () => {
         drag="x"
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.05}
+        onDragStart={() => {
+          setIsDragging(true);
+          if (intervalRef.current) clearInterval(intervalRef.current);
+        }}
         onDrag={(event, info) => {
-          setRotation((prev) => prev + info.delta.x * -0.4); 
-          // -0.4 = sensitivity factor
+          setRotation((prev) => prev + info.delta.x * -0.4);
+        }}
+        onDragEnd={(event, info) => {
+          setIsDragging(false);
+
+          // inertia: keep spinning naturally after release
+          animate(rotation, rotation + info.velocity.x * -0.2, {
+            type: "inertia",
+            min: -Infinity,
+            max: Infinity,
+            velocity: info.velocity.x * -0.2,
+            power: 0.8,
+            timeConstant: 300,
+            onUpdate: (latest) => setRotation(latest),
+          });
         }}
       >
         {images.map((src, index) => {
