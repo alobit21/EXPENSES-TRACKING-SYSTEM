@@ -4,6 +4,7 @@ import type { JSX } from "react";
 
 // Pages
 import LoginPage from "../pages/LoginPage";
+import SignupPage from "../pages/SignupPage";
 import DashboardPage from "../pages/DashboardPage";
 import Layout from "../components/layout/Layout";
 import ReportsPage from "../pages/ReportsPage";
@@ -33,6 +34,7 @@ export default function AppRoutes() {
       {/* Public routes */}
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/signup" element={<SignupPage />} />
       <Route path="/home" element={<LandingPage />} />
 
       {/* Protected routes */}
