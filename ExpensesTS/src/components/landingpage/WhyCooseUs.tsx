@@ -24,11 +24,12 @@ const features = [
 
 export default function WhyChooseUs() {
   return (
-   <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white to-slate-100 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100">
-  <h2 className="text-4xl font-extrabold text-center text-gray-800 dark:text-gray-100 mb-16">
-    The System Helps You In
-  </h2>
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-7xl mx-auto">
+   <section id="why-choose-us" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white to-slate-100 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100">
+  <div className="mx-auto max-w-6xl">
+    <h2 className="text-4xl font-bold text-center text-gray-800 dark:text-gray-100 mb-12">
+      The System Helps You In
+    </h2>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
     {features.map((feature, index) => (
       <motion.div
         key={index}
@@ -53,6 +54,7 @@ export default function WhyChooseUs() {
         </div>
       </motion.div>
     ))}
+    </div>
   </div>
 </section>
 

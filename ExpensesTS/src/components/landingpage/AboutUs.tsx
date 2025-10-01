@@ -24,17 +24,17 @@ const aboutItems = [
 
 export default function AboutUs() {
   return (
-   <section className="py-20 px-6 sm:px-10 lg:px-20 bg-gradient-to-br from-white to-slate-100 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100">
-  <div className="max-w-6xl mx-auto text-center">
-    <h2 className="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-6">
+   <section id="about" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white to-slate-100 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100">
+  <div className="mx-auto max-w-6xl text-center">
+    <h2 className="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-4">
       About Us
     </h2>
-    <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-12">
+    <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-10">
       At <span className="font-semibold text-gray-800 dark:text-gray-100">FinanceMaster</span>, we're on a mission to simplify personal finance for everyone. 
       Whether you're budgeting for your first paycheck or planning long-term goals, our tools empower you to take control of your financial future.
     </p>
 
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
       {aboutItems.map((item, index) => (
         <motion.div
           key={index}

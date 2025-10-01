@@ -22,8 +22,10 @@ const ResponsiveNavbar: React.FC<ResponsiveNavbarProps> = ({
   logo,
   navItems = [
     { name: 'Home', to: '/' },
-    { name: 'Features', to: '/features' },
-    { name: 'About', to: '/about' },
+    { name: 'Features', to: '/#features' },
+    { name: 'Why Choose Us', to: '/#why-choose-us' },
+    { name: 'Testimonials', to: '/#testimonials' },
+    { name: 'About', to: '/#about' },
   ],
   ctaText = 'Get Started',
   ctaLink = '/login',
@@ -84,21 +86,13 @@ const ResponsiveNavbar: React.FC<ResponsiveNavbarProps> = ({
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center space-x-6 justify-center flex-grow">
           {navItems.map((item) => (
-            <NavLink
+            <a
               key={item.name}
-              to={item.to}
-              className={({ isActive }) =>
-                `transition-colors duration-300 ${
-                  isActive
-                    ? 'text-green-600 dark:text-green-400 font-semibold'
-                    : scrolled
-                    ? 'text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400'
-                    : 'text-gray-800 dark:text-gray-200 hover:text-green-400 dark:hover:text-green-300'
-                }`
-              }
+              href={item.to}
+              className="transition-colors duration-300 text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400"
             >
               {item.name}
-            </NavLink>
+            </a>
           ))}
         </div>
 
@@ -135,20 +129,14 @@ const ResponsiveNavbar: React.FC<ResponsiveNavbarProps> = ({
           >
             <div className="flex flex-col items-start space-y-6 p-6">
               {navItems.map((item) => (
-                <NavLink
+                <a
                   key={item.name}
-                  to={item.to}
-                  className={({ isActive }) =>
-                    `text-lg font-medium ${
-                      isActive
-                        ? 'text-green-600 dark:text-green-400 font-semibold'
-                        : 'text-gray-800 dark:text-gray-200 hover:text-green-600 dark:hover:text-green-400'
-                    }`
-                  }
+                  href={item.to}
+                  className="text-lg font-medium text-gray-800 dark:text-gray-200 hover:text-green-600 dark:hover:text-green-400"
                   onClick={() => setIsOpen(false)}
                 >
                   {item.name}
-                </NavLink>
+                </a>
               ))}
             </div>
           </motion.div>

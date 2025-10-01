@@ -22,6 +22,7 @@ const testimonials = [
 export default function Testimonials() {
   return (
     <section
+  id="testimonials"
   className="relative py-20 px-4 sm:px-6 lg:px-8 bg-gray-900 dark:bg-gray-900 text-white"
   style={{
     backgroundImage: 'url("/assets/testimonial-bg.jpg")',
@@ -30,13 +31,13 @@ export default function Testimonials() {
   }}
 >
   {/* Overlay */}
-  <div className="absolute inset-0 bg-black/50 dark:bg-black/60 backdrop-blur-sm z-0"></div>
+  <div className="absolute inset-0 bg-black/40 dark:bg-black/50 backdrop-blur-sm z-0"></div>
 
-  <div className="relative z-10 max-w-6xl mx-auto">
-    <h2 className="text-4xl font-bold text-center text-white mb-16">
+  <div className="relative z-10 mx-auto max-w-6xl">
+    <h2 className="text-4xl font-bold text-center text-white mb-12">
       What Our Users Say
     </h2>
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
       {testimonials.map((testimonial, index) => (
         <motion.div
           key={index}

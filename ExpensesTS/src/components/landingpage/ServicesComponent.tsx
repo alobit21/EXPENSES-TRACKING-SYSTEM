@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, DollarSign, Calendar, FileText } from "lucide-react";
+import Carousel3D from './Carousel3D';
 
 const features = [
   { label: "Record incomes", icon: <DollarSign className="w-6 h-6 text-green-500" /> },
@@ -36,29 +37,26 @@ export default function LandingShowcase() {
 
   return (
     <section
-  className="py-20 px-6 bg-gradient-to-b from-white/80 to-slate-50/90 dark:from-gray-900/80 dark:to-gray-800/90 relative bg-cover bg-center"
+  id="features"
+  className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white/80 to-slate-50/90 dark:from-gray-900/80 dark:to-gray-800/90 relative bg-cover bg-center"
   style={{ backgroundImage: "url('/assets/javascript.webp')" }}
 >
   {/* Backdrop Overlay */}
   <div className="absolute inset-0 backdrop-blur-sm" />
-  <div className="relative z-10">
-    <h2 className="text-4xl font-extrabold text-center mb-16 text-slate-800 dark:text-slate-200">
+  <div className="relative z-10 mx-auto max-w-6xl">
+    <h2 className="text-4xl font-extrabold text-center mb-12 text-slate-800 dark:text-slate-200">
       What Our Expense Tracker Does
     </h2>
 
-    <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
-      {/* Left Side - Video */}
+    <div className="grid lg:grid-cols-2 gap-12 items-center">
+      {/* Left Side - 3D Carousel */}
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
-        className="rounded-3xl overflow-hidden"
+        className="rounded-3xl overflow-hidden h-96"
       >
-        <img
-          src="/assets/video/expenses.gif" // replace with your gif path
-          alt="Expense tracking demo"
-          className="w-full h-full object-cover"
-        />
+        <Carousel3D />
       </motion.div>
 
       {/* Right Side - Features */}
