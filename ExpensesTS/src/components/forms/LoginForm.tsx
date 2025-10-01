@@ -41,7 +41,7 @@ export default function LoginForm() {
           placeholder="Enter Your Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+          className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
           required
           disabled={isLoading}
         />
@@ -57,7 +57,7 @@ export default function LoginForm() {
           placeholder="*********"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+          className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
           required
           disabled={isLoading}
         />
@@ -65,7 +65,7 @@ export default function LoginForm() {
       
       <button
         type="submit"
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center"
+        className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center"
         disabled={isLoading}
       >
         {isLoading ? (
