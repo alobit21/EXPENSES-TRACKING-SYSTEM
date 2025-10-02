@@ -64,12 +64,12 @@ export function Navbar() {
               Logout
             </button>
           ) : (
-            <button
-              onClick={() => signIn()}
+            <Link
+              href="/blogyangu/auth/signin"
               className="hidden md:inline-flex items-center rounded-md border border-border px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
             >
               Login
-            </button>
+            </Link>
           )}
           <button
             className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border md:hidden"
@@ -113,12 +113,13 @@ export function Navbar() {
                   Logout
                 </button>
               ) : (
-                <button
-                  onClick={() => { setOpen(false); signIn() }}
+                <Link
+                  href="/blogyangu/auth/signin"
+                  onClick={() => setOpen(false)}
                   className="w-full rounded-md border border-border px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
                 >
                   Login
-                </button>
+                </Link>
               )}
             </div>
           </div>
