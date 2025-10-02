@@ -45,7 +45,7 @@ export default function AdminTags() {
             <h1 className="text-2xl font-bold">Tags</h1>
           </header>
 
-          <TableToolbar title="Tags" />
+          <TableToolbar />
 
           {loading ? (
             <div className="text-muted-foreground">Loading tags...</div>

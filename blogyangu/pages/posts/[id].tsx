@@ -30,6 +30,14 @@ interface Comment {
   }
 }
 
+interface Like {
+  id: number
+  userId: number
+  postId: number | null
+  commentId: number | null
+  createdAt: Date
+}
+
 interface PostWithExtras {
   id: number
   title: string

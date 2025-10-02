@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { FaRegThumbsUp, FaRegCommentDots } from "react-icons/fa"
 import { PostProps } from "./types"
 import { getAuthorDisplay, getAvatarUrl, getInitials } from "./utils/authorUtils"
@@ -38,9 +39,11 @@ export default function PostContent({
     <>
       {showImage && post.coverImage && !imageErrors[post.id] ? (
         <div className={`relative ${imageHeight} overflow-hidden`}>
-          <img
+          <Image
             src={post.coverImage}
             alt={post.title}
+            width={800}
+            height={400}
             className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
             onError={() => setImageErrors((prev) => ({ ...prev, [post.id]: true }))}
           />
@@ -73,10 +76,12 @@ export default function PostContent({
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-2">
             {getAvatarUrl(post.author) && !imageErrors[`author-${post.author.id}`] ? (
-              <img
+              <Image
                 src={getAvatarUrl(post.author)!}
                 alt={getAuthorDisplay(post.author)}
-                className="w-6 h-6 rounded-full border border-border dark:border-gray-600"
+                width={24}
+                height={24}
+                className="rounded-full border border-border dark:border-gray-600"
                 onError={() =>
                   setImageErrors((prev) => ({ ...prev, [`author-${post.author.id}`]: true }))
                 }

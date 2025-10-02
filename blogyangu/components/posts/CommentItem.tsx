@@ -1,4 +1,5 @@
 import { useState } from "react"
+import Image from "next/image"
 import { CommentItemProps } from "./types"
 
 export default function CommentItem({ 
@@ -25,10 +26,12 @@ export default function CommentItem({
     <div className="bg-card dark:bg-gray-900 rounded-lg p-4">
       <div className="flex items-center space-x-3 mb-3">
         {getAvatarUrl(comment.author) && !imageError ? (
-          <img
+          <Image
             src={getAvatarUrl(comment.author)!}
             alt={getAuthorDisplay(comment.author)}
-            className="w-8 h-8 rounded-full border border-border dark:border-gray-600"
+            width={32}
+            height={32}
+            className="rounded-full border border-border dark:border-gray-600"
             onError={() => setImageError(true)}
           />
         ) : (

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
+import { Role } from "@prisma/client"
 import RoleGuard from "@/components/dashboard/RoleGuard"
 import DataTable from "@/components/dashboard/DataTable"
 import DashboardLayout from "@/components/dashboard/DashboardLayout"
@@ -82,12 +83,28 @@ export default function AdminUsers() {
               open={openModal}
               onClose={() => setOpenModal(false)}
               mode={editing ? "edit" : "create"}
-              initialUser={editing || undefined}
+              initialUser={editing ? {
+                id: editing.id,
+                username: editing.username || '',
+                email: editing.email,
+                displayName: editing.displayName,
+                role: editing.role as Role
+              } : undefined}
               onSaved={(u) => {
+                const newUser: User = {
+                  id: u.id || '',
+                  email: u.email,
+                  username: u.username,
+                  displayName: u.displayName,
+                  role: u.role.toString(),
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString(),
+                  isVerified: false
+                }
                 if (editing) {
-                  setUsers((arr) => arr.map((x) => (x.id === u.id ? { ...x, ...u } : x)))
+                  setUsers((arr) => arr.map((x) => (x.id === u.id ? { ...x, ...newUser } : x)))
                 } else {
-                  setUsers((arr) => [u, ...arr])
+                  setUsers((arr) => [newUser, ...arr])
                 }
                 setEditing(null)
                 setOpenModal(false)

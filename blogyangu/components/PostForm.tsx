@@ -1,5 +1,6 @@
 import { useState, useEffect, ChangeEvent } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import {
   Card,
   CardContent,
@@ -489,9 +490,11 @@ const insertImageCommand: Command = {
             )}
             {coverImagePreview && !imageError && (
               <div className="mt-4 rounded-lg overflow-hidden shadow-lg">
-                <img
+                <Image
                   src={coverImagePreview}
                   alt="Cover image preview"
+                  width={800}
+                  height={256}
                   className="w-full h-64 object-cover"
                   onError={() => {
                     setImageError("Failed to load image preview")

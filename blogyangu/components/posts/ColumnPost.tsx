@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { FaRegThumbsUp, FaRegCommentDots, FaEdit, FaTrash } from "react-icons/fa";
 import CommentSection from "./CommentSection";
 import { PostProps, Author } from "./types";
@@ -45,9 +46,11 @@ export default function ColumnPost({
       {/* Left Image */}
       {post.coverImage && !imageErrors[post.id] ? (
         <div className="w-full md:w-64 h-64 flex-shrink-0">
-          <img
+          <Image
             src={post.coverImage}
             alt={post.title}
+            width={256}
+            height={256}
             className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
             onError={() => setImageErrors((prev) => ({ ...prev, [post.id]: true }))}
           />
@@ -81,10 +84,12 @@ export default function ColumnPost({
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             {getAvatarUrl(post.author) && !imageErrors[`author-${post.author.id}`] ? (
-              <img
+              <Image
                 src={getAvatarUrl(post.author)!}
                 alt={getAuthorDisplay(post.author)}
-                className="w-8 h-8 rounded-full border border-border dark:border-gray-600"
+                width={32}
+                height={32}
+                className="rounded-full border border-border dark:border-gray-600"
                 onError={() =>
                   setImageErrors((prev) => ({
                     ...prev,

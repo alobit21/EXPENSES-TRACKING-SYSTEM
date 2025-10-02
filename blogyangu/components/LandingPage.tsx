@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Home() {
   const [email, setEmail] = useState('');
@@ -139,7 +140,7 @@ export default function Home() {
                 transition={{ delay: i * 0.2 }}
                 className="bg-white rounded-lg shadow-md overflow-hidden"
               >
-                <img src={category.img} alt={category.title} className="w-full h-48 object-cover" />
+                <Image src={category.img} alt={category.title} width={400} height={192} className="w-full h-48 object-cover" />
                 <div className="p-4">
                   <h3 className="font-bold text-lg mb-2">{category.title}</h3>
                   <p className="text-gray-600 mb-4">{category.desc}</p>

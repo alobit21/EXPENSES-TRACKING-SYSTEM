@@ -1,5 +1,6 @@
 // components/CommentThread.tsx
 import { useState } from 'react'
+import Image from 'next/image'
 import { CommentWithAuthor } from '../types/blog'
 
 interface CommentThreadProps {
@@ -23,10 +24,12 @@ export default function CommentThread({ comment, postId, onReply }: CommentThrea
   return (
     <div className="border-l-2 border-gray-200 pl-4 my-4">
       <div className="flex items-start space-x-3">
-        <img
+        <Image
           src={comment.author.avatarUrl || '/default-avatar.png'}
           alt={comment.author.displayName || comment.author.username}
-          className="w-10 h-10 rounded-full"
+          width={40}
+          height={40}
+          className="rounded-full"
         />
         <div className="flex-1">
           <div className="bg-gray-100 p-3 rounded-lg">

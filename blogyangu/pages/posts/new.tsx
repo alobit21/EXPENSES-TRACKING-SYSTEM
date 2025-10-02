@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
+import Image from "next/image"
 import PostForm from "@/components/PostForm"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -141,10 +142,12 @@ export default function NewPostPage() {
           {session?.user ? (
             <>
               {getAvatarUrl(session.user as Author) && !imageError ? (
-                <img
+                <Image
                   src={getAvatarUrl(session.user as Author)!}
                   alt={getAuthorDisplay(session.user as Author)}
-                  className="w-10 h-10 rounded-full border border-border dark:border-gray-600"
+                  width={40}
+                  height={40}
+                  className="rounded-full border border-border dark:border-gray-600"
                   onError={() => setImageError(true)}
                 />
               ) : (

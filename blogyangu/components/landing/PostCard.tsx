@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 
 interface Author {
   id: number
@@ -25,7 +26,7 @@ export default function PostCard({ post }: { post: LandingPost }) {
     <article className="bg-card dark:bg-gray-900 rounded-xl overflow-hidden shadow hover:shadow-lg transition-all duration-300 flex flex-col">
       {post.coverImage ? (
         <div className="w-full h-48 overflow-hidden">
-          <img src={post.coverImage} alt={post.title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+          <Image src={post.coverImage} alt={post.title} width={400} height={192} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
         </div>
       ) : (
         <div className="w-full h-48 bg-secondary dark:bg-gray-900 flex items-center justify-center text-muted-foreground dark:text-gray-400">No image</div>
@@ -47,7 +48,7 @@ export default function PostCard({ post }: { post: LandingPost }) {
         <div className="mt-auto pt-4 flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
             {post.author?.avatarUrl ? (
-              <img src={post.author.avatarUrl} alt={post.author.username} className="w-6 h-6 rounded-full border border-border dark:border-gray-600" />
+              <Image src={post.author.avatarUrl} alt={post.author.username} width={24} height={24} className="rounded-full border border-border dark:border-gray-600" />
             ) : (
               <div className="w-6 h-6 rounded-full bg-secondary dark:bg-gray-700 flex items-center justify-center border border-border dark:border-gray-600">
                 <span className="text-[10px] text-muted-foreground dark:text-gray-300">{(post.author?.displayName || post.author?.username || "U").charAt(0).toUpperCase()}</span>

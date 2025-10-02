@@ -56,7 +56,15 @@ export default async function handler(
     })
 
     // Return user without password hash
-    const { passwordHash, ...userWithoutPassword } = user
+    const userWithoutPassword = {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      displayName: user.displayName,
+      role: user.role,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
+    }
 
     res.status(201).json({ 
       message: 'User created successfully',

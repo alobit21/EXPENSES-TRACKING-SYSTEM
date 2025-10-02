@@ -4,6 +4,7 @@
 
 import { useState } from 'react'
 import { useSession } from 'next-auth/react'
+import Image from 'next/image'
 import CommentThread from './CommentThread'
 import { PostWithDetails, CommentWithAuthor } from '../types/blog'
 
@@ -100,10 +101,12 @@ export default function BlogPost({ post }: BlogPostProps) {
       <header className="mb-8">
         <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
         <div className="flex items-center text-gray-600 mb-4">
-          <img
+          <Image
             src={post.author.avatarUrl || '/default-avatar.png'}
             alt={post.author.displayName || post.author.username}
-            className="w-10 h-10 rounded-full mr-3"
+            width={40}
+            height={40}
+            className="rounded-full mr-3"
           />
           <div>
             <p className="font-semibold">
@@ -115,9 +118,11 @@ export default function BlogPost({ post }: BlogPostProps) {
           </div>
         </div>
         {post.coverImage && (
-          <img
+          <Image
             src={post.coverImage}
             alt={post.title}
+            width={800}
+            height={256}
             className="w-full h-64 object-cover rounded-lg mb-4"
           />
         )}
