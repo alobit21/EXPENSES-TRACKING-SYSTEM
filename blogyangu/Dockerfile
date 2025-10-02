@@ -12,4 +12,4 @@ COPY . .
 EXPOSE 3000
 
 # Run migrations before starting Next.js
-CMD npx prisma migrate deploy && npm run build && npm run start
+CMD npx prisma migrate deploy && npx prisma generate && npm run build && npm run start
