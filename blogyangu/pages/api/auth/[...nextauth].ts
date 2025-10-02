@@ -74,6 +74,7 @@ export const authOptions: AuthOptions = {
                 avatarUrl: user.image,
                 role: "READER", // default role
                 username: user.email!.split("@")[0], // use email prefix as username
+                passwordHash: "oauth_user", // placeholder for OAuth users
               },
             })
             user.id = newUser.id.toString()
