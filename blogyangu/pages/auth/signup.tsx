@@ -41,7 +41,7 @@ export default function SignUp() {
     }
 
     try {
-      const response = await fetch("/api/auth/signup", {
+      const response = await fetch("/blogyangu/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
