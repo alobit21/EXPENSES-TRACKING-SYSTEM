@@ -34,14 +34,14 @@ export default function SignIn() {
       setError(result.error);
       setLoading(false);
     } else {
-      router.push("/blogyangu/posts");
+      router.push("/posts");
     }
   };
 
   // Handle Google OAuth login
   const handleGoogleLogin = async () => {
     setLoading(true);
-    await signIn("google", { callbackUrl: "/blogyangu/posts" });
+    await signIn("google", { callbackUrl: "/posts" });
   };
 
   return (
@@ -136,7 +136,7 @@ export default function SignIn() {
         <CardFooter className="justify-center">
           <p className="text-center text-sm text-gray-400">
             Don&apos;t have an account?{" "}
-            <Link href="/blogyangu/auth/signup" className="text-blue-400 hover:text-blue-300">
+            <Link href="/auth/signup" className="text-blue-400 hover:text-blue-300">
               Sign up
             </Link>
           </p>

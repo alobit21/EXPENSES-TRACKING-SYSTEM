@@ -65,7 +65,7 @@ export function Navbar() {
             </button>
           ) : (
             <Link
-              href="/blogyangu/auth/signin"
+              href="/auth/signin"
               className="hidden md:inline-flex items-center rounded-md border border-border px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
             >
               Login
@@ -114,7 +114,7 @@ export function Navbar() {
                 </button>
               ) : (
                 <Link
-                  href="/blogyangu/auth/signin"
+                  href="/auth/signin"
                   onClick={() => setOpen(false)}
                   className="w-full rounded-md border border-border px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
                 >
