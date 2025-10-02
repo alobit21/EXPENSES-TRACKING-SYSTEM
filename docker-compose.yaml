@@ -46,6 +46,28 @@ services:
     networks:
       - expenses_net
 
+  blogyangu:
+    build:
+      context: ./blogyangu
+      dockerfile: Dockerfile
+    image: codewithmac/blogyangu:dev
+    container_name: blogyangu
+    environment:
+      DATABASE_URL: ${NEXT_DATABASE_URL}
+      NODE_ENV: development
+    depends_on:
+      - postgres
+    networks:
+      - expenses_net
+    ports:
+      - "8080:3000"
+    volumes:
+      - ./blogyangu:/app
+      - /app/node_modules
+    env_file:
+      - .env
+
+
   nginx:
     image: nginx:alpine
     container_name: expenses_nginx
