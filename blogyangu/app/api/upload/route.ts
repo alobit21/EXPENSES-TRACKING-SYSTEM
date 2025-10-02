@@ -5,39 +5,33 @@ import path from "path"
 
 export const config = {
   api: {
-    bodyParser: false, // disable Next's body parsing
+    bodyParser: false,
   },
 }
 
-// Ensure uploads dir exists
 const uploadDir = path.join(process.cwd(), "public/uploads")
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true })
 }
 
-export async function POST(req: Request) {
+export async function POST(req: Request): Promise<Response> {
   return new Promise((resolve, reject) => {
     const form = formidable({
       multiples: false,
       uploadDir,
       keepExtensions: true,
-      filename: (name, ext, part, form) => {
-        // Create unique filename
-        return Date.now().toString() + "_" + part.originalFilename
-      },
+      filename: (name, ext, part) => Date.now().toString() + "_" + part.originalFilename,
     })
 
     form.parse(req as any, (err, fields, files) => {
       if (err) {
-        reject(NextResponse.json({ error: "Upload failed" }, { status: 500 }))
+        resolve(NextResponse.json({ error: "Upload failed" }, { status: 500 }))
         return
       }
 
-      const file = files.file?.[0] // formidable v3 returns array
+      const file = files.file?.[0]
       if (!file) {
-        resolve(
-          NextResponse.json({ error: "No file uploaded" }, { status: 400 })
-        )
+        resolve(NextResponse.json({ error: "No file uploaded" }, { status: 400 }))
         return
       }
 
