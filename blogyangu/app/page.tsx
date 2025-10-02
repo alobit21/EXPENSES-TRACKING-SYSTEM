@@ -3,6 +3,12 @@ import { prisma } from "@/lib/prisma"
 import PostCard from "@/components/landing/PostCard"
 import Newsletter from "@/components/landing/Newsletter"
 
+
+interface Category {
+  id: number;
+  name: string;
+}
+
 export const revalidate = 0
 
 export default async function Page() {
@@ -51,13 +57,12 @@ export default async function Page() {
                 <Link href="/posts" className="bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-lg font-medium">Explore Posts</Link>
                 <a href="#newsletter" className="bg-card hover:bg-accent hover:text-accent-foreground text-foreground px-5 py-3 rounded-lg border border-border font-medium dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700">Subscribe</a>
               </div>
-              {categories?.length > 0 && (
-                <div className="mt-8 flex flex-wrap gap-2">
-                  {categories.slice(0, 10).map((c) => (
-                    <span key={c.id} className="text-xs px-3 py-1 rounded-full bg-blue-900 text-blue-300 border border-blue-800">{c.name}</span>
-                  ))}
-                </div>
-              )}
+              {categories.slice(0, 10).map((c: Category) => (
+  <span key={c.id} className="text-xs px-3 py-1 rounded-full bg-blue-900 text-blue-300 border border-blue-800">
+    {c.name}
+  </span>
+))}
+
             </div>
             {featured && (
               <div className="bg-card/60 border border-border rounded-xl p-4 dark:bg-gray-900/60 dark:border-gray-700">
