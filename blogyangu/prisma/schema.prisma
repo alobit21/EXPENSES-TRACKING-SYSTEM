@@ -1,0 +1,187 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  username      String    @unique
+  email         String    @unique
+  passwordHash  String
+  displayName   String?
+  bio           String?
+  avatarUrl     String?
+  role          Role      @default(AUTHOR)
+  isVerified    Boolean   @default(false)
+  posts         Post[]
+  comments      Comment[]
+  likes         Like[]
+  bookmarks     Bookmark[]
+  media         Media[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("users")
+}
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  posts       Post[]
+  createdAt   DateTime @default(now())
+
+  @@map("categories")
+}
+
+model Tag {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  slug      String    @unique
+  posts     PostTag[]
+  createdAt DateTime  @default(now())
+
+  @@map("tags")
+}
+
+model Post {
+  id              Int         @id @default(autoincrement())
+  title           String
+  slug            String      @unique
+  excerpt         String?
+  content         String
+  coverImage      String?
+  author          User        @relation(fields: [authorId], references: [id])
+  authorId        Int
+  category        Category?   @relation(fields: [categoryId], references: [id])
+  categoryId      Int?
+  status          PostStatus  @default(DRAFT)
+  publishedAt     DateTime?
+  metaDescription String?
+  allowComments   Boolean     @default(true)
+  viewCount       Int         @default(0)
+  tags            PostTag[]
+  comments        Comment[]
+  likes           Like[]
+  bookmarks       Bookmark[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@map("posts")
+}
+
+model PostTag {
+  post    Post   @relation(fields: [postId], references: [id])
+  postId  Int
+  tag     Tag    @relation(fields: [tagId], references: [id])
+  tagId   Int
+
+  @@id([postId, tagId])
+  @@map("post_tags")
+}
+
+model Comment {
+  id        Int       @id @default(autoincrement())
+  content   String
+  author    User      @relation(fields: [authorId], references: [id])
+  authorId  Int
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    Int
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  parentId  Int?
+  replies   Comment[] @relation("CommentReplies")
+  status    CommentStatus @default(APPROVED)
+  moderationNote String?
+  deletedAt DateTime?
+  likes     Like[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("comments")
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  post      Post?    @relation(fields: [postId], references: [id], onDelete:Cascade)
+  postId    Int?
+  comment   Comment? @relation(fields: [commentId], references: [id])
+  commentId Int?
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId, commentId])
+  @@map("likes")
+}
+
+model Bookmark {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    Int
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+  @@map("bookmarks")
+}
+
+model Media {
+  id               Int      @id @default(autoincrement())
+  filename         String
+  originalFilename String
+  filePath         String
+  mimeType         String
+  fileSize         Int
+  uploader         User?    @relation(fields: [uploaderId], references: [id])
+  uploaderId       Int?
+  altText          String?
+  createdAt        DateTime @default(now())
+
+  @@map("media")
+}
+
+model Setting {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  value     String?
+  type      SettingType @default(TEXT)
+  category  String   @default("general")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}
+
+enum Role {
+  ADMIN
+  AUTHOR
+  READER
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum CommentStatus {
+  APPROVED
+  PENDING
+  SPAM
+  REJECTED
+}
+
+enum SettingType {
+  TEXT
+  BOOLEAN
+  NUMBER
+  JSON
+}
