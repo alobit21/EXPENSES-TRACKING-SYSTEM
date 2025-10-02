@@ -9,9 +9,34 @@ interface Category {
   name: string;
 }
 
+interface LandingPost {
+  id: number;
+  title: string;
+  excerpt: string;
+  slug: string;
+  coverImage: string;
+  author: {
+    id: number;
+    username: string;
+    displayName: string;
+    avatarUrl: string;
+  };
+  category: {
+    id: number;
+    name: string;
+  } | null;
+  publishedAt: string;
+  likeCount: number;
+  commentCount: number;
+}
+
+
+
 export const revalidate = 0
 
 export default async function Page() {
+
+  
   const [posts, categories] = await Promise.all([
     prisma.post.findMany({
       include: { author: true, comments: true, likes: true, category: true },
@@ -99,9 +124,12 @@ export default async function Page() {
             <Link href="/posts" className="text-sm text-blue-300 hover:text-blue-200">Browse all →</Link>
           </div>
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {latest.map((p) => (
-              <PostCard key={p.id} post={p} />
-            ))}
+          {latest.map((p: LandingPost) => (
+  <PostCard key={p.id} post={p} />
+))}
+
+
+
           </div>
         </section>
       )}
