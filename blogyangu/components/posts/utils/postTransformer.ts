@@ -1,10 +1,10 @@
 import { Post } from "../../../types/posts"
-import { Post as PrismaPost } from "@prisma/client"
+import { Post as PrismaPost, Category as PrismaCategory, User as PrismaUser } from "@prisma/client"
 
 export const transformPrismaPostToCustomPost = (
   prismaPost: PrismaPost & { 
-    author?: any
-    category?: any
+    author?: PrismaUser
+    category?: PrismaCategory
     _count?: { likes?: number; comments?: number }
   }
 ): Post => {
@@ -14,11 +14,15 @@ export const transformPrismaPostToCustomPost = (
     excerpt: prismaPost.excerpt,
     slug: prismaPost.slug,
     coverImage: prismaPost.coverImage,
-    author: prismaPost.author || {
-      id: prismaPost.authorId,
+    author: prismaPost.author ? {
+      id: prismaPost.author.id,
+      username: prismaPost.author.username,
+      displayName: prismaPost.author.displayName,
+      avatarUrl: prismaPost.author.avatarUrl,
+    } : {
+      id: prismaPost.authorId || 0,
       username: "Unknown",
-      name: "Unknown Author",
-      displayName: null,
+      displayName: "Unknown Author",
       avatarUrl: null,
     },
     // 👇 Convert Date → string
@@ -26,7 +30,10 @@ export const transformPrismaPostToCustomPost = (
 
     likeCount: prismaPost._count?.likes || 0,
     commentCount: prismaPost._count?.comments || 0,
-    category: prismaPost.category || null,
+    category: prismaPost.category ? {
+      id: prismaPost.category.id,
+      name: prismaPost.category.name,
+    } : null,
 
     // Keep raw Prisma fields
     content: prismaPost.content,

@@ -1,9 +1,11 @@
 import { useRouter } from "next/router"
 import { Post, Comment } from "../types"
+import { Category as PrismaCategory } from "@prisma/client"
 import React from "react"
+import { Session } from "next-auth"
 
 export class PostService {
-  static async fetchCategories(setCategories: (categories: any[]) => void) {
+  static async fetchCategories(setCategories: (categories: PrismaCategory[]) => void) {
     try {
       const res = await fetch("/api/categories")
       if (res.ok) {
@@ -33,12 +35,12 @@ export class PostService {
       }
       const data = await res.json() as { id: number; status: string; postId: number; moderationNote?: string }
       setCommentsByPost((prev) => {
-        const deepClone = (arr: any[]): any[] => arr.map((c) => ({ ...c, replies: c.replies ? deepClone(c.replies) : [] }))
+        const deepClone = (arr: Comment[]): Comment[] => arr.map((c) => ({ ...c, replies: c.replies ? deepClone(c.replies) : [] }))
         const list = prev[postId] ? deepClone(prev[postId]) : []
-        const visit = (items: any[]): boolean => {
+        const visit = (items: Comment[]): boolean => {
           for (const it of items) {
             if (it.id === commentId) {
-              it.status = data.status
+              it.status = data.status as "APPROVED" | "PENDING" | "SPAM" | "REJECTED"
               it.moderationNote = data.moderationNote
               return true
             }
@@ -73,13 +75,13 @@ export class PostService {
       }
       const data = await res.json() as { id: number; content: string; status: string; postId: number }
       setCommentsByPost((prev) => {
-        const deepClone = (arr: any[]): any[] => arr.map((c) => ({ ...c, replies: c.replies ? deepClone(c.replies) : [] }))
+        const deepClone = (arr: Comment[]): Comment[] => arr.map((c) => ({ ...c, replies: c.replies ? deepClone(c.replies) : [] }))
         const list = prev[postId] ? deepClone(prev[postId]) : []
-        const visit = (items: any[]): boolean => {
+        const visit = (items: Comment[]): boolean => {
           for (const it of items) {
             if (it.id === commentId) {
               it.content = data.content
-              it.status = data.status
+              it.status = data.status as "APPROVED" | "PENDING" | "SPAM" | "REJECTED"
               return true
             }
             if (it.replies && visit(it.replies)) return true
@@ -107,7 +109,7 @@ export class PostService {
         throw new Error(e?.error || "Failed to delete comment")
       }
       setCommentsByPost((prev) => {
-        const removeFrom = (items: any[]): any[] => {
+        const removeFrom = (items: Comment[]): Comment[] => {
           return items
             .filter((it) => it.id !== commentId)
             .map((it) => ({ ...it, replies: it.replies ? removeFrom(it.replies) : [] }))
@@ -125,7 +127,7 @@ export class PostService {
   static async likeComment(
     commentId: number,
     postId: number,
-    session: any,
+    session: Session | null,
     setCommentsByPost: React.Dispatch<React.SetStateAction<Record<number, Comment[]>>>
   ) {
     if (!session?.user?.id) {
@@ -143,9 +145,9 @@ export class PostService {
 
       // update tree likeCount
       setCommentsByPost((prev) => {
-        const deepClone = (arr: any[]): any[] => arr.map((c) => ({ ...c, replies: c.replies ? deepClone(c.replies) : [] }))
+        const deepClone = (arr: Comment[]): Comment[] => arr.map((c) => ({ ...c, replies: c.replies ? deepClone(c.replies) : [] }))
         const list = prev[postId] ? deepClone(prev[postId]) : []
-        const visit = (items: any[]): boolean => {
+        const visit = (items: Comment[]): boolean => {
           for (const it of items) {
             if (it.id === commentId) {
               it.likeCount = data.likeCount
@@ -181,9 +183,9 @@ export class PostService {
 
       // Update comment status in local state
       setCommentsByPost((prev) => {
-        const deepClone = (arr: any[]): any[] => arr.map((c) => ({ ...c, replies: c.replies ? deepClone(c.replies) : [] }))
+        const deepClone = (arr: Comment[]): Comment[] => arr.map((c) => ({ ...c, replies: c.replies ? deepClone(c.replies) : [] }))
         const list = prev[postId] ? deepClone(prev[postId]) : []
-        const visit = (items: any[]): boolean => {
+        const visit = (items: Comment[]): boolean => {
           for (const it of items) {
             if (it.id === commentId) {
               it.status = "APPROVED"
@@ -205,7 +207,7 @@ export class PostService {
     }
   }
 
-  private static showLoginAlert(router: any) {
+  private static showLoginAlert(router: ReturnType<typeof useRouter>) {
     const shouldLogin = confirm("Please login to like posts. Click OK to login.")
     if (shouldLogin) {
       router.push('/auth/signin')
@@ -222,7 +224,7 @@ export class PostService {
       const res = await fetch("/api/posts")
       if (res.ok) {
         const data = await res.json()
-        const postsWithCounts = data.map((post: any) => ({
+        const postsWithCounts = data.map((post: Post) => ({
           ...post,
           likeCount: post.likeCount || 0,
           commentCount: post.commentCount || 0,
@@ -298,7 +300,7 @@ export class PostService {
   static async submitComment(
   postId: number,
   content: string,
-  session: any,
+  session: Session | null,
   setCommentsByPost: React.Dispatch<React.SetStateAction<Record<number, Comment[]>>>,
   setCommentText?: React.Dispatch<React.SetStateAction<string>>,
   setActiveCommentPostId?: React.Dispatch<React.SetStateAction<number | null>>,
@@ -332,10 +334,10 @@ export class PostService {
       const newComment = await res.json()
       alert("Thank you for your comment. Your contribution will be public after admin approval.")
       setCommentsByPost((prev) => {
-        const deepClone = (arr: any[]): any[] => arr.map((c) => ({ ...c, replies: c.replies ? deepClone(c.replies) : [] }))
+        const deepClone = (arr: Comment[]): Comment[] => arr.map((c) => ({ ...c, replies: c.replies ? deepClone(c.replies) : [] }))
         const list = prev[postId] ? deepClone(prev[postId]) : []
         if (parentId) {
-          const attach = (items: any[]): boolean => {
+          const attach = (items: Comment[]): boolean => {
             for (const it of items) {
               if (it.id === parentId) {
                 it.replies = it.replies || []
@@ -374,7 +376,7 @@ export class PostService {
   }
 }
 
- static async likePost(postId: number, session: any, setPosts: React.Dispatch<React.SetStateAction<Post[]>>, router?: any) {
+ static async likePost(postId: number, session: Session | null, setPosts: React.Dispatch<React.SetStateAction<Post[]>>, router?: ReturnType<typeof useRouter>) {
   if (!session?.user?.id) {
     if (router) {
       this.showLoginAlert(router)

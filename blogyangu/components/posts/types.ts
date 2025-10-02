@@ -1,6 +1,7 @@
 
 
 import { Dispatch, SetStateAction } from "react"
+import { Session } from "next-auth"
 
 
 
@@ -86,7 +87,7 @@ export interface PostCommonProps {
   loadingComments: boolean
   commentsByPost: Record<number, Comment[]>
   isAdminOrAuthor: boolean
-  session: any
+  session: Session | null
   currentUserId?: number
   onToggleComments: (postId: number) => void
   onSubmitComment: (postId: number) => void

@@ -1,6 +1,8 @@
 import { Author } from "@/components/posts/types";
 import { Session } from "next-auth";
 
+export type { Author };
+
  
 export interface Comment {
   id: number;

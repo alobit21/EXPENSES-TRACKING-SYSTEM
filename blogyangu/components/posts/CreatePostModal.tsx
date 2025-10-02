@@ -1,12 +1,15 @@
 import PostForm from "@/components/PostForm"
 import { Category } from "@prisma/client"
+import { Post } from "./types"
+import { Dispatch, SetStateAction } from "react"
+import { Session } from "next-auth"
 
 interface CreatePostModalProps {
   showModal: boolean
   setShowModal: (show: boolean) => void
   categories: Category[]
-  session: any
-  setPosts: (posts: any) => void
+  session: Session | null
+  setPosts: Dispatch<SetStateAction<Post[]>>
 }
 
 export default function CreatePostModal({ 
@@ -46,9 +49,21 @@ export default function CreatePostModal({
                 throw new Error(err.message || "Failed to create post")
               }
 
-              const post = await res.json()
+              const responseData = await res.json()
+              const post: Post = {
+                id: responseData.id,
+                title: responseData.title,
+                excerpt: responseData.excerpt,
+                slug: responseData.slug,
+                coverImage: responseData.coverImage,
+                author: responseData.author,
+                publishedAt: responseData.publishedAt,
+                likeCount: responseData.likeCount || 0,
+                commentCount: responseData.commentCount || 0,
+                category: responseData.category
+              }
               alert(`Post created: ${post.title}`)
-              setPosts((prev: any) => [post, ...prev])
+              setPosts((prev: Post[]) => [post, ...prev])
               setShowModal(false)
             } catch (err) {
               console.error("Error creating post:", err)

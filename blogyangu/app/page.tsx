@@ -9,23 +9,25 @@ interface Category {
   name: string;
 }
 
+interface Author {
+  id: number;
+  username: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+}
+
 interface LandingPost {
   id: number;
   title: string;
-  excerpt: string;
+  excerpt: string | null;
   slug: string;
-  coverImage: string;
-  author: {
-    id: number;
-    username: string;
-    displayName: string;
-    avatarUrl: string;
-  };
+  coverImage: string | null;
+  author: Author;
   category: {
     id: number;
     name: string;
   } | null;
-  publishedAt: string;
+  publishedAt: string | null;
   likeCount: number;
   commentCount: number;
 }
@@ -46,7 +48,7 @@ export default async function Page() {
     prisma.category.findMany({ orderBy: { name: "asc" } }),
   ])
 
-  const postsWithCounts = posts.map((post: any) => ({
+  const postsWithCounts = posts.map((post) => ({
     id: post.id,
     title: post.title,
     excerpt: post.excerpt,
@@ -61,9 +63,9 @@ export default async function Page() {
         }
       : { id: 0, username: "unknown", displayName: "Unknown", avatarUrl: null },
     category: post.category ? { id: post.category.id, name: post.category.name } : null,
-    publishedAt: post.publishedAt,
+    publishedAt: post.publishedAt?.toISOString() || null,
     likeCount: post.likes.length,
-    commentCount: post.comments.filter((c: any) => c.status === "APPROVED").length,
+    commentCount: post.comments.filter((c) => c.status === "APPROVED").length,
   }))
 
   const featured = postsWithCounts[0]

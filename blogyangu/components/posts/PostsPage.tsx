@@ -64,7 +64,7 @@ const [imageErrors, setImageErrors] = useState<Record<string | number, boolean>>
   }
 
   const handleApproveComment = async (commentId: number, postId: number) => {
-    await PostService.approveComment(commentId, postId, setCommentsByPost as any, setPosts as any)
+    await PostService.approveComment(commentId, postId, setCommentsByPost, setPosts)
   }
 
   const handleReplyComment = async (postId: number, parentId: number, content: string) => {

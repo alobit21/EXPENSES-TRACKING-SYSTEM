@@ -15,7 +15,7 @@ if (!fs.existsSync(uploadDir)) {
 }
 
 export async function POST(req: Request): Promise<Response> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const form = formidable({
       multiples: false,
       uploadDir,
@@ -23,7 +23,7 @@ export async function POST(req: Request): Promise<Response> {
       filename: (name, ext, part) => Date.now().toString() + "_" + part.originalFilename,
     })
 
-    form.parse(req as any, (err, fields, files) => {
+    form.parse(req as unknown as Parameters<typeof form.parse>[0], (err, fields, files) => {
       if (err) {
         resolve(NextResponse.json({ error: "Upload failed" }, { status: 500 }))
         return
