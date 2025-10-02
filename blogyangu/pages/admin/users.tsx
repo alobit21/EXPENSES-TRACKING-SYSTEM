@@ -5,13 +5,33 @@ import DataTable from "@/components/dashboard/DataTable"
 import DashboardLayout from "@/components/dashboard/DashboardLayout"
 import UserModal from "@/components/admin/UserModal"
 
+interface User {
+  id: string
+  email: string
+  username?: string
+  displayName?: string
+  role: string
+  createdAt: string
+  updatedAt: string
+  isVerified: boolean
+}
+
+interface UserRow {
+  id: string
+  username: string
+  email: string
+  role: string
+  createdAt: string
+  actions?: string
+}
+
 export default function AdminUsers() {
   const { data: session } = useSession()
-  const role = (session?.user as any)?.role as string | undefined
+  const role = session?.user?.role as string | undefined
   const isAdmin = role === "ADMIN"
-  const [users, setUsers] = useState<any[]>([])
+  const [users, setUsers] = useState<User[]>([])
   const [openModal, setOpenModal] = useState(false)
-  const [editing, setEditing] = useState<any | null>(null)
+  const [editing, setEditing] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -25,7 +45,7 @@ export default function AdminUsers() {
         } else {
           setError("Failed to fetch users")
         }
-      } catch (e) {
+      } catch {
         setError("Network error")
       } finally {
         setLoading(false)
@@ -34,12 +54,15 @@ export default function AdminUsers() {
   }, [])
 
   const onCreate = () => { setEditing(null); setOpenModal(true) }
-  const onEdit = async (u: any) => { setEditing(u); setOpenModal(true) }
-  const onDelete = async (u: any) => {
+  const onEdit = async (row: UserRow) => { 
+    const user = users.find(u => u.id === row.id)
+    if (user) setEditing(user); setOpenModal(true) 
+  }
+  const onDelete = async (row: UserRow) => {
     if (!confirm("Delete this user?")) return
     try {
-      const res = await fetch(`/api/users/${u.id}`, { method: "DELETE" })
-      if (res.ok) setUsers((arr) => arr.filter((x) => x.id !== u.id))
+      const res = await fetch(`/api/users/${row.id}`, { method: "DELETE" })
+      if (res.ok) setUsers((arr) => arr.filter((x) => x.id !== row.id))
     } catch {}
   }
 
@@ -83,19 +106,19 @@ export default function AdminUsers() {
                 { key: "username", header: "Username" },
                 { key: "email", header: "Email" },
                 { key: "role", header: "Role" },
-                { key: "createdAt", header: "Created", render: (r: any) => new Date(r.createdAt).toLocaleString() },
+                { key: "createdAt", header: "Created", render: (r: UserRow) => new Date(r.createdAt).toLocaleString() },
                 ...(isAdmin
-                  ? ([{ key: "actions", header: "Actions", render: (row: any) => (
+                  ? ([{ key: "actions", header: "Actions", render: (row: UserRow) => (
                       <div className="flex gap-2">
                         <button className="px-2 py-1 text-xs bg-yellow-500 hover:bg-yellow-600 text-white rounded" onClick={() => onEdit(row)}>Edit</button>
                         <button className="px-2 py-1 text-xs bg-red-600 hover:bg-red-700 text-white rounded" onClick={() => onDelete(row)}>Delete</button>
                       </div>
-                    ) }] as any)
-                  : ([] as any)),
+                    ) }] as const)
+                  : ([] as const)),
               ]}
               rows={users.map((u) => ({
                 id: u.id,
-                username: u.username || u.name || "user",
+                username: u.username || u.displayName || "user",
                 email: u.email || "",
                 role: u.role || "USER",
                 createdAt: u.createdAt,

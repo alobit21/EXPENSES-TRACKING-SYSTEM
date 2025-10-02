@@ -21,7 +21,7 @@ export default function RePieChart({ data, innerRadius = 60, outerRadius = 110 }
     <div style={{ width: "100%", height: 300 }}>
       <ResponsiveContainer>
         <RCPieChart>
-          <Tooltip formatter={(val: any, _n, payload: any) => {
+          <Tooltip formatter={(val: number, _n: string, payload: { name?: string } | undefined) => {
             const v = Number(val) || 0
             const pct = ((v / total) * 100).toFixed(1)
             return [`${v} (${pct}%)`, payload?.name]

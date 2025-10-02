@@ -1,6 +1,8 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import PostForm from "../../../components/PostForm";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -8,14 +10,30 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+
+interface Post {
+  id: number
+  title: string
+  slug: string
+  content: string
+  excerpt?: string | undefined
+  metaDescription?: string | undefined
+  coverImage?: string | undefined
+  categoryId?: number | undefined
+  status?: string | undefined
+  allowComments?: boolean | undefined
+}
+
+interface Category {
+  id: number
+  name: string
+}
 
 export default function EditPostPage() {
   const router = useRouter();
   const { id } = router.query;
-  const [post, setPost] = useState<any>(null);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [post, setPost] = useState<Post | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogTitle, setDialogTitle] = useState<string>("");

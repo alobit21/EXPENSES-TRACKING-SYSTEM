@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 import PostForm from "@/components/PostForm"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 
 interface Category {
@@ -22,13 +22,15 @@ type Author = {
   avatarUrl?: string | null; // ✅ Add this line
 };
 
-function isAuthor(user: any): user is Author {
-  return (
-    typeof user.id === 'string' &&
-    typeof user.email === 'string' &&
-    typeof user.displayName === 'string' &&
-    typeof user.username === 'string'
-  );
+interface User {
+  id?: string | number
+  email?: string | null
+  name?: string | null
+  image?: string | null
+  role?: string | null
+  displayName?: string
+  username?: string
+  avatarUrl?: string | null
 }
 
 
@@ -39,7 +41,6 @@ export default function NewPostPage() {
   const { data: session } = useSession()
   const [imageError, setImageError] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [dialogTitle, setDialogTitle] = useState("")
   const [dialogMessage, setDialogMessage] = useState("")
 
   useEffect(() => {
@@ -75,19 +76,16 @@ export default function NewPostPage() {
       })
       if (res.ok) {
         const post = await res.json()
-        setDialogTitle("Post created")
         setDialogMessage(`${post.title}`)
         setDialogOpen(true)
         window.location.href = `/posts/${post.id}`
       } else {
         const err = await res.json()
-        setDialogTitle("Create failed")
         setDialogMessage(err.message || "Failed to create post")
         setDialogOpen(true)
       }
     } catch (err) {
       console.error("Error creating post:", err)
-      setDialogTitle("Create error")
       setDialogMessage("An error occurred while creating the post")
       setDialogOpen(true)
     }

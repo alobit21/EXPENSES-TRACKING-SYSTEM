@@ -47,7 +47,7 @@ export default function CommentItem({
       {comment.status === "PENDING" && (
         <div className="mb-2 text-xs italic text-yellow-400">Pending approval</div>
       )}
-      {(comment.status as any) === "REJECTED" && (isAdminOrAuthor || currentUserId === comment.author.id) && (
+      {comment.status === "REJECTED" && (isAdminOrAuthor || currentUserId === comment.author.id) && (
         <div className="mb-2 text-xs text-red-500 dark:text-red-400">
           Rejected{comment.moderationNote ? `: ${comment.moderationNote}` : ""}
         </div>
@@ -64,7 +64,12 @@ export default function CommentItem({
           />
           <div className="mt-2 flex items-center gap-2">
             <button
-              onClick={() => { onEdit && onEdit(editText.trim()); setIsEditing(false) }}
+              onClick={() => {
+                if (onEdit) {
+                  onEdit(editText.trim());
+                }
+                setIsEditing(false);
+              }}
               disabled={!editText.trim()}
               className="text-xs bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white px-3 py-1 rounded"
             >Save</button>

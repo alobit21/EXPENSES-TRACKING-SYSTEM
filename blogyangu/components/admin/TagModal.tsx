@@ -2,15 +2,23 @@
 
 import React, { useState } from "react"
 
+interface Tag {
+  id: number
+  name: string
+  slug: string
+}
+
+interface TagModalProps {
+  open: boolean
+  onClose: () => void
+  onCreated: (tag: Tag) => void
+}
+
 export default function TagModal({
   open,
   onClose,
   onCreated,
-}: {
-  open: boolean
-  onClose: () => void
-  onCreated: (tag: any) => void
-}) {
+}: TagModalProps) {
   const [name, setName] = useState("")
   const [slug, setSlug] = useState("")
   const [loading, setLoading] = useState(false)
@@ -32,8 +40,8 @@ export default function TagModal({
       setName("")
       setSlug("")
       onClose()
-    } catch (e: any) {
-      setError(e.message)
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "An error occurred")
     } finally {
       setLoading(false)
     }

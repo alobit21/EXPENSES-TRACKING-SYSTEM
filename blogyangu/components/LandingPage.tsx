@@ -218,7 +218,7 @@ export default function Home() {
                 transition={{ delay: i * 0.2 }}
                 className="bg-white p-6 rounded-lg shadow-md"
               >
-                <p className="text-gray-700 mb-4 italic">"{testimonial.quote}"</p>
+                <p className="text-gray-700 mb-4 italic">&ldquo;{testimonial.quote}&rdquo;</p>
                 <p className="font-semibold text-gray-800">{testimonial.name}</p>
               </motion.div>
             ))}

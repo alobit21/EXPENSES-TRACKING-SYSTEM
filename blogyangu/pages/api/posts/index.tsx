@@ -10,11 +10,6 @@ import { Post, User, Comment, Like } from "@prisma/client";
 
 
 
-type Fields<T> = {
-  [key: string]: T[];
-};
-
-
 
 export const config = {
   api: { bodyParser: false },
@@ -154,9 +149,9 @@ const slug = await makeUniqueSlug(title)
     })
 
     return res.status(201).json(newPost)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("🔥 Error creating post:", error)
-    return res.status(500).json({ error: error.message || "Internal server error" })
+    return res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" })
   }
 }
 

@@ -5,10 +5,17 @@ import Link from "next/link"
 import { useRouter } from "next/router"
 import { useSession } from "next-auth/react"
 import { Menu, X, LayoutDashboard, Users, MessageSquare, Folder, ThumbsUp, Tag, Settings } from "lucide-react"
+import { Role } from "@prisma/client"
 
-type Role = "ADMIN" | "AUTHOR" | undefined
+interface SidebarItemProps {
+  href: string
+  label: string
+  count?: number
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
+  active: boolean
+}
 
-function SidebarItem({ href, label, count, icon: Icon, active }: { href: string; label: string; count?: number; icon: React.ComponentType<any>; active: boolean }) {
+function SidebarItem({ href, label, count, icon: Icon, active }: SidebarItemProps) {
   return (
     <Link
       href={href}
@@ -32,7 +39,7 @@ function SidebarItem({ href, label, count, icon: Icon, active }: { href: string;
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession()
   const [open, setOpen] = useState(false)
-  const role: Role = (session?.user as any)?.role
+  const role: Role | undefined = session?.user?.role as Role | undefined
   const router = useRouter()
 
   // Counts for sidebar badges
@@ -111,7 +118,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     href={l.href}
                     label={l.label}
                     count={l.count as number | undefined}
-                    icon={l.icon as any}
+                    icon={l.icon}
                     active={router.pathname === l.href || router.pathname.startsWith(l.href + "/")}
                   />
                 ))}

@@ -1,17 +1,15 @@
 // pages/posts/[id].tsx
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '../api/auth/[...nextauth]'
 import { prisma } from '../../lib/prisma'
-import { Post, User, Comment as PrismaComment, Like } from '@prisma/client'
 import { Session } from 'next-auth'
 import Link from 'next/link'
 import Image from 'next/image'
 import { FaRegThumbsUp, FaThumbsUp, FaRegComment, FaEdit, FaTrash, FaArrowLeft, FaReply } from 'react-icons/fa'
 import { useSession } from 'next-auth/react'
-import ReactMarkdown from 'react-markdown'
 import * as Showdown from "showdown"
 
 // Types matching your backend response
@@ -58,6 +56,17 @@ interface PostLite {
   commentCount?: number
 }
 
+interface PrismaPostWithCounts {
+  id: number
+  title: string
+  slug: string
+  coverImage: string | null
+  _count: {
+    comments: number
+    likes: number
+  }
+}
+
 interface Props {
   post: PostWithExtras
   initialComments: Comment[]
@@ -70,7 +79,7 @@ interface Props {
 
 export default function PostDetail({ post, initialComments, relatedPosts, trendingPosts, mostLikedPosts, mostCommentedPosts, latestPosts }: Props) {
   const router = useRouter()
-  const { data: session, status } = useSession()
+  const { data: session } = useSession()
   const [imageError, setImageError] = useState(false)
   const [commentText, setCommentText] = useState('')
   const [replyingTo, setReplyingTo] = useState<number | null>(null)
@@ -733,7 +742,6 @@ function formatDate(date: Date | string | null) {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await getServerSession(context.req, context.res, authOptions)
   const { id } = context.params!
 
   try {
@@ -835,7 +843,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       })
     ])
 
-    const mapLite = (arr: any[]): PostLite[] =>
+    const mapLite = (arr: PrismaPostWithCounts[]): PostLite[] =>
       arr.map(p => ({
         id: p.id,
         title: p.title,

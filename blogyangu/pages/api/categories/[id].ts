@@ -36,8 +36,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         data: { name, slug: makeSlug(name), description },
       })
       return res.json(category)
-    } catch (error: any) {
-      if (error.code === "P2002") {
+    } catch (error: unknown) {
+      if (error instanceof Error && 'code' in error && error.code === "P2002") {
         return res.status(400).json({ message: "Category already exists" })
       }
       console.error(error)

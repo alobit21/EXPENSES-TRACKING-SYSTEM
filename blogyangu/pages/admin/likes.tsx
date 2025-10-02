@@ -3,8 +3,45 @@ import RoleGuard from "@/components/dashboard/RoleGuard"
 import DashboardLayout from "@/components/dashboard/DashboardLayout"
 import DataTable from "@/components/dashboard/DataTable"
 
+interface LikeUser {
+  id: string
+  username?: string
+  displayName?: string
+}
+
+interface LikePost {
+  id: number
+  title: string
+  authorId: string
+  category: { name: string }
+}
+
+interface LikeComment {
+  id: number
+  content: string
+  authorId: string
+}
+
+interface Like {
+  id: number
+  createdAt: string
+  userId: string
+  postId?: number
+  commentId?: number
+  user?: LikeUser
+  post?: LikePost
+  comment?: LikeComment
+}
+
+interface LikeRow {
+  id: number
+  user: string
+  target: string
+  createdAt: string
+}
+
 export default function AdminLikes() {
-  const [likes, setLikes] = useState<any[]>([])
+  const [likes, setLikes] = useState<Like[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -47,7 +84,7 @@ export default function AdminLikes() {
                 { key: "id", header: "ID" },
                 { key: "user", header: "User" },
                 { key: "target", header: "Target" },
-                { key: "createdAt", header: "Date", render: (r: any) => new Date(r.createdAt).toLocaleString() },
+                { key: "createdAt", header: "Date", render: (r: LikeRow) => new Date(r.createdAt).toLocaleString() },
               ]}
               rows={rows}
             />

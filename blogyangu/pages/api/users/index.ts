@@ -3,12 +3,13 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "../auth/[...nextauth]"
 import { prisma } from "@/lib/prisma"
 import crypto from "crypto"
+import { Role } from "@prisma/client"
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = await getServerSession(req, res, authOptions as any)
+  const session = await getServerSession(req, res, authOptions)
   // Allow public GET; admin-only for mutations
   if (req.method !== "GET") {
-    const role = (session as any)?.user?.role
+    const role = session?.user?.role
     if (!role || role !== "ADMIN") {
       return res.status(403).json({ message: "Forbidden" })
     }
@@ -33,9 +34,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     if (req.method === "POST") {
-      const role = (session as any)?.user?.role
+      const role = session?.user?.role
       if (!role || role !== "ADMIN") return res.status(403).json({ message: "Forbidden" })
-      const { username, email, password, role: newRole = "AUTHOR", displayName } = req.body || {}
+      const { username, email, password, role: newRole = "AUTHOR" as Role, displayName } = req.body || {}
       if (!username || !email || !password) return res.status(400).json({ message: "username, email and password are required" })
       const salt = crypto.randomBytes(16).toString("hex")
       const derivedKey = crypto.scryptSync(password, salt, 64).toString("hex")
@@ -46,14 +47,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           select: { id: true, username: true, email: true, role: true, displayName: true, createdAt: true },
         })
         return res.status(201).json(user)
-      } catch (e: any) {
-        if (e?.code === "P2002") return res.status(409).json({ message: "Username or email already exists" })
+      } catch (e: unknown) {
+        if (e instanceof Error && 'code' in e && e.code === "P2002") return res.status(409).json({ message: "Username or email already exists" })
         throw e
       }
     }
 
     return res.status(405).json({ message: "Method Not Allowed" })
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error("/api/users error:", e)
     return res.status(500).json({ message: "Internal Server Error" })
   }

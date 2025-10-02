@@ -1,12 +1,44 @@
 import { useEffect, useMemo, useState } from "react"
-import { useSession } from "next-auth/react"
 import RoleGuard from "@/components/dashboard/RoleGuard"
 import DashboardLayout from "@/components/dashboard/DashboardLayout"
 import DataTable from "@/components/dashboard/DataTable"
 
+interface LikeUser {
+  id: number
+  username?: string | null
+  displayName?: string | null
+}
+
+interface LikePost {
+  id: number
+  title: string
+}
+
+interface LikeComment {
+  id: number
+  content: string
+}
+
+interface Like {
+  id: number
+  userId: number
+  postId?: number | null
+  commentId?: number | null
+  createdAt: string | Date
+  user?: LikeUser
+  post?: LikePost
+  comment?: LikeComment
+}
+
+interface LikeRow {
+  id: number
+  user: string
+  target: string
+  createdAt: string | Date
+}
+
 export default function AuthorLikes() {
-  const { data: session } = useSession()
-  const [likes, setLikes] = useState<any[]>([])
+  const [likes, setLikes] = useState<Like[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -25,7 +57,7 @@ export default function AuthorLikes() {
   }, [])
 
   const rows = useMemo(() => {
-    return likes.map((l: any) => ({
+    return likes.map((l: Like) => ({
       id: l.id,
       user: l.user?.username || l.user?.displayName || `#${l.userId}`,
       target: l.post ? `Post: ${l.post.title}` : l.comment ? `Comment: ${l.comment.content?.slice(0,50)}…` : "-",
@@ -51,7 +83,7 @@ export default function AuthorLikes() {
                 { key: "id", header: "ID" },
                 { key: "user", header: "User" },
                 { key: "target", header: "Target" },
-                { key: "createdAt", header: "Date", render: (r: any) => new Date(r.createdAt).toLocaleString() },
+                { key: "createdAt", header: "Date", render: (r: LikeRow) => new Date(r.createdAt).toLocaleString() },
               ]}
               rows={rows}
             />

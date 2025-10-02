@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { FaRegThumbsUp, FaRegCommentDots, FaEdit, FaTrash } from "react-icons/fa";
 import CommentSection from "./CommentSection";
-import { PostProps } from "./types";
+import { PostProps, Author } from "./types";
 
 export default function ColumnPost({
   post,
@@ -23,9 +23,9 @@ export default function ColumnPost({
   onDenyComment = () => {},
   onEditComment = () => {},
   onDeleteComment = () => {},
-  getAuthorDisplay = (author: any) => author?.displayName || author?.username || "Unknown",
+  getAuthorDisplay = (author: Author) => author?.displayName || author?.username || "Unknown",
   getAvatarUrl = () => null,
-  getInitials = (author: any) =>
+  getInitials = (author: Author) =>
     (author?.displayName || author?.username || "U").charAt(0).toUpperCase(),
   session = null,
   currentUserId,

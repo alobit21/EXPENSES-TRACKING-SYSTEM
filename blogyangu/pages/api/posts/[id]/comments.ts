@@ -4,6 +4,24 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "../../auth/[...nextauth]"
 import { prisma } from "../../../../lib/prisma"
 
+interface CommentAuthor {
+  id: string | number
+  username?: string | null
+  displayName?: string | null
+  avatarUrl?: string | null
+}
+
+interface CommentNode {
+  id: number
+  content: string
+  createdAt: Date
+  status: string
+  author: CommentAuthor
+  parentId?: number
+  likeCount: number
+  replies: CommentNode[]
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query
   const session = await getServerSession(req, res, authOptions)
@@ -35,8 +53,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       })
 
       // Build threaded tree
-      const byId: Record<number, any> = {}
-      const roots: any[] = []
+      const byId: Record<number, CommentNode> = {}
+      const roots: CommentNode[] = []
       comments.forEach((c) => {
         byId[c.id] = {
           id: c.id,
@@ -45,11 +63,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           status: c.status,
           author: {
             id: c.author.id,
-            username: c.author.username,
-            displayName: c.author.displayName,
-            avatarUrl: c.author.avatarUrl,
+            username: c.author.username || undefined,
+            displayName: c.author.displayName || undefined,
+            avatarUrl: c.author.avatarUrl || undefined,
           },
-          parentId: c.parentId,
+          parentId: c.parentId || undefined,
           likeCount: c._count?.likes ?? 0,
           replies: [],
         }

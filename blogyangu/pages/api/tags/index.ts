@@ -4,8 +4,8 @@ import { authOptions } from "../auth/[...nextauth]"
 import { prisma } from "@/lib/prisma"
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = await getServerSession(req, res, authOptions as any)
-  const role = (session as any)?.user?.role
+  const session = await getServerSession(req, res, authOptions)
+  const role = session?.user?.role
   try {
     if (req.method === "GET") {
       const tags = await prisma.tag.findMany({
@@ -22,8 +22,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       try {
         const tag = await prisma.tag.create({ data: { name, slug }, select: { id: true, name: true, slug: true, createdAt: true } })
         return res.status(201).json(tag)
-      } catch (e: any) {
-        if (e?.code === "P2002") return res.status(409).json({ message: "Tag name or slug already exists" })
+      } catch (e: unknown) {
+        if (e instanceof Error && 'code' in e && e.code === "P2002") return res.status(409).json({ message: "Tag name or slug already exists" })
         throw e
       }
     }

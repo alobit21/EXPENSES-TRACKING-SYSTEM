@@ -1,6 +1,24 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
+import { Role } from "@prisma/client"
+
+interface User {
+  id?: number
+  username: string
+  email: string
+  displayName?: string
+  role: Role
+  password?: string
+}
+
+interface UserModalProps {
+  open: boolean
+  onClose: () => void
+  onSaved: (user: User) => void
+  initialUser?: Partial<User>
+  mode?: "create" | "edit"
+}
 
 export default function UserModal({
   open,
@@ -8,18 +26,12 @@ export default function UserModal({
   onSaved,
   initialUser,
   mode = "create",
-}: {
-  open: boolean
-  onClose: () => void
-  onSaved: (user: any) => void
-  initialUser?: any
-  mode?: "create" | "edit"
-}) {
+}: UserModalProps) {
   const [username, setUsername] = useState(initialUser?.username ?? "")
   const [email, setEmail] = useState(initialUser?.email ?? "")
   const [displayName, setDisplayName] = useState(initialUser?.displayName ?? "")
   const [password, setPassword] = useState("")
-  const [role, setRole] = useState(initialUser?.role ?? "AUTHOR")
+  const [role, setRole] = useState<Role>(initialUser?.role ?? Role.AUTHOR)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -28,7 +40,7 @@ export default function UserModal({
     setEmail("")
     setDisplayName("")
     setPassword("")
-    setRole("AUTHOR")
+    setRole(Role.AUTHOR)
     setError(null)
   }
 
@@ -38,7 +50,7 @@ export default function UserModal({
       setUsername(initialUser.username ?? "")
       setEmail(initialUser.email ?? "")
       setDisplayName(initialUser.displayName ?? "")
-      setRole(initialUser.role ?? "AUTHOR")
+      setRole(initialUser.role ?? Role.AUTHOR)
       setPassword("")
       setError(null)
     } else if (mode === "create") {
@@ -65,7 +77,7 @@ export default function UserModal({
     try {
       const url = mode === "edit" && initialUser?.id ? `/api/users/${initialUser.id}` : "/api/users"
       const method = mode === "edit" ? "PUT" : "POST"
-      const payload: any = { username, email, role, displayName }
+      const payload: Partial<User> = { username, email, role, displayName }
       if (mode === "create") payload.password = password
       if (mode === "edit" && password) payload.password = password
 
@@ -78,14 +90,14 @@ export default function UserModal({
       const isJson = ct.includes("application/json")
       const data = isJson ? await res.json() : await res.text()
       if (!res.ok) {
-        const msg = typeof data === "object" && (data as any)?.message ? (data as any).message : (typeof data === "string" && data) || "Failed to save user"
+        const msg = typeof data === "object" && (data as { message?: string })?.message ? (data as { message?: string }).message : (typeof data === "string" && data) || "Failed to save user"
         throw new Error(msg)
       }
       onSaved(data)
       reset()
       onClose()
-    } catch (e: any) {
-      setError(e.message)
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "An error occurred")
     } finally {
       setLoading(false)
     }
@@ -132,11 +144,11 @@ export default function UserModal({
           />
           <select
             value={role}
-            onChange={(e) => setRole(e.target.value)}
+            onChange={(e) => setRole(e.target.value as Role)}
             className="w-full rounded border border-input bg-background px-3 py-2 text-sm dark:bg-gray-900 dark:text-white dark:border-gray-700"
           >
-            <option value="AUTHOR">AUTHOR</option>
-            <option value="ADMIN">ADMIN</option>
+            <option value={Role.AUTHOR}>AUTHOR</option>
+            <option value={Role.ADMIN}>ADMIN</option>
           </select>
         </div>
 

@@ -5,6 +5,18 @@ import path from "path";
 import { prisma } from "../../../lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]";
+import { PostStatus } from "@prisma/client";
+
+interface PostUpdateData {
+  title: string | undefined;
+  content: string | undefined;
+  excerpt: string | null;
+  metaDescription: string | null;
+  status: PostStatus | undefined;
+  allowComments: boolean;
+  categoryId: number | null;
+  coverImage?: string;
+}
 
 export const config = { api: { bodyParser: false } };
 
@@ -52,12 +64,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     form.parse(req, async (err, fields, files) => {
       if (err) return res.status(500).json({ message: "Form parse error" });
 
-      const updateData: any = {
+      const updateData: PostUpdateData = {
         title: Array.isArray(fields.title) ? fields.title[0] : fields.title,
         content: Array.isArray(fields.content) ? fields.content[0] : fields.content,
         excerpt: fields.excerpt ? (Array.isArray(fields.excerpt) ? fields.excerpt[0] : fields.excerpt) : null,
         metaDescription: fields.metaDescription ? (Array.isArray(fields.metaDescription) ? fields.metaDescription[0] : fields.metaDescription) : null,
-        status: Array.isArray(fields.status) ? fields.status[0] : fields.status,
+        status: Array.isArray(fields.status) ? fields.status[0] as PostStatus : fields.status as PostStatus | undefined,
         allowComments: (Array.isArray(fields.allowComments) ? fields.allowComments[0] : fields.allowComments) === "true",
         categoryId: fields.categoryId ? parseInt(Array.isArray(fields.categoryId) ? fields.categoryId[0] : fields.categoryId) : null,
       };

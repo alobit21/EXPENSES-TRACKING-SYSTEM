@@ -5,11 +5,12 @@ import { useState, useMemo } from "react"
 import { Menu, X } from "lucide-react"
 import { ThemeToggle } from "@/components/theme/ThemeToggle"
 import { useSession, signIn, signOut } from "next-auth/react"
+import { Role } from "@prisma/client"
 
 export function Navbar() {
   const [open, setOpen] = useState(false)
   const { data: session } = useSession()
-  const role = (session?.user as any)?.role as string | undefined
+  const role = session?.user?.role as Role | undefined
   const links = useMemo(() => {
     const base = [
       { href: "/", label: "Home" },

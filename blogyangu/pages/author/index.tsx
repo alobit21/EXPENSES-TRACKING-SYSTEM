@@ -7,13 +7,67 @@ import ReBarChart from "@/components/dashboard/charts/ReBarChart"
 import RePieChart from "@/components/dashboard/charts/RePieChart"
 import DataTable from "@/components/dashboard/DataTable"
 import DashboardLayout from "@/components/dashboard/DashboardLayout"
+import { Role } from "@prisma/client"
+
+interface Post {
+  id: number
+  title: string
+  publishedAt?: string | Date | null
+  author?: {
+    id: number
+  }
+  category?: {
+    id: number
+    name: string
+  }
+  categoryId?: number | null
+  commentCount?: number
+  likeCount?: number
+}
+
+interface Comment {
+  id: number
+  postId: number
+  content: string
+}
+
+interface Like {
+  id: number
+  postId: number
+  post?: {
+    category?: {
+      name: string
+    }
+  }
+}
+
+interface Category {
+  id: number
+  name: string
+}
+
+interface PostRow {
+  id: number
+  title: string
+  publishedAt?: string | Date | null
+  category?: {
+    id: number
+    name: string
+  }
+  categoryId?: number | null
+}
+
+interface TrendData {
+  x: string
+  y: number
+}
 
 export default function AuthorDashboard() {
   const { data: session, status } = useSession()
-  const role = (session?.user as any)?.role as string | undefined
+  const role = session?.user?.role as Role | undefined
   const meId = session?.user?.id ? Number(session.user.id) : undefined
-  const [posts, setPosts] = useState<any[]>([])
-  const [comments, setComments] = useState<any[]>([])
+  const [posts, setPosts] = useState<Post[]>([])
+  const [comments, setComments] = useState<Comment[]>([])
   const [likes, setLikes] = useState<number>(0)
   const [topCats, setTopCats] = useState<{ label: string; value: number }[]>([])
   const [categoryShare, setCategoryShare] = useState<{ label: string; value: number }[]>([])
@@ -34,18 +88,18 @@ export default function AuthorDashboard() {
         const likesArr = lr.ok ? await lr.json() : []
         const categories = gr.ok ? await gr.json() : []
         const cmap: Record<number, string> = {}
-        categories.forEach((c: any) => { if (c?.id != null) cmap[Number(c.id)] = c.name })
+        categories.forEach((c: Category) => { if (c?.id != null) cmap[Number(c.id)] = c.name })
         setCatMap(cmap)
         let useAll = role === "ADMIN"
-        let basePosts = useAll ? allPosts : (meId ? allPosts.filter((p: any) => Number(p.author?.id) === Number(meId)) : [])
+        let basePosts = useAll ? allPosts : (meId ? allPosts.filter((p: Post) => Number(p.author?.id) === Number(meId)) : [])
         // If author has no posts yet, fall back to site-wide data to avoid empty dashboard
         if (!useAll && basePosts.length === 0) {
           useAll = true
           basePosts = allPosts
         }
-        const basePostIds = new Set(basePosts.map((p: any) => p.id))
-        const baseComments = useAll ? allComments : allComments.filter((c: any) => basePostIds.has(c.postId))
-        const baseLikes = useAll ? likesArr.length : likesArr.filter((l: any) => l.postId && basePostIds.has(l.postId)).length
+        const basePostIds = new Set(basePosts.map((p: Post) => p.id))
+        const baseComments = useAll ? allComments : allComments.filter((c: Comment) => basePostIds.has(c.postId))
+        const baseLikes = useAll ? likesArr.length : likesArr.filter((l: Like) => l.postId && basePostIds.has(l.postId)).length
 
         // Set primary data
         setPosts(basePosts)
@@ -54,7 +108,7 @@ export default function AuthorDashboard() {
 
         // Category metrics
         const counts: Record<string, number> = {}
-        basePosts.forEach((p: any) => {
+        basePosts.forEach((p: Post) => {
           const name = p.category?.name || "Uncategorized"
           counts[name] = (counts[name] || 0) + 1
         })
@@ -67,7 +121,7 @@ export default function AuthorDashboard() {
 
         // Likes by category within scope
         const likeCounts: Record<string, number> = {}
-        likesArr.forEach((l: any) => {
+        likesArr.forEach((l: Like) => {
           if (useAll || basePostIds.has(l.postId)) {
             const cat = l.post?.category?.name || "Uncategorized"
             likeCounts[cat] = (likeCounts[cat] || 0) + 1
@@ -91,10 +145,10 @@ export default function AuthorDashboard() {
     { label: "Drafts", value: posts.filter((p) => !p.publishedAt).length },
   ], [posts, comments, likes])
 
-  const trend = posts
+  const trend: TrendData[] = posts
     .filter((p) => p.publishedAt)
     .slice(0, 10)
-    .map((p: any, i: number) => ({ x: new Date(p.publishedAt).toLocaleDateString(), y: (p.commentCount ?? 0) + (p.likeCount ?? 0) }))
+    .map((p: Post) => ({ x: new Date(p.publishedAt!).toLocaleDateString(), y: (p.commentCount ?? 0) + (p.likeCount ?? 0) }))
 
   return (
     <RoleGuard allow={["AUTHOR", "ADMIN"]}>
@@ -132,10 +186,10 @@ export default function AuthorDashboard() {
             <DataTable
               columns={[
                 { key: "title", header: "Title" },
-                { key: "publishedAt", header: "Status", render: (r: any) => (r.publishedAt ? "Published" : "Draft") },
-                { key: "category", header: "Category", render: (r: any) => r.category?.name || (r.category?.id != null ? catMap[Number(r.category.id)] : undefined) || (r.categoryId != null ? catMap[Number(r.categoryId)] : undefined) || "-" },
+                { key: "publishedAt", header: "Status", render: (r: PostRow) => (r.publishedAt ? "Published" : "Draft") },
+                { key: "category", header: "Category", render: (r: PostRow) => r.category?.name || (r.category?.id != null ? catMap[Number(r.category.id)] : undefined) || (r.categoryId != null ? catMap[Number(r.categoryId)] : undefined) || "-" },
               ]}
-              rows={posts.slice(0, 10).map((p: any) => ({
+              rows={posts.slice(0, 10).map((p: Post) => ({
                 id: p.id,
                 title: p.title,
                 publishedAt: p.publishedAt,
