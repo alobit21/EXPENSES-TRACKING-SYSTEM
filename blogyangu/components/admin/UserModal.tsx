@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react"
 import { Role } from "@prisma/client"
 
 interface User {
-  id?: number
+  id?: string
   username: string
   email: string
   displayName?: string

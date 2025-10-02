@@ -2,8 +2,6 @@
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '../api/auth/[...nextauth]'
 import { prisma } from '../../lib/prisma'
 import { Session } from 'next-auth'
 import Link from 'next/link'

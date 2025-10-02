@@ -1,8 +1,7 @@
 import Link from "next/link"
-import { FaRegThumbsUp, FaRegCommentDots, FaEdit, FaTrash } from "react-icons/fa"
+import { FaEdit, FaTrash } from "react-icons/fa"
 import { PostProps } from "../types"
 import CommentSection from "../CommentSection"
-import { getAuthorDisplay, getAvatarUrl, getInitials } from "../utils/authorUtils"
 import PostContent from "../PostContent"
 
 export default function FeaturedPost({ post, ...props }: PostProps) {

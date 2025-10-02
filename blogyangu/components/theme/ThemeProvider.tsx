@@ -55,7 +55,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // On mount, ensure DOM matches current state; also subscribe to system changes if user has no explicit pref
   useEffect(() => {
     applyThemeToDom(theme)
-  }, [])
+  }, [theme])
 
   useEffect(() => {
     if (typeof window === "undefined") return

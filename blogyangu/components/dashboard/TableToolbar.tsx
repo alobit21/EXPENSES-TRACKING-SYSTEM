@@ -3,11 +3,9 @@
 import React from "react"
 
 export default function TableToolbar({
-  title,
   onAdd,
   right,
 }: {
-  title: string
   onAdd?: () => void
   right?: React.ReactNode
 }) {

@@ -38,7 +38,7 @@ export default function RePieChart({ data, innerRadius = 60, outerRadius = 110 }
             stroke="#0b1220"
             strokeWidth={2}
             labelLine={false}
-            label={({ name, value }) => {
+            label={({ value }) => {
               const v = Number(value) || 0
               const pct = (v / total) * 100
               return pct >= 8 ? `${Math.round(pct)}%` : ""

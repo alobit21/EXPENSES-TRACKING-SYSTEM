@@ -22,17 +22,6 @@ type Author = {
   avatarUrl?: string | null; // ✅ Add this line
 };
 
-interface User {
-  id?: string | number
-  email?: string | null
-  name?: string | null
-  image?: string | null
-  role?: string | null
-  displayName?: string
-  username?: string
-  avatarUrl?: string | null
-}
-
 
 export default function NewPostPage() {
   const [categories, setCategories] = useState<Category[]>([])
