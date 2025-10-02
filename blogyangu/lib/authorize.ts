@@ -13,7 +13,7 @@ export const authorize = async (
     res.status(401).json({ message: "Unauthorized" })
     return null
   }
-  if (roles.length && !roles.includes(session.user.role)) {
+  if (roles.length && session.user.role && !roles.includes(session.user.role)) {
     res.status(403).json({ message: "Forbidden" })
     return null
   }
