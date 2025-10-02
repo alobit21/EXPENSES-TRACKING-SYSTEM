@@ -6,4 +6,7 @@ const nextConfig: NextConfig = {
   assetPrefix: '/blogyangu',
 };
 
-export default nextConfig;
+   export default {
+    trailingSlash: true, // ensures URLs end with a slash
+  }
+  
