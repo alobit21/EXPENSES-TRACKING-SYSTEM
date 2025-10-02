@@ -49,8 +49,8 @@ export const authOptions: AuthOptions = {
   ],
 
   pages: {
-    signIn: "/auth/signin",
-    error: "/auth/signin", // redirect to login on error
+    signIn: "/blogyangu/auth/signin",
+    error: "/blogyangu/auth/signin", // redirect to login on error
   },
 
   session: {

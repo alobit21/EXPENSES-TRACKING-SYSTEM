@@ -41,7 +41,7 @@ export default function SignUp() {
     }
 
     try {
-      const response = await fetch("/api/auth/signup", {
+      const response = await fetch("/blogyangu/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -58,7 +58,7 @@ export default function SignUp() {
         throw new Error(data.error || "Something went wrong");
       }
 
-      router.push("/auth/signin?message=Account created successfully");
+      router.push("/blogyangu/auth/signin?message=Account created successfully");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -178,7 +178,7 @@ export default function SignUp() {
           </div>
 
           <button
-            onClick={() => window.location.href = "/api/auth/signin"}
+            onClick={() => window.location.href = "/blogyangu/api/auth/signin"}
             className="w-full flex justify-center items-center py-2 px-4 border border-input text-sm font-medium rounded-md bg-background text-foreground hover:bg-accent hover:text-accent-foreground dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600"
           >
             <svg
@@ -198,7 +198,7 @@ export default function SignUp() {
         <CardFooter className="justify-center">
           <p className="text-center text-sm text-gray-400">
             Already have an account?{" "}
-            <Link href="/auth/signin" className="text-blue-400 hover:text-blue-300">
+            <Link href="/blogyangu/auth/signin" className="text-blue-400 hover:text-blue-300">
               Sign in
             </Link>
           </p>
