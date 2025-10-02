@@ -1,6 +1,6 @@
+import { authorize } from "@/lib/authorize"
+import { prisma } from "@/lib/prisma"
 import { NextApiRequest, NextApiResponse } from "next"
-import { prisma } from "../../../lib/prisma"
-import { authorize } from "../../../lib/authorize"
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const session = await authorize(req, res, ["ADMIN", "AUTHOR"])
