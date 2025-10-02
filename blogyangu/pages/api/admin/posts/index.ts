@@ -19,9 +19,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === "POST") {
     const { title, content, coverImage, categoryId, status } = req.body
+    const slug = title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '')
     const newPost = await prisma.post.create({
       data: {
         title,
+        slug,
         content,
         coverImage,
         categoryId,
