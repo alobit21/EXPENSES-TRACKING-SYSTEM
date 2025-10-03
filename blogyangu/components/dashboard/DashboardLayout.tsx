@@ -5,7 +5,8 @@ import Link from "next/link"
 import { useRouter } from "next/router"
 import { useSession } from "next-auth/react"
 import { Menu, X, LayoutDashboard, Users, MessageSquare, Folder, ThumbsUp, Tag, Settings } from "lucide-react"
-import { Role } from "@prisma/client"
+
+type Role = 'USER' | 'ADMIN' | 'AUTHOR';
 
 interface SidebarItemProps {
   href: string

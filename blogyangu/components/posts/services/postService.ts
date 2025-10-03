@@ -34,7 +34,7 @@ export class PostService {
         try {
           const errorData = await res.json();
           errorMessage = errorData.message || errorData.error || errorMessage;
-        } catch (e) {
+        } catch (_e) {
           // If we can't parse the error as JSON, use the status text
           errorMessage = res.statusText || errorMessage;
         }
