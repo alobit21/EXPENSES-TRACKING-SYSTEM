@@ -48,7 +48,18 @@ export default async function Page() {
     prisma.category.findMany({ orderBy: { name: "asc" } }),
   ])
 
-  const postsWithCounts = posts.map((post) => ({
+  const postsWithCounts = posts.map((post: { 
+    id: number;
+    title: string;
+    excerpt: string | null;
+    slug: string;
+    coverImage: string | null;
+    author: any;
+    category: { id: number; name: string } | null;
+    publishedAt: Date | null;
+    likes: any[];
+    comments: { status: string }[];
+  }) => ({
     id: post.id,
     title: post.title,
     excerpt: post.excerpt,

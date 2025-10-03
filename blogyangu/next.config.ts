@@ -50,7 +50,6 @@ const nextConfig: NextConfig = {
 
   // Production optimizations
   reactStrictMode: true,
-  swcMinify: isProd,
   compress: isProd,
   poweredByHeader: false,
   generateEtags: true,

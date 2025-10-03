@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useState, useMemo } from "react"
 import { Menu, X } from "lucide-react"
 import { ThemeToggle } from "@/components/theme/ThemeToggle"
-import { useSession, signIn, signOut } from "next-auth/react"
+import { useSession, signOut } from "next-auth/react"
 import { Role } from "@prisma/client"
 
 export function Navbar() {
