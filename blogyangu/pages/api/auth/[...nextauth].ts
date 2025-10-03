@@ -1,18 +1,17 @@
 // pages/api/auth/[...nextauth].ts
-import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "../../../lib/prisma";
 import bcrypt from "bcryptjs";
+import NextAuth, { AuthOptions } from "next-auth";
 
-const isProd = process.env.NODE_ENV === "production";
+const isProd = process.env.NODE_ENV === 'production';
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+const baseUrl = process.env.NEXTAUTH_URL || (isProd ? 'https://expenses.seranise.co.tz' : 'http://localhost:3000');
 
 export const authOptions: AuthOptions = {
   debug: !isProd,
   secret: process.env.NEXTAUTH_SECRET,
-  
-  // Configure pages with base path
   pages: {
     signIn: `${basePath}/auth/signin`,
     error: `${basePath}/auth/error`,
@@ -89,6 +88,20 @@ export const authOptions: AuthOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
 
+  // Use the base URL for all callbacks
+  cookies: {
+    sessionToken: {
+      name: `__Secure-next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: isProd,
+        domain: isProd ? '.seranise.co.tz' : undefined,
+      },
+    },
+  },
+
   callbacks: {
     async redirect({ url, baseUrl }) {
       // Handle relative URLs
@@ -97,17 +110,38 @@ export const authOptions: AuthOptions = {
         const cleanUrl = url.startsWith(basePath) ? url : `${basePath}${url}`;
         return new URL(cleanUrl, baseUrl).toString();
       }
+      
       // Handle absolute URLs
       try {
         const urlObj = new URL(url);
         if (urlObj.origin === baseUrl) {
           return url;
         }
+        // If the URL is from the same domain but different subdomain
+        if (urlObj.hostname.endsWith('seranise.co.tz')) {
+          return url;
+        }
       } catch (e) {
-        // Invalid URL, use baseUrl
+        console.error('Error parsing URL in redirect callback:', e);
       }
-      // Fallback to base URL
-      return baseUrl;
+      
+      // Fallback to base URL with base path
+      return new URL(basePath || '/', baseUrl).toString();
+    },
+    
+    async session({ session, token }) {
+      // Ensure the session has the correct base URL
+      if (session.user) {
+        session.user.id = token.sub || '';
+      }
+      return session;
+    },
+    
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+      }
+      return token;
     }
   }
 };
