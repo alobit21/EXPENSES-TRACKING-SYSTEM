@@ -12,8 +12,11 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - expenses_net
-    env_file:
-      - .env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   backend:
     build:
@@ -29,11 +32,10 @@ services:
       DB_DATABASE: ${DB_DATABASE}
       NODE_ENV: ${NODE_ENV}
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - expenses_net
-    env_file:
-      - .env
 
   frontend:
     build:
@@ -50,19 +52,25 @@ services:
     build:
       context: ./blogyangu
       dockerfile: Dockerfile
-    image: codewithmac/blogyangu:prod
     container_name: blogyangu
     environment:
-      DATABASE_URL: ${NEXT_DATABASE_URL}
-      NODE_ENV: production
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
+      - NEXTAUTH_URL=${NEXTAUTH_URL}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - NODE_ENV=production
+      - NEXT_PUBLIC_BASE_PATH=${NEXT_PUBLIC_BASE_PATH}
+    ports:
+      - "3000:3000"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - expenses_net
-    env_file:
-      - .env
-
-
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3  
   nginx:
     image: nginx:alpine
     container_name: expenses_nginx
@@ -77,6 +85,7 @@ services:
     depends_on:
       - frontend
       - backend
+      - blogyangu
     networks:
       - expenses_net
 
@@ -85,4 +94,3 @@ volumes:
 
 networks:
   expenses_net:
-    driver: bridge
