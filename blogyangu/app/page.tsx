@@ -54,10 +54,15 @@ export default async function Page() {
     excerpt: string | null;
     slug: string;
     coverImage: string | null;
-    author: any;
+    author: {
+      id: number;
+      username: string;
+      displayName: string | null;
+      avatarUrl: string | null;
+    };
     category: { id: number; name: string } | null;
     publishedAt: Date | null;
-    likes: any[];
+    likes: Array<{ id: number; userId: number }>;
     comments: { status: string }[];
   }) => ({
     id: post.id,

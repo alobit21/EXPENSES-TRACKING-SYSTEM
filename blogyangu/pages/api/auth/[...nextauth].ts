@@ -7,7 +7,8 @@ import NextAuth, { AuthOptions } from "next-auth";
 
 const isProd = process.env.NODE_ENV === 'production';
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-const baseUrl = process.env.NEXTAUTH_URL || (isProd ? 'https://expenses.seranise.co.tz' : 'http://localhost:3000');
+// Prefix with underscore to indicate intentionally unused
+const _baseUrl = process.env.NEXTAUTH_URL || (isProd ? 'https://expenses.seranise.co.tz' : 'http://localhost:3000');
 
 export const authOptions: AuthOptions = {
   debug: !isProd,

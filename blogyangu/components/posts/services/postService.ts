@@ -46,14 +46,15 @@ export class PostService {
       setCategories(data);
       return data;
     } catch (err) {
+      const errorObj = err instanceof Error ? err : new Error(String(err));
       console.error("Failed to fetch categories:", {
-        error: err,
-        message: err instanceof Error ? err.message : 'Unknown error',
-        stack: err instanceof Error ? err.stack : undefined,
+        error: errorObj,
+        message: errorObj.message,
+        stack: errorObj.stack,
         timestamp: new Date().toISOString()
       });
       // Re-throw with more context
-      const error = new Error(`Failed to load categories: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      const error = new Error(`Failed to load categories: ${errorObj.message}`);
       error.name = 'CategoriesFetchError';
       throw error;
     }
