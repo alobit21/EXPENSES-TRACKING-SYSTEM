@@ -1,7 +1,13 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
-import { Role } from "@prisma/client"
+const Role = {
+  USER: 'USER',
+  ADMIN: 'ADMIN',
+  AUTHOR: 'AUTHOR'
+} as const;
+
+type Role = typeof Role[keyof typeof Role];
 
 interface User {
   id?: string
