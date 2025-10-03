@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/router";
 import Link from "next/link";
@@ -13,10 +13,32 @@ import {
 
 export default function SignIn() {
   const router = useRouter();
+  const { error: errorQuery } = router.query;
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Map NextAuth error codes to friendly messages
+  useEffect(() => {
+    if (errorQuery) {
+      const messages: Record<string, string> = {
+        CredentialsSignin: "Invalid email or password. Please try again.",
+        OAuthSignin: "There was an issue connecting to the provider.",
+        OAuthCallback: "The OAuth callback failed. Please try again.",
+        OAuthCreateAccount: "Could not create an account from this provider.",
+        EmailCreateAccount: "Email already in use. Try signing in instead.",
+        EmailSignin: "Check your email inbox for the magic link.",
+        Callback: "Login callback failed. Please retry.",
+        AccessDenied: "Access denied. You do not have permission.",
+        Verification: "The verification link is invalid or expired.",
+        AuthenticationError: "Authentication failed. Please try again.",
+        default: "An unexpected error occurred. Please try again.",
+      };
+      setError(messages[errorQuery as string] || messages.default);
+    }
+  }, [errorQuery]);
 
   // Handle Credentials login
   const handleCredentialsLogin = async (e: React.FormEvent) => {
@@ -24,24 +46,47 @@ export default function SignIn() {
     setLoading(true);
     setError("");
 
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+        callbackUrl: `${window.location.origin}/posts`
+      });
 
-    if (result?.error) {
-      setError(result.error);
+      if (result?.error) {
+        // Map inline errors as well
+        if (result.error === "CredentialsSignin") {
+          setError("Invalid email or password. Please try again.");
+        } else if (result.error.includes("oauth_user")) {
+          setError("This email is registered with Google. Please sign in with Google.");
+        } else {
+          setError(result.error);
+        }
+        setLoading(false);
+      } else {
+        // Use window.location to ensure full page reload and proper base path handling
+        window.location.href = result?.url || "/posts";
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("An unexpected error occurred. Please try again.");
       setLoading(false);
-    } else {
-      router.push("/posts");
     }
   };
 
   // Handle Google OAuth login
   const handleGoogleLogin = async () => {
     setLoading(true);
-    await signIn("google", { callbackUrl: "/posts" });
+    try {
+      await signIn("google", { 
+        callbackUrl: `${window.location.origin}/posts` 
+      });
+    } catch (err) {
+      console.error("Google sign in error:", err);
+      setError("Failed to sign in with Google. Please try again.");
+      setLoading(false);
+    }
   };
 
   return (

@@ -7,13 +7,55 @@ import { Session } from "next-auth"
 export class PostService {
   static async fetchCategories(setCategories: (categories: PrismaCategory[]) => void) {
     try {
-      const res = await fetch("/api/categories")
-      if (res.ok) {
-        const data = await res.json()
-        setCategories(data)
+      // Use the full URL from the environment or fall back to current origin
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : '');
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+      
+      // Log the URL being called for debugging
+      const apiUrl = `${basePath}/api/categories`;
+      const fullUrl = new URL(apiUrl, baseUrl).toString();
+      console.log('Fetching categories from:', fullUrl);
+      
+      const res = await fetch(fullUrl, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache',
+        },
+      });
+      
+      // Log response details for debugging
+      console.log('Response status:', res.status, res.statusText);
+      
+      if (!res.ok) {
+        // Try to get the error message from the response
+        let errorMessage = `HTTP error! status: ${res.status}`;
+        try {
+          const errorData = await res.json();
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch (e) {
+          // If we can't parse the error as JSON, use the status text
+          errorMessage = res.statusText || errorMessage;
+        }
+        throw new Error(`Failed to fetch categories: ${errorMessage}`);
       }
+      
+      const data = await res.json();
+      console.log('Categories data received:', data);
+      setCategories(data);
+      return data;
     } catch (err) {
-      console.error("Failed to fetch categories:", err)
+      console.error("Failed to fetch categories:", {
+        error: err,
+        message: err instanceof Error ? err.message : 'Unknown error',
+        stack: err instanceof Error ? err.stack : undefined,
+        timestamp: new Date().toISOString()
+      });
+      // Re-throw with more context
+      const error = new Error(`Failed to load categories: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      error.name = 'CategoriesFetchError';
+      throw error;
     }
   }
 
