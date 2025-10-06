@@ -47,30 +47,9 @@ services:
       - backend
     networks:
       - expenses_net
-
-  blogyangu:
-    build:
-      context: ./blogyangu
-      dockerfile: Dockerfile
-    container_name: blogyangu
-    environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
-      - NEXTAUTH_URL=${NEXTAUTH_URL}
-      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
-      - NODE_ENV=production
-      - NEXT_PUBLIC_BASE_PATH=${NEXT_PUBLIC_BASE_PATH}
-    ports:
-      - "3000:3000"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - expenses_net
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3  
+ 
+  
+  
   nginx:
     image: nginx:alpine
     container_name: expenses_nginx
@@ -85,7 +64,7 @@ services:
     depends_on:
       - frontend
       - backend
-      - blogyangu
+      
     networks:
       - expenses_net
 
